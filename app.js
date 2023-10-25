@@ -2,7 +2,11 @@ const express = require('express');
 const app = express();
 
 // NODE.ENV가 지정되어 있지 않으면 development 모드로 실행
-process.env.NODE_ENV = ( process.env.NODE_ENV && ( process.env.NODE_ENV ).trim().toLowerCase() == 'production' ) ? 'production' : 'development';
+process.env.NODE_ENV =
+  process.env.NODE_ENV &&
+  process.env.NODE_ENV.trim().toLowerCase() == 'production'
+    ? 'production'
+    : 'development';
 
 // env
 const dotenv = require('dotenv');
