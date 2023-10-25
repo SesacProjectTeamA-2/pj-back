@@ -1,1 +1,40 @@
-console.log('');
+const MeetUser = (Sequelize, DataTypes) => {
+  const model = Sequelize.define(
+    'meetUser',
+    {
+      muSeq: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        primaryKey: true,
+        autoIncrement: true,
+        comment: 'mu 시퀀스',
+      },
+      muIsLeader: {
+        type: DataTypes.STRING(1),
+        allowNull: true,
+        defaultValue: 'n',
+        comment: '모임장여부 / y: 모임장 / n: 모임원',
+      },
+      muIsBlackUser: {
+        type: DataTypes.STRING(1),
+        allowNull: false,
+        defaultValue: 'n',
+        comment: '블랙유저여부 / y: 블랙유저 / n: 화이트유저',
+      },
+      muBanReason: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null,
+        comment: '강퇴사유',
+      },
+    },
+    {
+      tableName: 'meetUser',
+      freezeTableName: true,
+      timestamps: true,
+    }
+  );
+  return model;
+};
+
+module.exports = MeetUser;
