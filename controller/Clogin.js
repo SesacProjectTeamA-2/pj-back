@@ -2,24 +2,18 @@ const dotenv = require('dotenv');
 const axios = require('axios');
 dotenv.config({ path: __dirname + '/../config/.env' });
 
-// GET '/api/user/users'
-// 모든 유저 조회
-exports.getUsers = (req, res) => {
-  res.send('ok');
-};
-
 // 네이버 url로 연결.
-exports.getLoginNaver = () => {
+exports.get('/api/login/naver', () => {
   const NaverClientId = process.env.NAVER_CLIENT_ID;
   const RedirectUri = encodeURI('http://localhost/8888/callback');
   const State = 'test';
   const NaverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${NaverClientId}&redirect_uri=${RedirectUri}&state=${State}`;
 
   res.redirect(NaverAuthUrl);
-};
+});
 
 // 로그인하여 정보처리 동의시, redirectUri 로 code 발급.
-exports.getLoginNaverRedirect = () => {
+exports.get('/api/login/naver/callback', function (req, res) {
   const NaverClientId = process.env.NAVER_CLIENT_ID;
   NaverClientIdSecret = process.env.NAVER_CLIENT_SECRET;
 
@@ -61,4 +55,4 @@ exports.getLoginNaverRedirect = () => {
       });
     })
     .then((res) => console.log(res.data));
-};
+});
