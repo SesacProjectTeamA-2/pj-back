@@ -1,6 +1,7 @@
 const dotenv = require('dotenv');
 const axios = require('axios');
 dotenv.config({ path: __dirname + '/../config/.env' });
+const { User } = require('../models');
 
 // GET '/api/user/users'
 // 모든 유저 조회
@@ -91,9 +92,8 @@ exports.getLoginGoogle = (req, res) => {
 // 아까 등록한 GOOGLE_LOGIN_REDIRECT_URI 일치해야 함
 exports.getLoginGoogleRedirect = async (req, res) => {
   const { code } = req.query;
-  console.log(`code: ${code}`);
 
-  // access_token, refresh_token 등 구글 토큰 정보 가져오기
+  // access_token 등 구글 토큰 정보 가져오기
   try {
     const tokenInfo = await axios.post(process.env.GOOGLE_OAUTH_TOKEN_URL, {
       // x-www-form-urlencoded(body)
@@ -111,33 +111,51 @@ exports.getLoginGoogleRedirect = async (req, res) => {
     if (access_token) {
       // token_type: 'Bearer'
       // email, gmail, profile, openid 등의 사용자 구글 계정 정보 가져오기
-      const userInfo = await axios.get(process.env.GOOGLE_USERINFO_URL, {
+      const googleUserInfo = await axios.get(process.env.GOOGLE_USERINFO_URL, {
         // Request Header에 Authorization 추가
         headers: {
           Authorization: `${token_type} ${access_token}`, // 'Bearer ~~~'
         },
       });
 
-      // 유저 정보
-      const { email, verified_email, name, picture, locale } = userInfo.data;
-      // 유저 정보 DB에 저장하기
-      res.send('ok');
+      const { email, verified_email, name, picture } = googleUserInfo.data; // 유저 정보
+
+      // 2) 회원가입 되어있는지 확인
+      const isJoined = await User.findOne({
+        where: {
+          uEmail: email,
+        },
+      });
+
+      // 3) 회원
+      if (isJoined) {
+        res.send({ isSuccess: true, isJoined: true });
+        // 4) 비회원
+      } else {
+        // 4-1) 검증(확인)된 메일일 경우에만 회원 가입 진행
+        if (verified_email) {
+          res.send({
+            isSuccess: true,
+            isJoined: false,
+            email,
+            name,
+            img: picture,
+          });
+        } else {
+          res.send({ isSuccess: false, msg: '검증되지 않은 Gmail입니다.' }); // 검증(확인)된 메일 X
+        }
+      }
     } else {
-      res.send({ isSuccess: false });
+      res.send({ isSuccess: false, msg: '해당 Gmail은 존재하지 않습니다.' }); // 구글 계정 정보 존재 X
     }
   } catch (err) {
     console.error(err);
-    res.send({ isSuccess: false });
+    res.send({ isSuccess: false, msg: 'error' }); // 에러
   }
-
-  // 1) 기존 회원인지, 비회원인지 확인
-  // 회원이면 메인화면으로 이동
-  // if (true) {
-  //   const userInfo = {};
-  //   res.send('회원', userInfo);
-  //   // 비회원이면 회원가입화면으로 이동
-  // } else {
-  //   res.send('비회원');
-  // }
-
 };
+
+// POST '/api/user/register'
+// 회원가입
+exports.postRegister = (req, res) => {
+
+}
