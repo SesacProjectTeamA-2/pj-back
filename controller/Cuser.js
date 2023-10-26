@@ -11,7 +11,9 @@ exports.getUsers = (req, res) => {
 // 네이버 url로 연결.
 exports.getLoginNaver = () => {
   const NaverClientId = process.env.NAVER_CLIENT_ID;
-  const RedirectUri = encodeURI('http://localhost/8888/callback');
+  const RedirectUri = encodeURI(
+    'http://localhost/8888/api/login/naver/callback'
+  );
   const State = 'test';
   const NaverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${NaverClientId}&redirect_uri=${RedirectUri}&state=${State}`;
 
