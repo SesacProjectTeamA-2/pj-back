@@ -10,7 +10,7 @@ const User = (Sequelize, DataTypes) => {
         comment: '유저 시퀀스',
       },
       uEmail: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(100),
         allowNull: false,
         unique: true,
         comment: '가입할 때 이메일 (UNIQUE)',
@@ -22,19 +22,19 @@ const User = (Sequelize, DataTypes) => {
         comment: '소셜로그인시 받아오는 코드 또는 토큰 값',
       },
       uName: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(20),
         allowNull: false,
         unique: true, // 닉네임 중복 X
         comment: '유저 닉네임',
       },
       uImg: {
-        type: DataTypes.STRING, // VARCHAR(255)
+        type: DataTypes.STRING,
         allowNull: true,
         defaultValue: 0, // 프로필 기본 값 뭘로 설정?
         comment: '프로필이미지',
       },
       uCharImg: {
-        type: DataTypes.STRING, // VARCHAR(255)
+        type: DataTypes.STRING,
         allowNull: false,
         defaultValue:
           'https://mblogthumb-phinf.pstatic.net/MjAxODEwMTlfMTgx/MDAxNTM5OTI4MjAwNDEx.k7oG-Q0tA6bdI1smaMzsK4t08NREjRrq3OthZKoIz8Qg.BeZxWi7HekwTWipOckbNWpvnesXuHjpldNGA7QppprUg.JPEG.retspe/eb13.jpg?type=w800', // 캐릭터 이미지 기본 값?
@@ -47,16 +47,25 @@ const User = (Sequelize, DataTypes) => {
         comment: '커버이미지',
       },
       uDesc: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(100),
         allowNull: true,
         defaultValue: null, // 자기소개 기본 값
         comment: '자기소개',
       },
-
-      uCategory: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        comment: '관심분야',
+      uCategory1: {
+        type: DataTypes.STRING(10),
+        allowNull: true,
+        comment: '관심분야1',
+      },
+      uCategory2: {
+        type: DataTypes.STRING(10),
+        allowNull: true,
+        comment: '관심분야2',
+      },
+      uCategory3: {
+        type: DataTypes.STRING(10),
+        allowNull: true,
+        comment: '관심분야3',
       },
       uSetDday: {
         type: DataTypes.STRING(1),
@@ -70,7 +79,7 @@ const User = (Sequelize, DataTypes) => {
         defaultValue: null,
         comment: '대표모임디데이',
       },
-      uMainMeet: {
+      uMainGroup: {
         type: DataTypes.INTEGER,
         allowNull: true,
         defaultValue: null,
