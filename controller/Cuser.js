@@ -66,19 +66,19 @@ exports.getKakao = async (req, res) => {
 };
 
 // 네이버 url로 연결.
-exports.getLoginNaver = () => {
+exports.getLoginNaver = (req, res) => {
   const NaverClientId = process.env.NAVER_CLIENT_ID;
-  const RedirectUri = encodeURI(
-    'http://localhost/8888/api/login/naver/callback'
-  );
+  const RedirectUri = 'http://localhost:8888/api/user/login/naver/callback';
   const State = 'test';
-  const NaverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${NaverClientId}&redirect_uri=${RedirectUri}&state=${State}`;
-
+  const NaverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${NaverClientId}&state=${State}&redirect_uri=${RedirectUri}`;
   res.redirect(NaverAuthUrl);
 };
 
 // 로그인하여 정보처리 동의시, redirectUri 로 code 발급.
-exports.getLoginNaverRedirect = async () => {
+exports.getLoginNaverRedirect = async (req, res) => {
+  // 회원정보에 동일한 email이 있으면, session 생성
+  // 없으면 회원가입위해 {nickname, email, profile Img} send
+  console.log(req.query);
   const NaverClientId = process.env.NAVER_CLIENT_ID;
   NaverClientIdSecret = process.env.NAVER_CLIENT_SECRET;
 
@@ -107,19 +107,28 @@ exports.getLoginNaverRedirect = async () => {
       'X-Naver-Client-Secret': NaverClientIdSecret,
     },
   })
-    .then((res) => {
-      console.log('토큰정보', res.data);
+    .then((tokenRes) => {
+      console.log('토큰정보', tokenRes.data);
 
       return axios({
         method: 'get',
         url: 'https://openapi.naver.com/v1/nid/me',
         // 프로필 api url
         headers: {
-          Authorization: res.data.token_type + ' ' + res.data.access_token,
+          Authorization:
+            tokenRes.data.token_type + ' ' + tokenRes.data.access_token,
         },
       });
     })
-    .then((res) => console.log(res.data));
+    .then((userRes) => {
+      const { id, nickname, profile_image, email } = userRes.data.response;
+
+      res.send({
+        userEmail: email,
+        userName: nickname,
+        userImg: profile_image,
+      });
+    });
 };
 
 // GET '/api/user/login/google'
