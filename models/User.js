@@ -1,6 +1,6 @@
 const User = (Sequelize, DataTypes) => {
   const model = Sequelize.define(
-    'user',
+    'tb_user',
     {
       uSeq: {
         type: DataTypes.INTEGER,
@@ -13,13 +13,13 @@ const User = (Sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
-        comment: '유저 이메일',
+        comment: '가입할 때 이메일 (UNIQUE)',
       },
       uToken: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
-        comment: '유저 고유 토큰',
+        comment: '소셜로그인시 받아오는 코드 또는 토큰 값',
       },
       uName: {
         type: DataTypes.STRING,
@@ -52,22 +52,17 @@ const User = (Sequelize, DataTypes) => {
         defaultValue: null, // 자기소개 기본 값
         comment: '자기소개',
       },
-      uSetDday: {
-        type: DataTypes.STRING(1),
-        allowNull: true,
-        defaultValue: 'n',
-        comment: '개인 디데이 설정 여부',
-      },
-      uDday: {
-        type: DataTypes.DATEONLY, // 시간은 필요 X
-        allowNull: true,
-        defaultValue: null,
-        comment: '개인 디데이',
-      },
+
       uCategory: {
         type: DataTypes.STRING,
         allowNull: false,
         comment: '관심분야',
+      },
+      uSetDday: {
+        type: DataTypes.STRING(1),
+        allowNull: true,
+        defaultValue: 'n',
+        comment: '대표 디데이 설정 여부',
       },
       uMainDday: {
         type: DataTypes.INTEGER, // 대표 모임 디데이,달성률 null값?
@@ -83,7 +78,7 @@ const User = (Sequelize, DataTypes) => {
       },
     },
     {
-      tableName: 'user',
+      tableName: 'tb_user',
       freezeTableName: true,
       timestamps: true,
     }

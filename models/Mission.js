@@ -1,27 +1,27 @@
-const Todo = (Sequelize, DataTypes) => {
+const Mission = (Sequelize, DataTypes) => {
   const model = Sequelize.define(
-    'todo',
+    'tb_mission',
     {
-      tSeq: {
+      mSeq: {
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
         autoIncrement: true,
-        comment: 'todo 시퀀스',
+        comment: '미션 시퀀스',
       },
-      tTitle: {
+      mTitle: {
         type: DataTypes.STRING,
         allowNull: false,
         comment: '미션제목',
       },
-      tContent: {
+      mContent: {
         type: DataTypes.STRING,
         allowNull: false,
         comment: '미션 인증 방식',
       },
     },
     {
-      tableName: 'todo',
+      tableName: 'tb_mission',
       freezeTableName: true,
       timestamps: true,
     }
@@ -29,4 +29,4 @@ const Todo = (Sequelize, DataTypes) => {
   return model;
 };
 
-module.exports = Todo;
+module.exports = Mission;

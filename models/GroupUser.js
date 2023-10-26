@@ -1,27 +1,27 @@
-const MeetUser = (Sequelize, DataTypes) => {
+const GroupUser = (Sequelize, DataTypes) => {
   const model = Sequelize.define(
-    'meetUser',
+    'tb_groupUser',
     {
-      muSeq: {
+      guSeq: {
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
         autoIncrement: true,
-        comment: 'mu 시퀀스',
+        comment: '모임 참여 유저 시퀀스 (아예 쓰지 않을 예정인 값)',
       },
-      muIsLeader: {
+      guIsLeader: {
         type: DataTypes.STRING(1),
         allowNull: true,
         defaultValue: 'n',
         comment: '모임장여부 / y: 모임장 / n: 모임원',
       },
-      muIsBlackUser: {
+      guIsBlackUser: {
         type: DataTypes.STRING(1),
         allowNull: false,
         defaultValue: 'n',
         comment: '블랙유저여부 / y: 블랙유저 / n: 화이트유저',
       },
-      muBanReason: {
+      guBanReason: {
         type: DataTypes.STRING,
         allowNull: true,
         defaultValue: null,
@@ -29,7 +29,7 @@ const MeetUser = (Sequelize, DataTypes) => {
       },
     },
     {
-      tableName: 'meetUser',
+      tableName: 'tb_groupUser',
       freezeTableName: true,
       timestamps: true,
     }
@@ -37,4 +37,4 @@ const MeetUser = (Sequelize, DataTypes) => {
   return model;
 };
 
-module.exports = MeetUser;
+module.exports = GroupUser;
