@@ -97,8 +97,8 @@ exports.getLoginGoogleRedirect = async (req, res) => {
   }
 };
 
-// POST '/api/user/signup'
+// POST '/api/user/register'
 // 회원가입
-exports.postSignUp = (req, res) => {
-  
+exports.postRegister = (req, res) => {
+
 }
