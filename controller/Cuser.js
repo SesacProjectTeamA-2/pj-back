@@ -9,12 +9,6 @@ exports.getUsers = (req, res) => {
   res.send('ok');
 };
 
-const axios = require('axios');
-
-// env
-const dotenv = require('dotenv');
-dotenv.config({ path: __dirname + '/config/.env' });
-
 exports.getOAuth = (req, res) => {
   const REST_API_KEY = process.env.REST_API_KEY;
   const REDIRECT_URL = process.env.REDIRECT_URL;
