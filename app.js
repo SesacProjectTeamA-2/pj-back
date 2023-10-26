@@ -43,8 +43,7 @@ app.use(
   })
 );
 
-// 라우터
-// 게시글
+// 유저 관련
 const userRouter = require('./routes/user');
 app.use('/api/user', userRouter);
 
