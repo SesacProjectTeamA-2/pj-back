@@ -21,7 +21,7 @@ exports.getLoginNaver = () => {
 };
 
 // 로그인하여 정보처리 동의시, redirectUri 로 code 발급.
-exports.getLoginNaverRedirect = () => {
+exports.getLoginNaverRedirect = async () => {
   const NaverClientId = process.env.NAVER_CLIENT_ID;
   NaverClientIdSecret = process.env.NAVER_CLIENT_SECRET;
 
