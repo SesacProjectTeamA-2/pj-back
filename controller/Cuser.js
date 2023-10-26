@@ -9,7 +9,6 @@ exports.getUsers = (req, res) => {
   res.send('ok');
 };
 
-
 const axios = require('axios');
 
 // env
@@ -72,7 +71,6 @@ exports.getKakao = async (req, res) => {
   }
 };
 
-
 // 네이버 url로 연결.
 exports.getLoginNaver = () => {
   const NaverClientId = process.env.NAVER_CLIENT_ID;
@@ -128,6 +126,7 @@ exports.getLoginNaverRedirect = async () => {
       });
     })
     .then((res) => console.log(res.data));
+};
 
 // GET '/api/user/login/google'
 // 구글 로그인
@@ -219,7 +218,4 @@ exports.getLoginGoogleRedirect = async (req, res) => {
 
 // POST '/api/user/register'
 // 회원가입
-exports.postRegister = (req, res) => {
-
-}
-
+exports.postRegister = (req, res) => {};
