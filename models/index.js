@@ -1,65 +1,63 @@
 'use strict';
-
 const Sequelize = require('sequelize');
 const config = require(__dirname + '/../config/config.js')[
   process.env.NODE_ENV
 ];
 const db = {};
-
 const { database, username, password } = config;
 const sequelize = new Sequelize(database, username, password, config); // db, user, password, config 객체 저장
 
 // Sequelize 모델
 const User = require('./User')(sequelize, Sequelize);
-const Meet = require('./Meet')(sequelize, Sequelize);
-const MeetBoard = require('./MeetBoard')(sequelize, Sequelize);
-const MeetBoardComment = require('./MeetBoardComment')(sequelize, Sequelize);
-const MeetBoardIcon = require('./MeetBoardIcon')(sequelize, Sequelize);
-const MeetUser = require('./MeetUser')(sequelize, Sequelize);
-const Todo = require('./Todo')(sequelize, Sequelize);
+const Group = require('./Group')(sequelize, Sequelize);
+const GroupBoard = require('./GroupBoard')(sequelize, Sequelize);
+const GroupBoardComment = require('./GroupBoardComment')(sequelize, Sequelize);
+const GroupBoardIcon = require('./GroupBoardIcon')(sequelize, Sequelize);
+const GroupUser = require('./GroupUser')(sequelize, Sequelize);
+const Mission = require('./Mission')(sequelize, Sequelize);
 
 //=== Relation 설정 ===
 // 전체 1:다 관계
 
-// 1. User 1 - MeetUser 다
-User.hasMany(MeetUser, { foreignKey: 'uSeq' });
-MeetUser.belongsTo(User, { foreignKey: 'uSeq' });
+// 1. User 1 - GroupUser 다
+User.hasMany(GroupUser, { foreignKey: 'uSeq' });
+GroupUser.belongsTo(User, { foreignKey: 'uSeq' });
 
-// 2. Meet 1 - MeetUser 다
-Meet.hasMany(MeetUser, { foreignKey: 'mSeq' });
-MeetUser.belongsTo(Meet, { foreignKey: 'mSeq' });
+// 2. Group 1 - GroupUser 다
+Group.hasMany(GroupUser, { foreignKey: 'gSeq' });
+GroupUser.belongsTo(Group, { foreignKey: 'gSeq' });
 
-// 3. Meet 1 - Todo 다
-Meet.hasMany(Todo, { foreignKey: 'mSeq' });
-Todo.belongsTo(Meet, { foreignKey: 'mSeq' });
+// 3. Group 1 - Mission 다
+Group.hasMany(Mission, { foreignKey: 'gSeq' });
+Mission.belongsTo(Group, { foreignKey: 'gSeq' });
 
-// 4. Todo 1 - MeetBoard 다
-Todo.hasMany(MeetBoard, { foreignKey: 'tSeq' });
-MeetBoard.belongsTo(Todo, { foreignKey: 'tSeq' });
+// 4. Mission 1 - GroupBoard 다
+Mission.hasMany(GroupBoard, { foreignKey: 'mSeq' });
+GroupBoard.belongsTo(Mission, { foreignKey: 'mSeq' });
 
-// 5. MeetUser 1 - MeetBoard 다
-MeetUser.hasMany(MeetBoard, { foreignKey: 'mSeq' });
-MeetBoard.belongsTo(MeetUser, { foreignKey: 'mSeq' });
+// 5. GroupUser 1 - GroupBoard 다
+GroupUser.hasMany(GroupBoard, { foreignKey: 'gSeq' });
+GroupBoard.belongsTo(GroupUser, { foreignKey: 'gSeq' });
 
-// 6. MeetUser 1 - MeetBoard 다
-MeetUser.hasMany(MeetBoard, { foreignKey: 'uSeq' });
-MeetBoard.belongsTo(MeetUser, { foreignKey: 'uSeq' });
+// 6. GroupUser 1 - GroupBoard 다
+GroupUser.hasMany(GroupBoard, { foreignKey: 'uSeq' });
+GroupBoard.belongsTo(GroupUser, { foreignKey: 'uSeq' });
 
-// 7. MeetBoard 1 - MeetBoardComment 다
-MeetBoard.hasMany(MeetBoardComment, { foreignKey: 'mbSeq' });
-MeetBoardComment.belongsTo(MeetBoard, { foreignKey: 'mbSeq' });
+// 7. GroupBoard 1 - GroupBoardComment 다
+GroupBoard.hasMany(GroupBoardComment, { foreignKey: 'gbSeq' });
+GroupBoardComment.belongsTo(GroupBoard, { foreignKey: 'gbSeq' });
 
-// 8. MeetBoard 1 - MeetBoardIcon 다
-MeetBoard.hasMany(MeetBoardIcon, { foreignKey: 'mbSeq' });
-MeetBoardIcon.belongsTo(MeetBoard, { foreignKey: 'mbSeq' });
+// 8. GroupBoard 1 - GroupBoardIcon 다
+GroupBoard.hasMany(GroupBoardIcon, { foreignKey: 'gbSeq' });
+GroupBoardIcon.belongsTo(GroupBoard, { foreignKey: 'gbSeq' });
 
 db.User = User;
-db.Meet = Meet;
-db.MeetBoard = MeetBoard;
-db.MeetBoardComment = MeetBoardComment;
-db.MeetBoardIcon = MeetBoardIcon;
-db.MeetUser = MeetUser;
-db.Todo = Todo;
+db.Group = Group;
+db.GroupBoard = GroupBoard;
+db.GroupBoardComment = GroupBoardComment;
+db.GroupBoardIcon = GroupBoardIcon;
+db.GroupUser = GroupUser;
+db.Mission = Mission;
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;

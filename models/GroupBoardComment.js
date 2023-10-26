@@ -1,20 +1,20 @@
-const MeetBoardComment = (Sequelize, DataTypes) => {
+const GroupBoardComment = (Sequelize, DataTypes) => {
   const model = Sequelize.define(
-    'meetBoardComment',
+    'tb_groupBoardComment',
     {
-      mbcSeq: {
+      gbcSeq: {
         type: DataTypes.INTEGER,
         allowNull: false,
         primaryKey: true,
         autoIncrement: true,
         comment: '댓글 시퀀스',
       },
-      mbcContent: {
+      gbcContent: {
         type: DataTypes.STRING,
         allowNull: false,
         comment: '댓글 내용',
       },
-      mbcDepth1: {
+      gbcDepth1: {
         type: DataTypes.INTEGER,
         allowNull: true,
         defaultValue: null,
@@ -22,7 +22,7 @@ const MeetBoardComment = (Sequelize, DataTypes) => {
       },
     },
     {
-      tableName: 'meetBoardComment',
+      tableName: 'tb_groupBoardComment',
       freezeTableName: true,
       timestamps: true,
     }
@@ -30,4 +30,4 @@ const MeetBoardComment = (Sequelize, DataTypes) => {
   return model;
 };
 
-module.exports = MeetBoardComment;
+module.exports = GroupBoardComment;
