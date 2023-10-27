@@ -123,7 +123,7 @@ router.get('/login/google/redirect', controller.getLoginGoogleRedirect); // 구�
  *                        description: "관심분야3"
  */
 
-router.post('/register', authUtil, controller.postRegister); // 회원가입
+router.post('/register', controller.postRegister); // 회원가입
 
 /**
  * @swagger
@@ -161,6 +161,6 @@ router.post('/register', authUtil, controller.postRegister); // 회원가입
     "setMainGroup": 1}
  *                          ]
  */
-router.get('/mypage/:uSeq', controller.getProfile);
+router.get('/mypage/:uSeq', authUtil, controller.getProfile);
 
 module.exports = router;
