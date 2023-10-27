@@ -15,12 +15,7 @@ const User = (Sequelize, DataTypes) => {
         unique: true,
         comment: '가입할 때 이메일 (UNIQUE)',
       },
-      uToken: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
-        comment: '소셜로그인시 받아오는 코드 또는 토큰 값',
-      },
+
       uName: {
         type: DataTypes.STRING(20),
         allowNull: false,
@@ -66,6 +61,11 @@ const User = (Sequelize, DataTypes) => {
         type: DataTypes.STRING(10),
         allowNull: true,
         comment: '관심분야3',
+      },
+      uPhrase: {
+        type: DataTypes.STRING(100),
+        allowNull: true,
+        comment: '내가 적은 명언, 좌우명',
       },
       uSetDday: {
         type: DataTypes.STRING(1),

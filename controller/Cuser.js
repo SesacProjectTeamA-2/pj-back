@@ -166,5 +166,34 @@ exports.getProfile = async (req, res) => {
     where: { uSeq: userSeq },
   });
 
-  console.log(userInfo);
+  const {
+    uEmail,
+    uName,
+    uImg,
+    uCharImg,
+    uCoverImg,
+    uDesc,
+    uPhrase,
+    uCategory1,
+    uCategory2,
+    uCategory3,
+    uSetDday,
+    uMainDday,
+    uMainGroup,
+  } = userInfo;
+
+  res.send({
+    nickname: uName,
+    userImg: uImg,
+    character: uCharImg,
+    coverImg: uCoverImg,
+    coverLetter: uDesc,
+    phrase: uPhrase,
+    category1: uCategory1,
+    category2: uCategory2,
+    category3: uCategory3,
+    setDday: uSetDday,
+    mainDday: uMainDday,
+    setMainGroup: uMainGroup,
+  });
 };
