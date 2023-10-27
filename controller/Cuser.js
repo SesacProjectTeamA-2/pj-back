@@ -65,7 +65,6 @@ exports.getKakao = async (req, res) => {
   }
 };
 
-
 // 네이버 url로 연결.
 exports.getLoginNaver = (req, res) => {
   const NaverClientId = process.env.NAVER_CLIENT_ID;
@@ -79,9 +78,9 @@ exports.getLoginNaver = (req, res) => {
 exports.getLoginNaverRedirect = async (req, res) => {
   // 회원정보에 동일한 email이 있으면, session 생성
   // 없으면 회원가입위해 {nickname, email, profile Img} send
-  console.log(req.query);
+  console.log('리퀘스트 쿼리', req.query);
   const NaverClientId = process.env.NAVER_CLIENT_ID;
-  NaverClientIdSecret = process.env.NAVER_CLIENT_SECRET;
+  const NaverClientIdSecret = process.env.NAVER_CLIENT_SECRET;
 
   // 발급된 code 변수할당.
   // code 값은 토큰 발급 요청에 사용됨.
@@ -132,7 +131,6 @@ exports.getLoginNaverRedirect = async (req, res) => {
       });
     });
 };
-
 
 // GET '/api/user/login/google'
 // 구글 로그인
@@ -288,7 +286,6 @@ exports.postRegister = async (req, res) => {
 
 exports.postRegister = (req, res) => {};
 
-
 // 프로필 수정
 exports.getProfile = async (req, res) => {
   // 보여줄 정보 : 닉네임, 설명, 캐릭터, 관심분야(null), 메인화면 설정(dday, 달성량), 커버이미지, 회원탈퇴
@@ -329,5 +326,3 @@ exports.getProfile = async (req, res) => {
     setMainGroup: uMainGroup,
   });
 };
-
-
