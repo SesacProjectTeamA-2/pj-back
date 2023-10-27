@@ -65,6 +65,7 @@ exports.getKakao = async (req, res) => {
   }
 };
 
+
 // 네이버 url로 연결.
 exports.getLoginNaver = (req, res) => {
   const NaverClientId = process.env.NAVER_CLIENT_ID;
@@ -120,6 +121,7 @@ exports.getLoginNaverRedirect = async (req, res) => {
         },
       });
     })
+
     .then((userRes) => {
       const { id, nickname, profile_image, email } = userRes.data.response;
 
@@ -130,6 +132,7 @@ exports.getLoginNaverRedirect = async (req, res) => {
       });
     });
 };
+
 
 // GET '/api/user/login/google'
 // 구글 로그인
@@ -221,6 +224,7 @@ exports.getLoginGoogleRedirect = async (req, res) => {
 
 // POST '/api/user/register'
 // 회원가입
+
 exports.postRegister = async (req, res) => {
   try {
     let {
@@ -281,3 +285,49 @@ exports.postRegister = async (req, res) => {
     });
   }
 };
+
+exports.postRegister = (req, res) => {};
+
+
+// 프로필 수정
+exports.getProfile = async (req, res) => {
+  // 보여줄 정보 : 닉네임, 설명, 캐릭터, 관심분야(null), 메인화면 설정(dday, 달성량), 커버이미지, 회원탈퇴
+  const userSeq = req.params.uSeq;
+
+  const userInfo = await User.findOne({
+    where: { uSeq: userSeq },
+  });
+
+  const {
+    uEmail,
+    uName,
+    uImg,
+    uCharImg,
+    uCoverImg,
+    uDesc,
+    uPhrase,
+    uCategory1,
+    uCategory2,
+    uCategory3,
+    uSetDday,
+    uMainDday,
+    uMainGroup,
+  } = userInfo;
+
+  res.send({
+    nickname: uName,
+    userImg: uImg,
+    character: uCharImg,
+    coverImg: uCoverImg,
+    coverLetter: uDesc,
+    phrase: uPhrase,
+    category1: uCategory1,
+    category2: uCategory2,
+    category3: uCategory3,
+    setDday: uSetDday,
+    mainDday: uMainDday,
+    setMainGroup: uMainGroup,
+  });
+};
+
+
