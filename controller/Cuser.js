@@ -9,7 +9,6 @@ exports.getUsers = (req, res) => {
   res.send('ok');
 };
 
-
 // 네이버 url로 연결.
 exports.getLoginNaver = () => {
   const NaverClientId = process.env.NAVER_CLIENT_ID;
@@ -65,7 +64,7 @@ exports.getLoginNaverRedirect = async () => {
       });
     })
     .then((res) => console.log(res.data));
-=======
+};
 // GET '/api/user/login/google'
 // 구글 로그인
 // 참고 자료 : https://velog.io/@mainfn/Node.js-express%EB%A1%9C-%EA%B5%AC%EA%B8%80-OAuth-%ED%9A%8C%EC%9B%90%EA%B0%80%EC%9E%85%EB%A1%9C%EA%B7%B8%EC%9D%B8-%EA%B5%AC%ED%98%84
@@ -156,6 +155,16 @@ exports.getLoginGoogleRedirect = async (req, res) => {
 
 // POST '/api/user/register'
 // 회원가입
-exports.postRegister = (req, res) => {
+exports.postRegister = (req, res) => {};
 
-}
+// 프로필 수정
+exports.getProfile = async (req, res) => {
+  // 보여줄 정보 : 닉네임, 설명, 캐릭터, 관심분야(null), 메인화면 설정(dday, 달성량), 커버이미지, 회원탈퇴
+  const userSeq = req.params.uSeq;
+
+  const userInfo = await User.findOne({
+    where: { uSeq: userSeq },
+  });
+
+  console.log(userInfo);
+};
