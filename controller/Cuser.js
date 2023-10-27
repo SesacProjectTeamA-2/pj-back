@@ -65,7 +65,6 @@ exports.getKakao = async (req, res) => {
   }
 };
 
-
 // 네이버 url로 연결.
 exports.getLoginNaver = (req, res) => {
   const NaverClientId = process.env.NAVER_CLIENT_ID;
@@ -132,7 +131,6 @@ exports.getLoginNaverRedirect = async (req, res) => {
       });
     });
 };
-
 
 // GET '/api/user/login/google'
 // 구글 로그인
@@ -287,7 +285,6 @@ exports.postRegister = async (req, res) => {
 };
 
 exports.postRegister = (req, res) => {};
-
 
 // 프로필 수정
 exports.getProfile = async (req, res) => {
