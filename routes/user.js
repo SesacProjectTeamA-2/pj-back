@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../controller/Cuser');
+const authUtil = require('../middlewares/auth').checkToken;
 
 /**
  * @swagger
@@ -79,16 +80,6 @@ router.get('/login/google/redirect', controller.getLoginGoogleRedirect); // 구�
  *                uCategory3:
  *                  type: string
  *                  description: "관심분야3"
- *                uSetDday:
- *                  type: string
- *                  description: "대표 디데이 설정 여부"
- *                  default: "n"
- *                uMainDday:
- *                  type: integer
- *                  description: "대표 모임 디데이"
- *                uMainGroup:
- *                  type: integer
- *                  description: "대표 모임 달성률"
  *      responses:
  *        "200":
  *          description: "회원가입 성공"
@@ -130,19 +121,9 @@ router.get('/login/google/redirect', controller.getLoginGoogleRedirect); // 구�
  *                      uCategory3:
  *                        type: string
  *                        description: "관심분야3"
- *                      uSetDday:
- *                        type: string
- *                        description: "대표 디데이 설정 여부"
- *                        default: "n"
- *                      uMainDday:
- *                        type: integer
- *                        description: "대표 모임 디데이"
- *                      uMainGroup:
- *                        type: integer
- *                        description: "대표 모임 달성률"
  */
-router.post('/register', controller.postRegister); // 회원가입
 
+router.post('/register', authUtil, controller.postRegister); // 회원가입
 
 /**
  * @swagger

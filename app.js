@@ -26,7 +26,7 @@ const session = require('express-session');
 const cors = require('cors');
 
 // swagger
-const { swaggerUI, specs } = require('./utils/swagger/swagger');
+const { swaggerUI, specs } = require('./modules/swagger/swagger');
 
 // 미들웨어 등록
 // 1) body-parser
