@@ -3,6 +3,7 @@ dotenv.config({ path: __dirname + '/.env' });
 
 const config = {
   development: {
+    // DB 설정
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,
@@ -14,8 +15,12 @@ const config = {
       typeCast: true,
       timezone: 'Asia/Seoul', // DB에 저장할 때 시간 설정
     },
+    // 서버 설정
+    serverUrl: process.env.SERVER_DEV_URL,
+    serverPort: process.env.SERVER_DEV_PORT,
   },
   production: {
+    // DB 설정
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,
@@ -27,6 +32,9 @@ const config = {
       typeCast: true,
       timezone: 'Asia/Seoul', // DB에 저장할 때 시간 설정
     },
+    // 서버 설정
+    serverUrl: process.env.SERVER_PROD_URL,
+    serverPort: process.env.SERVER_PROD_PORT,
   },
 };
 
