@@ -2,6 +2,7 @@ const dotenv = require('dotenv');
 const axios = require('axios');
 dotenv.config({ path: __dirname + '/../config/.env' });
 const { User } = require('../models');
+const { Op } = require('sequelize');
 
 // GET '/api/user/users'
 // 모든 유저 조회
@@ -64,7 +65,6 @@ exports.getKakao = async (req, res) => {
     res.status(500).json({ error: '액세스 토큰 요청 중 오류 발생' });
   }
 };
-
 
 // 네이버 url로 연결.
 exports.getLoginNaver = (req, res) => {
@@ -132,7 +132,6 @@ exports.getLoginNaverRedirect = async (req, res) => {
       });
     });
 };
-
 
 // GET '/api/user/login/google'
 // 구글 로그인
@@ -226,7 +225,6 @@ exports.getLoginGoogleRedirect = async (req, res) => {
 // 회원가입
 exports.postRegister = (req, res) => {};
 
-
 // 프로필 수정
 exports.getProfile = async (req, res) => {
   // 보여줄 정보 : 닉네임, 설명, 캐릭터, 관심분야(null), 메인화면 설정(dday, 달성량), 커버이미지, 회원탈퇴
@@ -268,3 +266,50 @@ exports.getProfile = async (req, res) => {
   });
 };
 
+exports.editProfile = async (req, res) => {
+  const userSeq = req.params.uSeq;
+  const {
+    uName,
+    uDesc,
+    uPhrase,
+    uCategory1,
+    uCategory2,
+    uCategory3,
+    uSetDday,
+    uMainDday,
+    uMainGroup,
+  } = req.body;
+
+  const isNickname = await User.findOne({
+    where: { uName: uName, uSeq: { [Op.ne]: userSeq } },
+  });
+
+  // 닉네임이 이미 존재하는 경우
+  if (isNickname) {
+    res.send({ result: false, message: '이미 존재하는 닉네임입니다.' });
+  } else {
+    await User.update(
+      {
+        where: { uSeq: userSeq },
+      },
+      {
+        uName,
+        uDesc,
+        uPhrase,
+        uCategory1,
+        uCategory2,
+        uCategory3,
+        uSetDday,
+        uMainDday,
+        uMainGroup,
+      }
+    );
+    res.send({ result: true, message: '회원정보 수정 완료!' });
+  }
+};
+
+exports.editProfileImg = (req, res) => {
+  // uImg,
+  // uCharImg,
+  // uCoverImg,
+};

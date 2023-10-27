@@ -41,7 +41,6 @@ router.get('/login/google', controller.getLoginGoogle); // 구글 로그인
 router.get('/login/google/redirect', controller.getLoginGoogleRedirect); // 구글 로그인 처리
 router.post('/register', controller.postRegister); // 회원가입
 
-
 /**
  * @swagger
  * paths:
@@ -65,9 +64,6 @@ router.post('/register', controller.postRegister); // 회원가입
  *                      example:
  *                          [
 {    "nickname": "chitty",
-    "userImg": "../userimg",
-    "character": "./characterImg",
-    "coverImg": "././coverImg",
     "coverLetter": "안녕하세요 반갑습니다",
     "phrase": "내가 적은 명언",
     "category1": "운동",
@@ -79,5 +75,40 @@ router.post('/register', controller.postRegister); // 회원가입
  *                          ]
  */
 router.get('/mypage/:uSeq', controller.getProfile);
+
+/**
+ * @swagger
+ * paths:
+ *  /api/user/mypage/:uSeq:
+ *    get:
+ *      summary: "프로필 수정"
+ *      description: "닉네임, 자기소개, 명언, 카테고리 (1, 2, 3), 대표디데이설정, 설정그룹값, 달성률 그룹값 body로 받아옴."
+ *      tags: [userRouter]
+ *      responses:
+ *        "200":
+ *          description: 서버로 전달해주는 값은 {uName, uDesc, uCategory(1,2,3), uSetDay, uMainGroup, uMainDday} 입니다.
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                    ok:
+ *                      type: boolean
+ *                    users:
+ *                      type: object
+ *                      example:
+ *                          [
+{    "nickname": "chitty",
+    "userImg": "../userimg",
+    "phrase": "내가 적은 명언",
+    "category1": "운동",
+    "category2": null,
+    "category3": null,
+    "setDday": "y",
+    "mainDday": 1,
+    "setMainGroup": 1}
+ *                          ]
+ */
+router.patch('/mypage/:uSeq', controller.editProfile);
 
 module.exports = router;
