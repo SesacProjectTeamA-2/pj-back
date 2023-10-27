@@ -290,9 +290,6 @@ exports.editProfile = async (req, res) => {
   } else {
     await User.update(
       {
-        where: { uSeq: userSeq },
-      },
-      {
         uName,
         uDesc,
         uPhrase,
@@ -302,6 +299,9 @@ exports.editProfile = async (req, res) => {
         uSetDday,
         uMainDday,
         uMainGroup,
+      },
+      {
+        where: { uSeq: userSeq },
       }
     );
     res.send({ result: true, message: '회원정보 수정 완료!' });
