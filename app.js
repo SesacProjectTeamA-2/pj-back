@@ -8,12 +8,13 @@ process.env.NODE_ENV =
     ? 'production'
     : 'development';
 
+// config
+const config = require(__dirname + '/config/config.js')[process.env.NODE_ENV];
+const { serverUrl, serverPort } = config; // 서버 설정
+
 // env
 const dotenv = require('dotenv');
 dotenv.config({ path: __dirname + '/config/.env' });
-
-// 서버 설정
-const PORT = process.env.PORT;
 
 // 미리 설정한 sequelize 불러오기
 const db = require('./models/index');
@@ -24,10 +25,13 @@ const session = require('express-session');
 // 리액트와 연결을 위한 cors
 const cors = require('cors');
 
+// swagger
+const { swaggerUI, specs } = require('./utils/swagger/swagger');
+
 // 미들웨어 등록
 // 1) body-parser
-app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 // 2) cors
 app.use(cors());
 // 3) express-session
@@ -42,10 +46,16 @@ app.use(
     },
   })
 );
+// 4) swagger
+// 첫 인자로 받은 경로로 접속하면 swagger UI가 보임
+app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(specs));
 
-// 유저 관련
-const userRouter = require('./routes/user');
-app.use('/api/user', userRouter);
+/**
+ * @path {GET} ${URL}:${PORT}/api
+ * @description 모든 api는 indexRouter를 거쳐가도록 설정
+ */
+const indexRouter = require('./routes');
+app.use('/api', indexRouter);
 
 // 에러 처리
 app.get('*', (req, res) => {
@@ -53,7 +63,7 @@ app.get('*', (req, res) => {
 });
 
 db.sequelize.sync({ force: false }).then(() => {
-  app.listen(PORT, () => {
-    console.log(`http://localhost:${PORT}`);
+  app.listen(serverPort, () => {
+    console.log(`${serverUrl}:${serverPort}`);
   });
 });

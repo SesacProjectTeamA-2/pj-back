@@ -9,20 +9,77 @@ exports.getUsers = (req, res) => {
   res.send('ok');
 };
 
-// 네이버 url로 연결.
-exports.getLoginNaver = () => {
-  const NaverClientId = process.env.NAVER_CLIENT_ID;
-  const RedirectUri = encodeURI(
-    'http://localhost/8888/api/login/naver/callback'
-  );
-  const State = 'test';
-  const NaverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${NaverClientId}&redirect_uri=${RedirectUri}&state=${State}`;
+exports.getOAuth = (req, res) => {
+  const REST_API_KEY = process.env.REST_API_KEY;
+  const REDIRECT_URL = process.env.REDIRECT_URL;
+  const kakaoAuthURL = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URL}`;
+  console.log(kakaoAuthURL);
+  res.redirect(kakaoAuthURL);
+  console.log(res.statusCode);
+};
 
+exports.getKakao = async (req, res) => {
+  const { code } = req.query; // 카카오로부터 전달받은 인증 코드
+  const REST_API_KEY = process.env.REST_API_KEY;
+  const REDIRECT_URL = process.env.REDIRECT_URL;
+
+  // 액세스 토큰 요청을 위한 데이터 생성
+  const data = new URLSearchParams();
+  data.append('grant_type', 'authorization_code');
+  data.append('client_id', REST_API_KEY);
+  data.append('redirect_uri', REDIRECT_URL);
+  data.append('code', code);
+
+  console.log(code);
+
+  try {
+    // 카카오 OAuth 서버로 POST 요청 보내기
+    const response = await axios.post(
+      'https://kauth.kakao.com/oauth/token',
+      data,
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      }
+    );
+
+    // 응답 데이터에서 액세스 토큰 추출
+    const { access_token } = response.data;
+
+    const kakaoUser = await axios.get(`https://kapi.kakao.com/v2/user/me`, {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    });
+    const userEmail = kakaoUser.data.kakao_account.email;
+    const userName = kakaoUser.data.properties.nickname;
+    const userImg = kakaoUser.data.properties.profile_image;
+    console.log(userEmail, userName, userImg);
+
+    res.status(200).json({ userEmail, userName, userImg });
+  } catch (error) {
+    // 에러 처리
+    console.error('액세스 토큰 요청 중 오류 발생:', error);
+    res.status(500).json({ error: '액세스 토큰 요청 중 오류 발생' });
+  }
+};
+
+
+// 네이버 url로 연결.
+exports.getLoginNaver = (req, res) => {
+  const NaverClientId = process.env.NAVER_CLIENT_ID;
+  const RedirectUri = 'http://localhost:8888/api/user/login/naver/callback';
+  const State = 'test';
+  const NaverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${NaverClientId}&state=${State}&redirect_uri=${RedirectUri}`;
   res.redirect(NaverAuthUrl);
 };
 
 // 로그인하여 정보처리 동의시, redirectUri 로 code 발급.
-exports.getLoginNaverRedirect = async () => {
+exports.getLoginNaverRedirect = async (req, res) => {
+  // 회원정보에 동일한 email이 있으면, session 생성
+  // 없으면 회원가입위해 {nickname, email, profile Img} send
+  console.log(req.query);
   const NaverClientId = process.env.NAVER_CLIENT_ID;
   NaverClientIdSecret = process.env.NAVER_CLIENT_SECRET;
 
@@ -51,20 +108,32 @@ exports.getLoginNaverRedirect = async () => {
       'X-Naver-Client-Secret': NaverClientIdSecret,
     },
   })
-    .then((res) => {
-      console.log('토큰정보', res.data);
+    .then((tokenRes) => {
+      console.log('토큰정보', tokenRes.data);
 
       return axios({
         method: 'get',
         url: 'https://openapi.naver.com/v1/nid/me',
         // 프로필 api url
         headers: {
-          Authorization: res.data.token_type + ' ' + res.data.access_token,
+          Authorization:
+            tokenRes.data.token_type + ' ' + tokenRes.data.access_token,
         },
       });
     })
-    .then((res) => console.log(res.data));
+
+    .then((userRes) => {
+      const { id, nickname, profile_image, email } = userRes.data.response;
+
+      res.send({
+        userEmail: email,
+        userName: nickname,
+        userImg: profile_image,
+      });
+    });
 };
+
+
 // GET '/api/user/login/google'
 // 구글 로그인
 // 참고 자료 : https://velog.io/@mainfn/Node.js-express%EB%A1%9C-%EA%B5%AC%EA%B8%80-OAuth-%ED%9A%8C%EC%9B%90%EA%B0%80%EC%9E%85%EB%A1%9C%EA%B7%B8%EC%9D%B8-%EA%B5%AC%ED%98%84
@@ -157,6 +226,7 @@ exports.getLoginGoogleRedirect = async (req, res) => {
 // 회원가입
 exports.postRegister = (req, res) => {};
 
+
 // 프로필 수정
 exports.getProfile = async (req, res) => {
   // 보여줄 정보 : 닉네임, 설명, 캐릭터, 관심분야(null), 메인화면 설정(dday, 달성량), 커버이미지, 회원탈퇴
@@ -197,3 +267,4 @@ exports.getProfile = async (req, res) => {
     setMainGroup: uMainGroup,
   });
 };
+
