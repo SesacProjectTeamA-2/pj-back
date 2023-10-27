@@ -221,4 +221,63 @@ exports.getLoginGoogleRedirect = async (req, res) => {
 
 // POST '/api/user/register'
 // 회원가입
-exports.postRegister = (req, res) => {};
+exports.postRegister = async (req, res) => {
+  try {
+    let {
+      uEmail,
+      uName,
+      uImg,
+      uCharImg,
+      uDesc,
+      uCategory1,
+      uCategory2,
+      uCategory3,
+      uSetDday,
+      uMainDday,
+      uMainGroup,
+    } = req.body;
+
+    // null 값 있는지 검사 : 필수값은 3개
+    if (!uEmail || !uName || !uCharImg) {
+      return res.status(400).json({
+        OK: false,
+        msg: '입력 필드 중 하나 이상이 누락되었습니다.',
+      });
+    }
+
+    // 중복 검사 (uEmail, uNname)
+    const uEmailIsDuplicate = await User.count({ where: { uEmail } });
+    const uNameIsDuplicate = await User.count({ where: { uName } });
+
+    if (uEmailIsDuplicate || uNameIsDuplicate) {
+      return res.status(409).json({
+        OK: false,
+        uEmailIsDuplicate,
+        uNameIsDuplicate,
+        msg: 'uEmail 또는 uNname 가 이미 존재합니다.',
+      });
+    }
+
+    // 사용자 추가
+    const newUser = await User.create({
+      uEmail: uEmail,
+      uName: uName,
+      uImg: uImg,
+      uCharImg: uCharImg,
+      uDesc: uDesc,
+      uCategory1: uCategory1,
+      uCategory2: uCategory2,
+      uCategory3: uCategory3,
+      uSetDday: uSetDday,
+      uMainDday: uMainDday,
+      uMainGroup: uMainGroup,
+    });
+    res.status(200).send(newUser);
+  } catch (err) {
+    console.log(err);
+    res.status(err.statusCode || 500).send({
+      msg: err.message,
+      OK: false,
+    });
+  }
+};
