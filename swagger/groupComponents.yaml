@@ -1,0 +1,8 @@
+schemas:
+  Response:
+    type: object
+    properties:
+      isSuccess:
+        type: boolean
+      msg:
+        type: string
