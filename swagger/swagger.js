@@ -1,7 +1,8 @@
 const swaggerUi = require('swagger-ui-express');
 const swaggerJSDoc = require('swagger-jsdoc');
+const fs = require('fs');
 
-const config = require(__dirname + '/../../config/config.js')[
+const config = require(__dirname + '/../config/config.js')[
   process.env.NODE_ENV
 ];
 
@@ -25,7 +26,7 @@ const options = {
       },
     ],
   },
-  apis: ['../../routes/*.js'], // swagger와 연동할 파일 작성
+  apis: ['./routes/*.js'], // swagger와 연동할 파일 작성
 };
 
 const specs = swaggerJSDoc(options);

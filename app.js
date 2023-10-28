@@ -26,9 +26,8 @@ const session = require('express-session');
 const cors = require('cors');
 
 // swagger
-const swaggerUi = require('swagger-ui-express');
-const YAML = require('yamljs');
-const path = require('path');
+const { swaggerUi, specs } = require('./swagger/swagger');
+const eba = require('express-basic-auth');
 
 // 미들웨어 등록
 // 1) body-parser
@@ -49,20 +48,15 @@ app.use(
   })
 );
 // 4) swagger
-const info = YAML.load(__dirname + '/swagger/info.yaml');
-const group = YAML.load(__dirname + '/swagger/group.yaml');
-const groupComponents = YAML.load(__dirname + '/swagger/groupComponents.yaml');
-const swaggerDocument = {
-  openapi: '3.0.0',
-  info,
-  group,
-  groupComponents,
-};
-
+// 첫 인자로 받은 경로로 접속하면 swagger UI가 보임
 app.use(
   '/api-docs',
+  eba({ // swagger 로그인 설정
+    challenge: true,
+    users: { admin: process.env.SWAGGER_PW },
+  }),
   swaggerUi.serve,
-  swaggerUi.setup(swaggerDocument, { explorer: true })
+  swaggerUi.setup(specs, { explorer: true })
 );
 
 /**
