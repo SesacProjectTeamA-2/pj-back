@@ -2,6 +2,11 @@ const dotenv = require('dotenv');
 const axios = require('axios');
 dotenv.config({ path: __dirname + '/../config/.env' });
 const { User } = require('../models');
+const { Op } = require('sequelize');
+
+// 로그인 된 사용자인지 아닌지 판별하려면 불러와야함
+const jwt = require('../modules/jwt');
+const authUtil = require('../middlewares/auth');
 
 // GET '/api/user/users'
 // 모든 유저 조회
@@ -55,9 +60,51 @@ exports.getKakao = async (req, res) => {
     const userEmail = kakaoUser.data.kakao_account.email;
     const userName = kakaoUser.data.properties.nickname;
     const userImg = kakaoUser.data.properties.profile_image;
-    console.log(userEmail, userName, userImg);
 
-    res.status(200).json({ userEmail, userName, userImg });
+    const alreadyUser = await User.findOne({
+      where: {
+        uEmail: userEmail,
+      },
+    });
+
+    // db에 값 있으면 이미 회원가입 한 유저
+    if (alreadyUser) {
+      console.log('db에서 가져온 uSeq', alreadyUser.uSeq);
+      console.log(userEmail, userName, userImg);
+
+      // 해당 3개의 값 가지는 토큰 생성
+      const jwtToken = await jwt.sign({
+        uSeq: alreadyUser.uSeq,
+        userName: userName,
+        userEmail: userEmail,
+      });
+      // console.log(jwtToken);
+
+      res.cookie('token', jwtToken.token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'None',
+      });
+      console.log(jwtToken.token);
+
+      // ****************** 토큰을 들고 메인 페이지로 렌더링해야함
+      res.status(200).send({
+        alreadyUser: true,
+        token: jwtToken.token,
+        userEmail: userEmail,
+        userName: userName,
+        userImg: userImg,
+      });
+    } else {
+      // 최초 로그인 하는 유저
+      // *************** 토큰 발급 없이 회원가입 창으로 렌더링 필요
+      res.status(200).send({
+        alreadyUser: false,
+        userEmail: userEmail,
+        userName: userName,
+        userImg: userImg,
+      });
+    }
   } catch (error) {
     // 에러 처리
     console.error('액세스 토큰 요청 중 오류 발생:', error);
@@ -80,7 +127,7 @@ exports.getLoginNaverRedirect = async (req, res) => {
   // 없으면 회원가입위해 {nickname, email, profile Img} send
   console.log(req.query);
   const NaverClientId = process.env.NAVER_CLIENT_ID;
-  NaverClientIdSecret = process.env.NAVER_CLIENT_SECRET;
+  const NaverClientIdSecret = process.env.NAVER_CLIENT_SECRET;
 
   // 발급된 code 변수할당.
   // code 값은 토큰 발급 요청에 사용됨.
@@ -120,14 +167,64 @@ exports.getLoginNaverRedirect = async (req, res) => {
         },
       });
     })
+
     .then((userRes) => {
       const { id, nickname, profile_image, email } = userRes.data.response;
 
-      res.send({
-        userEmail: email,
-        userName: nickname,
-        userImg: profile_image,
+      const userEmail = userRes.data.response.email;
+      const userName = userRes.data.response.nickname;
+      const userImg = userRes.data.response.profile_image;
+
+      const alreadyUser = User.findOne({
+        where: {
+          uEmail: email,
+        },
       });
+
+      // db에 값 있으면 이미 회원가입 한 유저
+      if (alreadyUser) {
+        console.log('db에서 가져온 uSeq', alreadyUser.uSeq);
+        console.log(userEmail, userName, profile_image);
+
+        // 해당 3개의 값 가지는 토큰 생성
+        const jwtToken = jwt.sign({
+          uSeq: alreadyUser.uSeq,
+          userName: userName,
+          userEmail: userEmail,
+        });
+        // console.log(jwtToken);
+
+        res.cookie('token', jwtToken.token, {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'None',
+        });
+        console.log(jwtToken.token);
+
+        // ****************** 토큰을 들고 메인 페이지로 렌더링해야함
+        res.status(200).send({
+          alreadyUser: true,
+          token: jwtToken.token,
+          userEmail: userEmail,
+          userName: userName,
+          userImg: userImg,
+        });
+      } else {
+        // 최초 로그인 하는 유저
+        // *************** 토큰 발급 없이 회원가입 창으로 렌더링 필요
+        res.status(200).send({
+          alreadyUser: false,
+          userEmail: userEmail,
+          userName: userName,
+          userImg: userImg,
+        });
+      }
+
+      // res.send({
+      //   userEmail: userEmail,
+      //   userName: userName,
+      //   userImg: userImg,
+      // });
     });
 };
 
@@ -186,22 +283,38 @@ exports.getLoginGoogleRedirect = async (req, res) => {
       const { email, verified_email, name, picture } = googleUserInfo.data; // 유저 정보
 
       // 2) 회원가입 되어있는지 확인
-      const isJoined = await User.findOne({
+      const alreadyUser = await User.findOne({
         where: {
           uEmail: email,
         },
       });
 
       // 3) 회원
-      if (isJoined) {
-        res.send({ isSuccess: true, isJoined: true });
+      if (alreadyUser) {
+        const userEmail = googleUserInfo.data.email;
+        const userName = googleUserInfo.data.name;
+
+        // 해당 3개의 값 가지는 토큰 생성
+        const jwtToken = await jwt.sign({
+          uSeq: alreadyUser.uSeq,
+          userName: userName,
+          userEmail: userEmail,
+        });
+        res.cookie('token', jwtToken.token, {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'None',
+        });
+        console.log(jwtToken.token);
+
+        res.send({ isSuccess: true, alreadyUser: true, token: jwtToken.token });
         // 4) 비회원
       } else {
         // 4-1) 검증(확인)된 메일일 경우에만 회원 가입 진행
         if (verified_email) {
           res.send({
             isSuccess: true,
-            isJoined: false,
+            alreadyUser: false,
             email,
             name,
             img: picture,
@@ -221,4 +334,164 @@ exports.getLoginGoogleRedirect = async (req, res) => {
 
 // POST '/api/user/register'
 // 회원가입
-exports.postRegister = (req, res) => {};
+exports.postRegister = async (req, res) => {
+  console.log(req.headers);
+
+  try {
+    let { uEmail, uName, uImg, uCharImg, uCategory1, uCategory2, uCategory3 } =
+      req.body;
+
+    // null 값 있는지 검사 : 필수값은 3개
+    if (!uEmail || !uName || !uCharImg) {
+      return res.status(400).json({
+        OK: false,
+        msg: '입력 필드 중 하나 이상이 누락되었습니다.',
+      });
+    }
+
+
+    // 중복 검사 (uEmail, uNname)
+    const uEmailIsDuplicate = await User.count({ where: { uEmail } });
+    const uNameIsDuplicate = await User.count({ where: { uName } });
+
+    if (uEmailIsDuplicate || uNameIsDuplicate) {
+      return res.status(409).json({
+        OK: false,
+        uEmailIsDuplicate,
+        uNameIsDuplicate,
+        msg: 'uEmail 또는 uNname 가 이미 존재합니다.',
+      });
+    }
+
+    // 사용자 추가
+    const newUser = await User.create({
+      uEmail: uEmail,
+      uName: uName,
+      uImg: uImg,
+      uCharImg: uCharImg,
+      uCategory1: uCategory1,
+      uCategory2: uCategory2,
+      uCategory3: uCategory3,
+    });
+
+    // 여기에는 이미 가입한 유저는 오지 않으니
+    // 새로 create하고 db에서 그 유저의 uSeq 가져와서 토큰 생성
+    const newUserToken = await User.findOne({
+      where: {
+        uEmail: uEmail,
+      },
+    });
+    // 해당 3개의 값 가지는 토큰 생성
+    const jwtToken = await jwt.sign({
+      uSeq: newUserToken.uSeq,
+      userName: uName,
+      userEmail: uEmail,
+    });
+    res.cookie('token', jwtToken.token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'None',
+    });
+    console.log(jwtToken.token);
+
+    res.status(200).send({ user: newUser, token: jwtToken.token });
+  } catch (err) {
+    console.log(err);
+    res.status(err.statusCode || 500).send({
+      msg: err.message,
+      OK: false,
+    });
+  }
+};
+
+
+// 프로필 수정
+exports.getProfile = async (req, res) => {
+  authUtil.checkToken();
+  // 보여줄 정보 : 닉네임, 설명, 캐릭터, 관심분야(null), 메인화면 설정(dday, 달성량), 커버이미지
+  const userSeq = req.params.uSeq;
+
+  const userInfo = await User.findOne({
+    where: { uSeq: userSeq },
+  });
+
+  const {
+    uEmail,
+    uName,
+    uImg,
+    uCharImg,
+    uCoverImg,
+    uDesc,
+    uPhrase,
+    uCategory1,
+    uCategory2,
+    uCategory3,
+    uSetDday,
+    uMainDday,
+    uMainGroup,
+  } = userInfo;
+
+  res.send({
+    nickname: uName,
+    userImg: uImg,
+    character: uCharImg,
+    coverImg: uCoverImg,
+    coverLetter: uDesc,
+    phrase: uPhrase,
+    category1: uCategory1,
+    category2: uCategory2,
+    category3: uCategory3,
+    setDday: uSetDday,
+    mainDday: uMainDday,
+    setMainGroup: uMainGroup,
+  });
+};
+
+
+exports.editProfile = async (req, res) => {
+  const userSeq = req.params.uSeq;
+  const {
+    uName,
+    uDesc,
+    uPhrase,
+    uCategory1,
+    uCategory2,
+    uCategory3,
+    uSetDday,
+    uMainDday,
+    uMainGroup,
+  } = req.body;
+
+  const isNickname = await User.findOne({
+    where: { uName: uName, uSeq: { [Op.ne]: userSeq } },
+  });
+
+  // 닉네임이 이미 존재하는 경우
+  if (isNickname) {
+    res.send({ result: false, message: '이미 존재하는 닉네임입니다.' });
+  } else {
+    await User.update(
+      {
+        uName,
+        uDesc,
+        uPhrase,
+        uCategory1,
+        uCategory2,
+        uCategory3,
+        uSetDday,
+        uMainDday,
+        uMainGroup,
+      },
+      {
+        where: { uSeq: userSeq },
+      }
+    );
+    res.send({ result: true, message: '회원정보 수정 완료!' });
+  }
+};
+
+exports.editProfileImg = (req, res) => {
+  // uImg,
+  // uCharImg,
+  // uCoverImg,
+};

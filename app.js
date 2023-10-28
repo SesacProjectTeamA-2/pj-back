@@ -26,7 +26,7 @@ const session = require('express-session');
 const cors = require('cors');
 
 // swagger
-const { swaggerUi, specs } = require('./swagger/swagger');
+const { swaggerUI, specs } = require('./modules/swagger/swagger');
 const eba = require('express-basic-auth');
 
 // 미들웨어 등록
