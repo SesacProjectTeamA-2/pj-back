@@ -27,6 +27,7 @@ const cors = require('cors');
 
 // swagger
 const { swaggerUI, specs } = require('./modules/swagger/swagger');
+const eba = require('express-basic-auth');
 
 // 미들웨어 등록
 // 1) body-parser
@@ -48,7 +49,15 @@ app.use(
 );
 // 4) swagger
 // 첫 인자로 받은 경로로 접속하면 swagger UI가 보임
-app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(specs));
+app.use(
+  '/api-docs',
+  eba({ // swagger 로그인 설정
+    challenge: true,
+    users: { admin: process.env.SWAGGER_PW },
+  }),
+  swaggerUi.serve,
+  swaggerUi.setup(specs, { explorer: true })
+);
 
 /**
  * @path {GET} ${URL}:${PORT}/api
