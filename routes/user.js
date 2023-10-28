@@ -136,7 +136,7 @@ router.post('/register', controller.postRegister); // 회원가입
  *      tags: [userRouter]
  *      responses:
  *        "200":
- *          description: 회원 정보 수정 페이지 load, 서버로 전달해주는 값은 uSeq 입니다.
+ *          description: "회원 정보 수정 페이지 load, 서버로 전달해주는 값은 uSeq 입니다."
  *          content:
  *            application/json:
  *              schema:
@@ -144,8 +144,8 @@ router.post('/register', controller.postRegister); // 회원가입
  *                properties:
  *                    ok:
  *                      type: boolean
- *                    user:
- *                      type: object
+ *                   user:
+ *                    type: object
  *                    properties:
  *                      nickname:
  *                        type: string
@@ -183,6 +183,7 @@ router.post('/register', controller.postRegister); // 회원가입
  *                      setMainGroup:
  *                        type: integer
  *                        description: "대표모임달성률"
+ 
  */
 router.get('/mypage/:uSeq', authUtil, controller.getProfile);
 
@@ -190,13 +191,13 @@ router.get('/mypage/:uSeq', authUtil, controller.getProfile);
  * @swagger
  * paths:
  *  /api/user/mypage/:uSeq:
- *    get:
+ *    patch:
  *      summary: "프로필 수정"
  *      description: "닉네임, 자기소개, 명언, 카테고리 (1, 2, 3), 대표디데이설정, 설정그룹값, 달성률 그룹값 body로 받아옴."
  *      tags: [userRouter]
- *      responses:
- *        "200":
- *          description: 서버로 전달해주는 값은 {uName, uDesc, uCategory(1,2,3), uSetDay, uMainGroup, uMainDday} 입니다.
+ *      requestBody:
+ *          required: true
+ *          description: : "서버로 전달해주는 값은 {uName, uDesc, uCategory(1,2,3), uSetDay, uMainGroup, uMainDday} 입니다."
  *          content:
  *            application/json:
  *              schema:
@@ -204,7 +205,7 @@ router.get('/mypage/:uSeq', authUtil, controller.getProfile);
  *                properties:
  *                    ok:
  *                      type: boolean
- *                    users:
+ *                    user:
  *                      type: object
  *                    properties:
  *                      uName:
@@ -233,8 +234,25 @@ router.get('/mypage/:uSeq', authUtil, controller.getProfile);
  *                        description: "대표모임디데이"
  *                      uMainGroup:
  *                        type: integer
- *                        description: "대표모임달성률"
- *                          ]
+ *                        description: "대표모임달성률"                        
+ *      responses:
+ *        "200":
+ *          description: "닉네임 중복 체크를 하면서 성공여부를 true/false 형태로 응답합니다."
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                    ok:
+ *                      type: boolean
+ *                    user:
+ *                      type: object
+ *                      result:
+ *                        type: boolean
+ *                        description: "정보수정 성공 여부"
+ *                      message:
+ *                        type: string
+ *                        description: "성공시: 정보 수정완료, 실패시: 닉네임이 중복됩니다"
  */
 router.patch('/mypage/:uSeq', controller.editProfile);
 
