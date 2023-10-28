@@ -2,6 +2,7 @@ const dotenv = require('dotenv');
 const axios = require('axios');
 dotenv.config({ path: __dirname + '/../config/.env' });
 const { User } = require('../models');
+const { Op } = require('sequelize');
 
 // 로그인 된 사용자인지 아닌지 판별하려면 불러와야함
 const jwt = require('../modules/jwt');
@@ -126,7 +127,7 @@ exports.getLoginNaverRedirect = async (req, res) => {
   // 없으면 회원가입위해 {nickname, email, profile Img} send
   console.log(req.query);
   const NaverClientId = process.env.NAVER_CLIENT_ID;
-  NaverClientIdSecret = process.env.NAVER_CLIENT_SECRET;
+  const NaverClientIdSecret = process.env.NAVER_CLIENT_SECRET;
 
   // 발급된 code 변수할당.
   // code 값은 토큰 발급 요청에 사용됨.
@@ -348,6 +349,7 @@ exports.postRegister = async (req, res) => {
       });
     }
 
+
     // 중복 검사 (uEmail, uNname)
     const uEmailIsDuplicate = await User.count({ where: { uEmail } });
     const uNameIsDuplicate = await User.count({ where: { uName } });
@@ -402,10 +404,11 @@ exports.postRegister = async (req, res) => {
   }
 };
 
+
 // 프로필 수정
 exports.getProfile = async (req, res) => {
   authUtil.checkToken();
-  // 보여줄 정보 : 닉네임, 설명, 캐릭터, 관심분야(null), 메인화면 설정(dday, 달성량), 커버이미지, 회원탈퇴
+  // 보여줄 정보 : 닉네임, 설명, 캐릭터, 관심분야(null), 메인화면 설정(dday, 달성량), 커버이미지
   const userSeq = req.params.uSeq;
 
   const userInfo = await User.findOne({
@@ -442,4 +445,53 @@ exports.getProfile = async (req, res) => {
     mainDday: uMainDday,
     setMainGroup: uMainGroup,
   });
+};
+
+
+exports.editProfile = async (req, res) => {
+  const userSeq = req.params.uSeq;
+  const {
+    uName,
+    uDesc,
+    uPhrase,
+    uCategory1,
+    uCategory2,
+    uCategory3,
+    uSetDday,
+    uMainDday,
+    uMainGroup,
+  } = req.body;
+
+  const isNickname = await User.findOne({
+    where: { uName: uName, uSeq: { [Op.ne]: userSeq } },
+  });
+
+  // 닉네임이 이미 존재하는 경우
+  if (isNickname) {
+    res.send({ result: false, message: '이미 존재하는 닉네임입니다.' });
+  } else {
+    await User.update(
+      {
+        uName,
+        uDesc,
+        uPhrase,
+        uCategory1,
+        uCategory2,
+        uCategory3,
+        uSetDday,
+        uMainDday,
+        uMainGroup,
+      },
+      {
+        where: { uSeq: userSeq },
+      }
+    );
+    res.send({ result: true, message: '회원정보 수정 완료!' });
+  }
+};
+
+exports.editProfileImg = (req, res) => {
+  // uImg,
+  // uCharImg,
+  // uCoverImg,
 };
