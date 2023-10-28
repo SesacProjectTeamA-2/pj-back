@@ -10,14 +10,15 @@ const authUtil = require('../middlewares/auth');
 
 // 모임 페이지 load
 exports.getGroup = async (req, res) => {
-  authUtil.checkToken();
+  authUtil.checkToken(req, tokenRes);
+  console.log(tokenRes.user);
 
   const groupSeq = req.params.gSeq;
 
   // 모임장여부 : true/false
   const groupUser = await GroupUser.findOne({
     attributes: ['guIsLeader'],
-    where: { gSeq: groupSeq, uSeq: user.uSeq },
+    where: { gSeq: groupSeq, uSeq: tokenRes.user.uSeq },
   });
   const isLeader = groupUser && groupUser.guIsLeader === 'y';
 
@@ -57,10 +58,22 @@ exports.getGroup = async (req, res) => {
 
 exports.joinGroup = async (req, res) => {
   const groupSeq = req.params.gSeq;
-  authUtil.checkToken();
-  // 비회원
+  authUtil.checkToken(req, tokenRes);
 
+  // 비회원
+  if (tokenRes.user.error) {
+    res.json({ result: false, message: '회원가입이 필요합니다.' });
+  }
   // 회원
+  if (tokenRes.user.uSeq) {
+    const userJoin = await GroupUser.create({
+      gSeq: groupSeq,
+      uSeq: tokenRes.user.uSeq,
+    });
+    console.log(
+      '참여 요청-알림-수락의 경우 레디스/웹소켓이 필요할것으로 생각됨.'
+    );
+  }
 };
 
 exports.rankSystem = async (req, res) => {};
