@@ -15,7 +15,6 @@ const User = (Sequelize, DataTypes) => {
         unique: true,
         comment: '가입할 때 이메일 (UNIQUE)',
       },
-
       uName: {
         type: DataTypes.STRING(20),
         allowNull: false,
@@ -50,16 +49,19 @@ const User = (Sequelize, DataTypes) => {
       uCategory1: {
         type: DataTypes.STRING(10),
         allowNull: true,
+        defaultValue: null,
         comment: '관심분야1',
       },
       uCategory2: {
         type: DataTypes.STRING(10),
         allowNull: true,
+        defaultValue: null,
         comment: '관심분야2',
       },
       uCategory3: {
         type: DataTypes.STRING(10),
         allowNull: true,
+        defaultValue: null,
         comment: '관심분야3',
       },
       uPhrase: {
