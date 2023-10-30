@@ -1,0 +1,11 @@
+# 모임 관련 Response
+description: 'pet create/edit request'
+content:
+  application/json:
+    schema:
+      type: object
+      properties:
+        name:
+          type: string
+        tags:
+          type: string

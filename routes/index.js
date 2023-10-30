@@ -23,8 +23,8 @@ router.use('/group', groupRouter); // 모임
 /**
  * @swagger
  * tags:
- *   name: groupRouter
- *   description: 게시글 관련 라우터
+ *   name: Board
+ *   description: 게시글 관련 API
  */
 router.use('/board', boardRouter); // 게시글
 
