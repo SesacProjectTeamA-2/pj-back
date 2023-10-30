@@ -162,6 +162,7 @@ exports.createBoard = async (req, res) => {
   const category = req.query.category;
 
   try {
+    console.log('gSeq : ', gSeq);
     if (!uSeq) {
       res.status(401).send({
         success: false,
@@ -173,6 +174,8 @@ exports.createBoard = async (req, res) => {
     const groupUser = await GroupUser.findOne({
       where: { uSeq: uSeq },
     });
+    const guSeq = groupUser.guSeq;
+    console.log('uSeq의 guSeq : ', guSeq);
 
     if (!groupUser) {
       res.status(402).send({
@@ -180,8 +183,6 @@ exports.createBoard = async (req, res) => {
         msg: '그룹에 참여한 유저 X or 비정상적인 접근',
       });
     }
-    const guSeq = groupUser.guSeq;
-    console.log('uSeq의 guSeq : ', groupUser.guSeq);
 
     if (category == 'mission') {
       const mSeq = req.query.mSeq;
@@ -191,9 +192,10 @@ exports.createBoard = async (req, res) => {
         gbTitle: req.body.gbTitle,
         gbContent: req.body.gbContent,
         gbCategory: req.query.category,
-        uSeq: uSeq,
-        gSeq: gSeq,
         mSeq: mSeq,
+        gSeq: gSeq,
+        uSeq: uSeq,
+        guSeq: guSeq,
       });
       res.status(200).send({
         success: true,
@@ -210,8 +212,9 @@ exports.createBoard = async (req, res) => {
         gbTitle: req.body.gbTitle,
         gbContent: req.body.gbContent,
         gbCategory: req.query.category,
-        uSeq: uSeq,
         gSeq: gSeq,
+        uSeq: uSeq,
+        guSeq: guSeq,
       });
       res.status(200).send({
         success: true,
