@@ -43,6 +43,10 @@ GroupBoard.belongsTo(GroupUser, { foreignKey: 'gSeq' });
 GroupUser.hasMany(GroupBoard, { foreignKey: 'uSeq' });
 GroupBoard.belongsTo(GroupUser, { foreignKey: 'uSeq' });
 
+// 6. GroupUser 1 - GroupBoard 다
+GroupUser.hasMany(GroupBoard, { foreignKey: 'guSeq' });
+GroupBoard.belongsTo(GroupUser, { foreignKey: 'guSeq' });
+
 // 7. GroupBoard 1 - GroupBoardComment 다
 GroupBoard.hasMany(GroupBoardComment, { foreignKey: 'gbSeq' });
 GroupBoardComment.belongsTo(GroupBoard, { foreignKey: 'gbSeq' });
