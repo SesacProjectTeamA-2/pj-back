@@ -204,7 +204,7 @@ exports.createBoard = async (req, res) => {
           gbSeq: newBoard.dataValues.gbSeq,
         },
       });
-    } else {
+    } else if (category === 'notice' || category === 'free') {
       // DB작업
       const newBoard = await GroupBoard.create({
         gbTitle: req.body.gbTitle,
@@ -222,17 +222,12 @@ exports.createBoard = async (req, res) => {
           gbSeq: newBoard.dataValues.gbSeq,
         },
       });
+    } else {
+      res.status(400).send({
+        success: false,
+        msg: '올바르지 않은 카테고리 값입니다.',
+      });
     }
-
-    res.status(200).send({
-      success: true,
-      msg: '게시글 생성 처리 성공',
-      gbSeq: newBoard.dataValues.gbSeq,
-      data: {
-        user: uSeq,
-        gbSeq: newBoard.dataValues.gbSeq,
-      },
-    });
   } catch (error) {
     // 기타 데이터베이스 오류
     console.log(error);
