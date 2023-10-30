@@ -19,7 +19,7 @@ const GroupBoard = (Sequelize, DataTypes) => {
         allowNull: false,
         comment: '게시글 내용',
       },
-      gbIdDone: {
+      gbIsDone: {
         type: DataTypes.STRING(1),
         allowNull: false,
         defaultValue: 'y',

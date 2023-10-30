@@ -3,6 +3,7 @@ const router = express.Router();
 
 const userRouter = require('./user');
 const groupRouter = require('./group');
+const boardRouter = require('./board');
 
 /**
  * @swagger
@@ -18,5 +19,13 @@ router.use('/user', userRouter); // 유저
  *   description: 모임 관련 API
  */
 router.use('/group', groupRouter); // 모임
+
+/**
+ * @swagger
+ * tags:
+ *   name: groupRouter
+ *   description: 게시글 관련 라우터
+ */
+router.use('/board', boardRouter); // 게시글
 
 module.exports = router;
