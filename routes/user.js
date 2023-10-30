@@ -22,7 +22,7 @@ router.get('/login/google/redirect', controller.getLoginGoogleRedirect); // 구�
  *    post:
  *      summary: "사용자 회원가입 요청"
  *      description: "사용자 회원가입 요청"
- *      tags: [userRouter]
+ *      tags: [User]
  *      requestBody:
  *        required: true
  *        content:
@@ -106,7 +106,7 @@ router.post('/register', controller.postRegister); // 회원가입
  *    get:
  *      summary: "프로필 수정 목록 조회"
  *      description: "서버에 데이터를 보내지 않고 Get방식으로 요청"
- *      tags: [userRouter]
+ *      tags: [User]
  *      responses:
  *        "200":
  *          description: "회원 정보 수정 페이지 load, 서버로 전달해주는 값은 uSeq 입니다."
@@ -167,7 +167,7 @@ router.get('/mypage/:uSeq', authUtil, controller.getProfile);
  *    patch:
  *      summary: "프로필 수정"
  *      description: "닉네임, 자기소개, 명언, 카테고리 (1, 2, 3), 대표디데이설정, 설정그룹값, 달성률 그룹값 body로 받아옴."
- *      tags: [userRouter]
+ *      tags: [User]
  *      requestBody:
  *          required: true
  *          description: "서버로 전달해주는 값은 {uName, uDesc, uCategory(1,2,3), uSetDay, uMainGroup, uMainDday} 입니다."

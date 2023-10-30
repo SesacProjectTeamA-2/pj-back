@@ -99,8 +99,7 @@ const controller = require('../controller/Cgroup');
  *     post:
  *       summary: 모임 생성
  *       description: POST 모임 생성
- *       tags:
- *         - [postRouter]
+ *       tags: [Group]
  *       requestBody:
  *         description: 모임을 생성하기 위한 정보
  *         content:
