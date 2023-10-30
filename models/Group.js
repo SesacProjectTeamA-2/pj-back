@@ -43,6 +43,12 @@ const Group = (Sequelize, DataTypes) => {
         defaultValue: null,
         comment: '커버 이미지',
       },
+      gTotalScore: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+        comment: '모임 미션 현재 점수',
+      },
     },
     {
       tableName: 'tb_group',

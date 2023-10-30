@@ -19,6 +19,11 @@ const Mission = (Sequelize, DataTypes) => {
         allowNull: false,
         comment: '미션 인증 방식',
       },
+      mLevel: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        comment: '난이도에 따른 점수 부여 차이',
+      },
     },
     {
       tableName: 'tb_mission',
