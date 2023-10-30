@@ -115,7 +115,7 @@ router.post('/register', controller.postRegister); // 회원가입
  *              schema:
  *                type: object
  *                properties:
- *                    ok:
+ *                   ok:
  *                      type: boolean
  *                   user:
  *                    type: object
@@ -163,14 +163,14 @@ router.get('/mypage/:uSeq', authUtil, controller.getProfile);
 /**
  * @swagger
  * paths:
- *  /api/user/mypage/:uSeq:
+ *  /api/user/mypage/uSeq:
  *    patch:
  *      summary: "프로필 수정"
  *      description: "닉네임, 자기소개, 명언, 카테고리 (1, 2, 3), 대표디데이설정, 설정그룹값, 달성률 그룹값 body로 받아옴."
  *      tags: [userRouter]
  *      requestBody:
  *          required: true
- *          description: : "서버로 전달해주는 값은 {uName, uDesc, uCategory(1,2,3), uSetDay, uMainGroup, uMainDday} 입니다."
+ *          description: "서버로 전달해주는 값은 {uName, uDesc, uCategory(1,2,3), uSetDay, uMainGroup, uMainDday} 입니다."
  *          content:
  *            application/json:
  *              schema:

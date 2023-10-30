@@ -1,4 +1,4 @@
-const swaggerUI = require('swagger-ui-express');
+const swaggerUi = require('swagger-ui-express');
 const swaggerJSDoc = require('swagger-jsdoc');
 
 const config = require(__dirname + '/../../config/config.js')[
@@ -12,8 +12,12 @@ const options = {
     openapi: '3.0.0',
     info: {
       version: '1.0.0',
-      title: 'Motimates',
+      title: 'Motimates OpenAPI',
       description: 'Motimates RestFul API 클라이언트 UI',
+      contact: {
+        name: 'Motimates',
+        email: 'eoeung113@gmail.com',
+      },
     },
     servers: [
       {
@@ -26,4 +30,4 @@ const options = {
 
 const specs = swaggerJSDoc(options);
 
-module.exports = { swaggerUI, specs };
+module.exports = { swaggerUi, specs };

@@ -4,12 +4,18 @@ const router = express.Router();
 const userRouter = require('./user');
 const groupRouter = require('./group');
 
+/**
+ * @swagger
+ * tags: 
+ *   name: userRouter
+ *   description: 유저 관련 라우터  
+ */
 router.use('/user', userRouter); // 유저
 /**
  * @swagger
- * tags: Group
- *   name: postGroup
- *   description: 모임 생성
+ * tags:
+ *   name: postRouter
+ *   description: 모임 관련 라우터
  */
 router.use('/group', groupRouter); // 모임
 
