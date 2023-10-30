@@ -87,6 +87,12 @@ const User = (Sequelize, DataTypes) => {
         defaultValue: null,
         comment: '대표모임달성률',
       },
+      isAdmin: {
+        type: DataTypes.STRING(1),
+        allowNull: true,
+        defaultValue: null,
+        comment: '관리자여부',
+      },
     },
     {
       tableName: 'tb_user',

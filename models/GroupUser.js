@@ -22,10 +22,22 @@ const GroupUser = (Sequelize, DataTypes) => {
         comment: '블랙유저여부 (y: 블랙유저 / null: 화이트유저)',
       },
       guBanReason: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(100),
         allowNull: true,
         defaultValue: null,
         comment: '강퇴사유',
+      },
+      guNowScore: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+        comment: '현재점수',
+      },
+      guTotalScore: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+        comment: '누적점수',
       },
     },
     {
