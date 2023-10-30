@@ -7,7 +7,7 @@ const boardRouter = require('./board');
 
 /**
  * @swagger
- * tags: 
+ * tags:
  *   name: User
  *   description: 유저 관련 API
  */
