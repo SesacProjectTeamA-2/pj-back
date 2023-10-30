@@ -2,6 +2,11 @@ const dotenv = require('dotenv');
 const axios = require('axios');
 dotenv.config({ path: __dirname + '/../config/.env' });
 const { User } = require('../models');
+const { Op } = require('sequelize');
+
+// 로그인 된 사용자인지 아닌지 판별하려면 불러와야함
+const jwt = require('../modules/jwt');
+const authUtil = require('../middlewares/auth');
 
 // GET '/api/user/users'
 // 모든 유저 조회
@@ -9,23 +14,120 @@ exports.getUsers = (req, res) => {
   res.send('ok');
 };
 
+exports.getOAuth = (req, res) => {
+  const REST_API_KEY = process.env.REST_API_KEY;
+  const REDIRECT_URL = process.env.REDIRECT_URL;
+  const kakaoAuthURL = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URL}`;
+  console.log(kakaoAuthURL);
+  res.redirect(kakaoAuthURL);
+  console.log(res.statusCode);
+};
+
+exports.getKakao = async (req, res) => {
+  const { code } = req.query; // 카카오로부터 전달받은 인증 코드
+  const REST_API_KEY = process.env.REST_API_KEY;
+  const REDIRECT_URL = process.env.REDIRECT_URL;
+
+  // 액세스 토큰 요청을 위한 데이터 생성
+  const data = new URLSearchParams();
+  data.append('grant_type', 'authorization_code');
+  data.append('client_id', REST_API_KEY);
+  data.append('redirect_uri', REDIRECT_URL);
+  data.append('code', code);
+
+  console.log(code);
+
+  try {
+    // 카카오 OAuth 서버로 POST 요청 보내기
+    const response = await axios.post(
+      'https://kauth.kakao.com/oauth/token',
+      data,
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      }
+    );
+
+    // 응답 데이터에서 액세스 토큰 추출
+    const { access_token } = response.data;
+
+    const kakaoUser = await axios.get(`https://kapi.kakao.com/v2/user/me`, {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    });
+    const userEmail = kakaoUser.data.kakao_account.email;
+    const userName = kakaoUser.data.properties.nickname;
+    const userImg = kakaoUser.data.properties.profile_image;
+
+    const alreadyUser = await User.findOne({
+      where: {
+        uEmail: userEmail,
+      },
+    });
+
+    // db에 값 있으면 이미 회원가입 한 유저
+    if (alreadyUser) {
+      console.log('db에서 가져온 uSeq', alreadyUser.uSeq);
+      console.log(userEmail, userName, userImg);
+
+      // 해당 3개의 값 가지는 토큰 생성
+      const jwtToken = await jwt.sign({
+        uSeq: alreadyUser.uSeq,
+        userName: userName,
+        userEmail: userEmail,
+      });
+      // console.log(jwtToken);
+
+      res.cookie('token', jwtToken.token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'None',
+      });
+      console.log(jwtToken.token);
+
+      // ****************** 토큰을 들고 메인 페이지로 렌더링해야함
+      res.status(200).send({
+        alreadyUser: true,
+        token: jwtToken.token,
+        userEmail: userEmail,
+        userName: userName,
+        userImg: userImg,
+      });
+    } else {
+      // 최초 로그인 하는 유저
+      // *************** 토큰 발급 없이 회원가입 창으로 렌더링 필요
+      res.status(200).send({
+        alreadyUser: false,
+        userEmail: userEmail,
+        userName: userName,
+        userImg: userImg,
+      });
+    }
+  } catch (error) {
+    // 에러 처리
+    console.error('액세스 토큰 요청 중 오류 발생:', error);
+    res.status(500).json({ error: '액세스 토큰 요청 중 오류 발생' });
+  }
+};
 
 // 네이버 url로 연결.
-exports.getLoginNaver = () => {
+exports.getLoginNaver = (req, res) => {
   const NaverClientId = process.env.NAVER_CLIENT_ID;
-  const RedirectUri = encodeURI(
-    'http://localhost/8888/api/login/naver/callback'
-  );
+  const RedirectUri = 'http://localhost:8888/api/user/login/naver/callback';
   const State = 'test';
-  const NaverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${NaverClientId}&redirect_uri=${RedirectUri}&state=${State}`;
-
+  const NaverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${NaverClientId}&state=${State}&redirect_uri=${RedirectUri}`;
   res.redirect(NaverAuthUrl);
 };
 
 // 로그인하여 정보처리 동의시, redirectUri 로 code 발급.
-exports.getLoginNaverRedirect = async () => {
+exports.getLoginNaverRedirect = async (req, res) => {
+  // 회원정보에 동일한 email이 있으면, session 생성
+  // 없으면 회원가입위해 {nickname, email, profile Img} send
+  console.log(req.query);
   const NaverClientId = process.env.NAVER_CLIENT_ID;
-  NaverClientIdSecret = process.env.NAVER_CLIENT_SECRET;
+  const NaverClientIdSecret = process.env.NAVER_CLIENT_SECRET;
 
   // 발급된 code 변수할당.
   // code 값은 토큰 발급 요청에 사용됨.
@@ -52,20 +154,80 @@ exports.getLoginNaverRedirect = async () => {
       'X-Naver-Client-Secret': NaverClientIdSecret,
     },
   })
-    .then((res) => {
-      console.log('토큰정보', res.data);
+    .then((tokenRes) => {
+      console.log('토큰정보', tokenRes.data);
 
       return axios({
         method: 'get',
         url: 'https://openapi.naver.com/v1/nid/me',
         // 프로필 api url
         headers: {
-          Authorization: res.data.token_type + ' ' + res.data.access_token,
+          Authorization:
+            tokenRes.data.token_type + ' ' + tokenRes.data.access_token,
         },
       });
     })
-    .then((res) => console.log(res.data));
-=======
+
+    .then((userRes) => {
+      const { id, nickname, profile_image, email } = userRes.data.response;
+
+      const userEmail = userRes.data.response.email;
+      const userName = userRes.data.response.nickname;
+      const userImg = userRes.data.response.profile_image;
+
+      const alreadyUser = User.findOne({
+        where: {
+          uEmail: email,
+        },
+      });
+
+      // db에 값 있으면 이미 회원가입 한 유저
+      if (alreadyUser) {
+        console.log('db에서 가져온 uSeq', alreadyUser.uSeq);
+        console.log(userEmail, userName, profile_image);
+
+        // 해당 3개의 값 가지는 토큰 생성
+        const jwtToken = jwt.sign({
+          uSeq: alreadyUser.uSeq,
+          userName: userName,
+          userEmail: userEmail,
+        });
+        // console.log(jwtToken);
+
+        res.cookie('token', jwtToken.token, {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'None',
+        });
+        console.log(jwtToken.token);
+
+        // ****************** 토큰을 들고 메인 페이지로 렌더링해야함
+        res.status(200).send({
+          alreadyUser: true,
+          token: jwtToken.token,
+          userEmail: userEmail,
+          userName: userName,
+          userImg: userImg,
+        });
+      } else {
+        // 최초 로그인 하는 유저
+        // *************** 토큰 발급 없이 회원가입 창으로 렌더링 필요
+        res.status(200).send({
+          alreadyUser: false,
+          userEmail: userEmail,
+          userName: userName,
+          userImg: userImg,
+        });
+      }
+
+      // res.send({
+      //   userEmail: userEmail,
+      //   userName: userName,
+      //   userImg: userImg,
+      // });
+    });
+};
+
 // GET '/api/user/login/google'
 // 구글 로그인
 // 참고 자료 : https://velog.io/@mainfn/Node.js-express%EB%A1%9C-%EA%B5%AC%EA%B8%80-OAuth-%ED%9A%8C%EC%9B%90%EA%B0%80%EC%9E%85%EB%A1%9C%EA%B7%B8%EC%9D%B8-%EA%B5%AC%ED%98%84
@@ -121,22 +283,38 @@ exports.getLoginGoogleRedirect = async (req, res) => {
       const { email, verified_email, name, picture } = googleUserInfo.data; // 유저 정보
 
       // 2) 회원가입 되어있는지 확인
-      const isJoined = await User.findOne({
+      const alreadyUser = await User.findOne({
         where: {
           uEmail: email,
         },
       });
 
       // 3) 회원
-      if (isJoined) {
-        res.send({ isSuccess: true, isJoined: true });
+      if (alreadyUser) {
+        const userEmail = googleUserInfo.data.email;
+        const userName = googleUserInfo.data.name;
+
+        // 해당 3개의 값 가지는 토큰 생성
+        const jwtToken = await jwt.sign({
+          uSeq: alreadyUser.uSeq,
+          userName: userName,
+          userEmail: userEmail,
+        });
+        res.cookie('token', jwtToken.token, {
+          httpOnly: true,
+          secure: true,
+          sameSite: 'None',
+        });
+        console.log(jwtToken.token);
+
+        res.send({ isSuccess: true, alreadyUser: true, token: jwtToken.token });
         // 4) 비회원
       } else {
         // 4-1) 검증(확인)된 메일일 경우에만 회원 가입 진행
         if (verified_email) {
           res.send({
             isSuccess: true,
-            isJoined: false,
+            alreadyUser: false,
             email,
             name,
             img: picture,
@@ -156,6 +334,164 @@ exports.getLoginGoogleRedirect = async (req, res) => {
 
 // POST '/api/user/register'
 // 회원가입
-exports.postRegister = (req, res) => {
+exports.postRegister = async (req, res) => {
+  console.log(req.headers);
 
-}
+  try {
+    let { uEmail, uName, uImg, uCharImg, uCategory1, uCategory2, uCategory3 } =
+      req.body;
+
+    // null 값 있는지 검사 : 필수값은 3개
+    if (!uEmail || !uName || !uCharImg) {
+      return res.status(400).json({
+        OK: false,
+        msg: '입력 필드 중 하나 이상이 누락되었습니다.',
+      });
+    }
+
+
+    // 중복 검사 (uEmail, uNname)
+    const uEmailIsDuplicate = await User.count({ where: { uEmail } });
+    const uNameIsDuplicate = await User.count({ where: { uName } });
+
+    if (uEmailIsDuplicate || uNameIsDuplicate) {
+      return res.status(409).json({
+        OK: false,
+        uEmailIsDuplicate,
+        uNameIsDuplicate,
+        msg: 'uEmail 또는 uNname 가 이미 존재합니다.',
+      });
+    }
+
+    // 사용자 추가
+    const newUser = await User.create({
+      uEmail: uEmail,
+      uName: uName,
+      uImg: uImg,
+      uCharImg: uCharImg,
+      uCategory1: uCategory1,
+      uCategory2: uCategory2,
+      uCategory3: uCategory3,
+    });
+
+    // 여기에는 이미 가입한 유저는 오지 않으니
+    // 새로 create하고 db에서 그 유저의 uSeq 가져와서 토큰 생성
+    const newUserToken = await User.findOne({
+      where: {
+        uEmail: uEmail,
+      },
+    });
+    // 해당 3개의 값 가지는 토큰 생성
+    const jwtToken = await jwt.sign({
+      uSeq: newUserToken.uSeq,
+      userName: uName,
+      userEmail: uEmail,
+    });
+    res.cookie('token', jwtToken.token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'None',
+    });
+    console.log(jwtToken.token);
+
+    res.status(200).send({ user: newUser, token: jwtToken.token });
+  } catch (err) {
+    console.log(err);
+    res.status(err.statusCode || 500).send({
+      msg: err.message,
+      OK: false,
+    });
+  }
+};
+
+
+// 프로필 수정
+exports.getProfile = async (req, res) => {
+  authUtil.checkToken();
+  // 보여줄 정보 : 닉네임, 설명, 캐릭터, 관심분야(null), 메인화면 설정(dday, 달성량), 커버이미지
+  const userSeq = req.params.uSeq;
+
+  const userInfo = await User.findOne({
+    where: { uSeq: userSeq },
+  });
+
+  const {
+    uEmail,
+    uName,
+    uImg,
+    uCharImg,
+    uCoverImg,
+    uDesc,
+    uPhrase,
+    uCategory1,
+    uCategory2,
+    uCategory3,
+    uSetDday,
+    uMainDday,
+    uMainGroup,
+  } = userInfo;
+
+  res.send({
+    nickname: uName,
+    userImg: uImg,
+    character: uCharImg,
+    coverImg: uCoverImg,
+    coverLetter: uDesc,
+    phrase: uPhrase,
+    category1: uCategory1,
+    category2: uCategory2,
+    category3: uCategory3,
+    setDday: uSetDday,
+    mainDday: uMainDday,
+    setMainGroup: uMainGroup,
+  });
+};
+
+
+exports.editProfile = async (req, res) => {
+  const userSeq = req.params.uSeq;
+  const {
+    uName,
+    uDesc,
+    uPhrase,
+    uCategory1,
+    uCategory2,
+    uCategory3,
+    uSetDday,
+    uMainDday,
+    uMainGroup,
+  } = req.body;
+
+  const isNickname = await User.findOne({
+    where: { uName: uName, uSeq: { [Op.ne]: userSeq } },
+  });
+
+  // 닉네임이 이미 존재하는 경우
+  if (isNickname) {
+    res.send({ result: false, message: '이미 존재하는 닉네임입니다.' });
+  } else {
+    await User.update(
+      {
+        uName,
+        uDesc,
+        uPhrase,
+        uCategory1,
+        uCategory2,
+        uCategory3,
+        uSetDday,
+        uMainDday,
+        uMainGroup,
+      },
+      {
+        where: { uSeq: userSeq },
+      }
+    );
+    res.send({ result: true, message: '회원정보 수정 완료!' });
+  }
+};
+
+exports.editProfileImg = (req, res) => {
+  // uImg,
+  // uCharImg,
+  // uCoverImg,
+};
