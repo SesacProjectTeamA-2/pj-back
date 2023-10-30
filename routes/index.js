@@ -8,7 +8,7 @@ const groupRouter = require('./group');
  * @swagger
  * tags: 
  *   name: User
- *   description: 유저 관련 라우터  
+ *   description: 유저 관련 API
  */
 router.use('/user', userRouter); // 유저
 /**
