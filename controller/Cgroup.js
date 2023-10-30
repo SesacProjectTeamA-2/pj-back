@@ -50,7 +50,7 @@ exports.postGroup = async (req, res) => {
     if (insertOneGroup) {
       const insertOneGroupUser = await GroupUser.create({
         gSeq: insertOneGroup.gSeq,
-        // uSeq, // 추후 jwt를 이용해서 값 받아온 다음, 진행해야함
+        uSeq,
         guIsLeader: 'y',
       });
 
