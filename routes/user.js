@@ -96,7 +96,6 @@ router.get('/login/google/redirect', controller.getLoginGoogleRedirect); // 구�
  *                        type: string
  *                        description: "관심분야3"
  */
-
 router.post('/register', controller.postRegister); // 회원가입
 
 /**
@@ -156,7 +155,6 @@ router.post('/register', controller.postRegister); // 회원가입
  *                      setMainGroup:
  *                        type: integer
  *                        description: "대표모임달성률"
- 
  */
 router.get('/mypage/:uSeq', authUtil, controller.getProfile);
 
