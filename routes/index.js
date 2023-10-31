@@ -8,7 +8,7 @@ const boardRouter = require('./board');
 // index 라우터에는 각각의 라우터에 대한 태그와 설명을 작성
 /**
  * @swagger
- * tags: 
+ * tags:
  *   name: User
  *   description: 유저 관련 API
  */

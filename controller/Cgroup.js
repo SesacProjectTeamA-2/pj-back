@@ -47,6 +47,8 @@ exports.postGroup = async (req, res) => {
       gCoverImg, // 커버 이미지
     });
 
+    console.log(insertOneGroup);
+
     // 2) 모임장을 모임 참여 유저에 추가
     if (insertOneGroup) {
       const insertOneGroupUser = await GroupUser.create({
@@ -54,6 +56,8 @@ exports.postGroup = async (req, res) => {
         uSeq,
         guIsLeader: 'y',
       });
+      
+      console.log(insertOneGroupUser);
 
       // 3) 모임 생성 화면에서 등록한 미션 등록
       if (insertOneGroupUser) {
@@ -63,6 +67,8 @@ exports.postGroup = async (req, res) => {
           mContent, // 미션 내용
           mLevel, // 난이도 (상: 5점, 중: 3점, 하: 1점)
         });
+
+        console.log(insertOneMission);
         if (insertOneMission) {
           res.json({ isSuccess: true, msg: '모임 생성에 성공했습니다.' });
         } else {
