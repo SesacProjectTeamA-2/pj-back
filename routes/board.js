@@ -33,4 +33,16 @@ router.get('/create', authUtil, controller.getCreateBoard);
 // /board/create
 router.post('/create', authUtil, controller.createBoard);
 
+// 게시글 수정 페이지 렌더링
+// /board/edit/:gbSeq
+router.get('/edit/:gbSeq', authUtil, controller.getEditBoard);
+
+// 게시글 수정 처리
+// /board/edit/:gbSeq
+router.patch('/edit/:gbSeq', authUtil, controller.editBoard);
+
+// 게시글 삭제 처리
+// /board/delete/:gbSeq
+router.delete('/delete/:gbSeq', authUtil, controller.deleteBoard);
+
 module.exports = router;
