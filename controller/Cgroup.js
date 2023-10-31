@@ -191,40 +191,7 @@ exports.deleteGroup = async (req, res) => {
         //    (4) 게시글 삭제
         //    (5) 댓글 삭제
         //    (6) 게시글에 대한 이모티콘 반응 삭제
-
-        // 게시글 먼저 삭제
-        const selectAllGroupBoard = await GroupBoard.findAll({
-          where: {
-            gSeq,
-          },
-        });
-
-        console.log(selectAllGroupBoard);
-
-        const selectAllGroupBoardIcon = await GroupBoardIcon.findAll({
-          where: {
-            gbSeq: {
-              [Op.in]: paramCategory,
-            },
-          },
-        });
-
-        const selectAllGroupBoardComment = await GroupBoardComment.findAll({
-          where: {},
-        });
-
         const deleteOneGroup = await Group.destroy({
-          where: {
-            gSeq,
-          },
-        });
-
-        const deleteGroupUser = await GroupUser.destroy({
-          where: {
-            gSeq,
-          },
-        });
-        const deleteGroupMission = await Mission.destroy({
           where: {
             gSeq,
           },
