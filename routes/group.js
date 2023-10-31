@@ -9,7 +9,7 @@ const authUtil = require('../middlewares/auth').checkToken;
  *   /api/group:
  *     post:
  *       summary: 모임 생성
- *       description: POST 모임 생성
+ *       description: 모임 생성
  *       tags: [Group]
  *       requestBody:
  *         description: 모임을 생성하기 위한 정보
@@ -25,8 +25,9 @@ const authUtil = require('../middlewares/auth').checkToken;
  *             application/json:
  *               schema:
  *                 $ref: '#/components/schemas/postGroupResult'
- *
  */
 router.post('/', authUtil, controller.postGroup); // 모임 생성
+
+
 
 module.exports = router;
