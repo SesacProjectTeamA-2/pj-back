@@ -403,7 +403,7 @@ exports.postRegister = async (req, res) => {
   }
 };
 
-// 프로필 수정
+// 프로필 수정 화면
 exports.getProfile = async (req, res) => {
   // 로그인된 상태
   if (req.headers) {
@@ -431,23 +431,33 @@ exports.getProfile = async (req, res) => {
       uSetDday,
       uMainDday,
       uMainGroup,
+      isUse,
     } = userInfo;
 
-    res.json({
-      result: true,
-      nickname: uName,
-      userImg: uImg,
-      character: uCharImg,
-      coverImg: uCoverImg,
-      coverLetter: uDesc,
-      phrase: uPhrase,
-      category1: uCategory1,
-      category2: uCategory2,
-      category3: uCategory3,
-      setDday: uSetDday,
-      mainDday: uMainDday,
-      setMainGroup: uMainGroup,
-    });
+    if (isUse) {
+      res.json({
+        result: true,
+        isUse: true,
+        nickname: uName,
+        userImg: uImg,
+        character: uCharImg,
+        coverImg: uCoverImg,
+        coverLetter: uDesc,
+        phrase: uPhrase,
+        category1: uCategory1,
+        category2: uCategory2,
+        category3: uCategory3,
+        setDday: uSetDday,
+        mainDday: uMainDday,
+        setMainGroup: uMainGroup,
+      });
+    } else {
+      res.json({
+        result: true,
+        isUse: false,
+        message: '관리자에 의해 추방된 유저입니다.',
+      });
+    }
     // 비로그인 상태
   } else {
     res.json({
