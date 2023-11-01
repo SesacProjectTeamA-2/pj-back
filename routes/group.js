@@ -7,6 +7,28 @@ const authUtil = require('../middlewares/auth').checkToken;
  * @swagger
  * paths:
  *   /api/group:
+ *     get:
+ *       summary: 모임 조회 (검색어 검색 / 카테고리 검색)
+ *       description: 모임 조회 (검색어 검색 / 카테고리 검색)
+ *       tags: [Group]
+ *       parameters:
+ *         - $ref: '#/components/parameters/groupSearchParam'
+ *         - $ref: '#/components/parameters/groupCategoryParam'
+ *       responses:
+ *         "200":
+ *           description: 조건에 해당하는 모임 조회
+ *           required: true
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/groupArray'
+ */
+router.get('/', controller.getGroups); // 모임 조회 (검색어 검색 / 카테고리 검색)
+
+/**
+ * @swagger
+ * paths:
+ *   /api/group:
  *     post:
  *       summary: 모임 생성
  *       description: 모임 생성
