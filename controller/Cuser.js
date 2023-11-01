@@ -349,7 +349,6 @@ exports.postRegister = async (req, res) => {
       });
     }
 
-
     // 중복 검사 (uEmail, uNname)
     const uEmailIsDuplicate = await User.count({ where: { uEmail } });
     const uNameIsDuplicate = await User.count({ where: { uName } });
@@ -404,7 +403,6 @@ exports.postRegister = async (req, res) => {
   }
 };
 
-
 // 프로필 수정
 exports.getProfile = async (req, res) => {
   authUtil.checkToken();
@@ -446,7 +444,6 @@ exports.getProfile = async (req, res) => {
     setMainGroup: uMainGroup,
   });
 };
-
 
 exports.editProfile = async (req, res) => {
   const userSeq = req.params.uSeq;
