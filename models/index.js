@@ -20,40 +20,112 @@ const Mission = require('./Mission')(sequelize, Sequelize);
 // 전체 1:다 관계
 
 // 1. User 1 - GroupUser 다
-User.hasMany(GroupUser, { foreignKey: 'uSeq' });
-GroupUser.belongsTo(User, { foreignKey: 'uSeq' });
+User.hasMany(GroupUser, {
+  foreignKey: 'uSeq',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
+GroupUser.belongsTo(User, {
+  foreignKey: 'uSeq',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
 
 // 2. Group 1 - GroupUser 다
-Group.hasMany(GroupUser, { foreignKey: 'gSeq' });
-GroupUser.belongsTo(Group, { foreignKey: 'gSeq' });
+Group.hasMany(GroupUser, {
+  foreignKey: 'gSeq',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
+GroupUser.belongsTo(Group, {
+  foreignKey: 'gSeq',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
 
 // 3. Group 1 - Mission 다
-Group.hasMany(Mission, { foreignKey: 'gSeq' });
-Mission.belongsTo(Group, { foreignKey: 'gSeq' });
+Group.hasMany(Mission, {
+  foreignKey: 'gSeq',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
+Mission.belongsTo(Group, {
+  foreignKey: 'gSeq',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
 
 // 4. Mission 1 - GroupBoard 다
-Mission.hasMany(GroupBoard, { foreignKey: 'mSeq' });
-GroupBoard.belongsTo(Mission, { foreignKey: 'mSeq' });
+Mission.hasMany(GroupBoard, {
+  foreignKey: 'mSeq',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
+GroupBoard.belongsTo(Mission, {
+  foreignKey: 'mSeq',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
 
 // 5. GroupUser 1 - GroupBoard 다
-GroupUser.hasMany(GroupBoard, { foreignKey: 'gSeq' });
-GroupBoard.belongsTo(GroupUser, { foreignKey: 'gSeq' });
+GroupUser.hasMany(GroupBoard, {
+  foreignKey: 'gSeq',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
+GroupBoard.belongsTo(GroupUser, {
+  foreignKey: 'gSeq',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
 
 // 6. GroupUser 1 - GroupBoard 다
-GroupUser.hasMany(GroupBoard, { foreignKey: 'uSeq' });
-GroupBoard.belongsTo(GroupUser, { foreignKey: 'uSeq' });
+GroupUser.hasMany(GroupBoard, {
+  foreignKey: 'uSeq',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
+GroupBoard.belongsTo(GroupUser, {
+  foreignKey: 'uSeq',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
 
 // 7. GroupUser 1 - GroupBoard 다
-GroupUser.hasMany(GroupBoard, { foreignKey: 'guSeq' });
-GroupBoard.belongsTo(GroupUser, { foreignKey: 'guSeq' });
+GroupUser.hasMany(GroupBoard, {
+  foreignKey: 'guSeq',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
+GroupBoard.belongsTo(GroupUser, {
+  foreignKey: 'guSeq',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
 
 // 8. GroupBoard 1 - GroupBoardComment 다
-GroupBoard.hasMany(GroupBoardComment, { foreignKey: 'gbSeq' });
-GroupBoardComment.belongsTo(GroupBoard, { foreignKey: 'gbSeq' });
+GroupBoard.hasMany(GroupBoardComment, {
+  foreignKey: 'gbSeq',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
+GroupBoardComment.belongsTo(GroupBoard, {
+  foreignKey: 'gbSeq',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
 
 // 9. GroupBoard 1 - GroupBoardIcon 다
-GroupBoard.hasMany(GroupBoardIcon, { foreignKey: 'gbSeq' });
-GroupBoardIcon.belongsTo(GroupBoard, { foreignKey: 'gbSeq' });
+GroupBoard.hasMany(GroupBoardIcon, {
+  foreignKey: 'gbSeq',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
+GroupBoardIcon.belongsTo(GroupBoard, {
+  foreignKey: 'gbSeq',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
 
 db.User = User;
 db.Group = Group;
