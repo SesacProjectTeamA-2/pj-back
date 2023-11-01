@@ -2,7 +2,7 @@ const dotenv = require('dotenv');
 const axios = require('axios');
 const cron = require('node-cron');
 dotenv.config({ path: __dirname + '/../config/.env' });
-const { Group, Mission } = require('../models');
+const { User, Group, Mission, GroupBoard, GroupUser } = require('../models');
 const Sequelize = require('sequelize');
 const { Op } = require('sequelize');
 
@@ -44,17 +44,66 @@ cron.schedule(
 // 미션 리스트
 exports.getMission = async (req, res) => {
   // 1. 로그인 여부
-  const token = req.headers.authorization.split(' ')[1];
-  const user = await jwt.verify(token);
+  if (req.headers) {
+    const token = req.headers.authorization.split(' ')[1];
+    const user = await jwt.verify(token);
 
-  // 2. 유저 닉네임/캐릭터
-  const userInfo = await User.findOne({
-    where: { uSeq: user.uSeq },
-  });
-  const { uName, uCharImg } = userInfo;
+    // 2. 유저 닉네임/캐릭터
+    const userInfo = await User.findOne({
+      where: { uSeq: user.uSeq },
+    });
+    const { uName, uCharImg } = userInfo;
 
-  // 3. 그룹별 미션 load()
-  const groups = await Group.findAll({
-    where: {},
-  });
+    // 3. 그룹별 미션 load(), group [디데이, 모임명 - join], mission [미션 제목, 미션만료x(null)], group board[미션완료여부(y) mission join]
+    const groups = await GroupUser.findAll({
+      where: { uSeq: user.uSeq },
+      attributes: ['gSeq'],
+      include: [{ model: Group }, { attributes: ['gName', 'gDday'] }],
+    });
+
+    console.log(groups);
+
+    const gSeqArray = groups.map((group) => group.gSeq);
+
+    const missionArray = await Mission.findAll({
+      attributes: ['mSeq', 'gSeq', 'mTitle'],
+      where: { gSeq: { [Op.in]: gSeqArray }, isExpired: { [Op.ne]: 'y' } },
+    });
+    const groupMission = missionArray.map((mission) => mission.mTitle);
+
+    const groupInfo = gSeqArray.reduce((result, gSeq) => {
+      const group = groups.find((group) => group.gSeq === gSeq);
+      const groupMissions = missionArray.filter(
+        (mission) => mission.gSeq === gSeq
+      );
+
+      if (group && groupMissions.length > 0) {
+        result.push({
+          gSeq: gSeq,
+          // gName: group.Group.gName,
+          // gDday: group.Group.gDday,
+          missions: groupMissions.map((mission) => ({
+            mSeq: mission.mSeq,
+            mTitle: mission.mTitle,
+          })),
+        });
+      }
+
+      return result;
+    }, []);
+
+    const doneArray = await GroupBoard.findAll({
+      where: { gbIsDone: 'y' },
+      attributes: ['mSeq'],
+      include: [{ model: Mission }],
+    });
+
+    res.json({
+      uName,
+      uCharImg,
+      groupInfo,
+    });
+  } else {
+    res.json({ result: false, message: '로그인 해주세요!' });
+  }
 };
