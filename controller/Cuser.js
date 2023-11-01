@@ -1,6 +1,10 @@
 const dotenv = require('dotenv');
 const axios = require('axios');
 dotenv.config({ path: __dirname + '/../config/.env' });
+// config
+const config = require(__dirname + '/../config/config.js')[process.env.NODE_ENV];
+const { serverUrl, serverPort } = config; // 서버 설정
+
 const { User } = require('../models');
 const { Op } = require('sequelize');
 
@@ -16,7 +20,7 @@ exports.getUsers = (req, res) => {
 
 exports.getOAuth = (req, res) => {
   const REST_API_KEY = process.env.REST_API_KEY;
-  const REDIRECT_URL = process.env.REDIRECT_URL;
+  const REDIRECT_URL = `${serverUrl}:${serverPort}/` + process.env.REDIRECT_URL;
   const kakaoAuthURL = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URL}`;
   console.log(kakaoAuthURL);
   res.redirect(kakaoAuthURL);
@@ -26,7 +30,7 @@ exports.getOAuth = (req, res) => {
 exports.getKakao = async (req, res) => {
   const { code } = req.query; // 카카오로부터 전달받은 인증 코드
   const REST_API_KEY = process.env.REST_API_KEY;
-  const REDIRECT_URL = process.env.REDIRECT_URL;
+  const REDIRECT_URL = `${serverUrl}:${serverPort}/` + process.env.REDIRECT_URL;
 
   // 액세스 토큰 요청을 위한 데이터 생성
   const data = new URLSearchParams();
@@ -115,7 +119,7 @@ exports.getKakao = async (req, res) => {
 // 네이버 url로 연결.
 exports.getLoginNaver = (req, res) => {
   const NaverClientId = process.env.NAVER_CLIENT_ID;
-  const RedirectUri = 'http://localhost:8888/api/user/login/naver/callback';
+  const RedirectUri = `${serverUrl}:${serverPort}/api/user/login/naver/callback`;
   const State = 'test';
   const NaverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${NaverClientId}&state=${State}&redirect_uri=${RedirectUri}`;
   res.redirect(NaverAuthUrl);
@@ -239,7 +243,7 @@ exports.getLoginGoogle = (req, res) => {
   // OAuth API에서 발급받은 clinet_id 추가
   url += `?client_id=${process.env.GOOGLE_CLIENT_ID}`;
   // OAuth API에 등록한 redirect url
-  url += `&redirect_uri=${process.env.GOOGLE_LOGIN_REDIRECT_URI}`;
+  url += `&redirect_uri=${serverUrl}:${serverPort}${process.env.GOOGLE_LOGIN_REDIRECT_URI}`;
   // 필수 옵션
   url += `&response_type=code`;
   // 구글에 등록된 유저의 email, profile, openid을 가져오겠다고 명시
@@ -262,7 +266,7 @@ exports.getLoginGoogleRedirect = async (req, res) => {
       code,
       client_id: process.env.GOOGLE_CLIENT_ID,
       client_secret: process.env.GOOGLE_CLIENT_SECRET,
-      redirect_uri: process.env.GOOGLE_LOGIN_REDIRECT_URI,
+      redirect_uri: `${serverUrl}:${serverPort}` + process.env.GOOGLE_LOGIN_REDIRECT_URI,
       grant_type: 'authorization_code',
     });
 

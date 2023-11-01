@@ -57,7 +57,7 @@ app.use(
     users: { admin: process.env.SWAGGER_PW },
   }),
   swaggerUi.serve,
-  swaggerUi.setup(specs, { explorer: true }) // swagger 검색 기능
+  swaggerUi.setup(specs)
 );
 
 /**
