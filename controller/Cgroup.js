@@ -59,7 +59,7 @@ exports.getGroup = async (req, res) => {
     console.log('리더여부', isLeader);
     console.log('멤버여부', isMember);
 
-    res.send({
+    res.json({
       isLogin: true,
       isMember,
       isLeader,
@@ -75,7 +75,7 @@ exports.getGroup = async (req, res) => {
   }
   // 비회원인경우
   else {
-    res.send({
+    res.json({
       isLogin: false,
       missionTitle,
       missionContent,
