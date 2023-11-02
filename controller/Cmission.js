@@ -13,8 +13,9 @@ const authUtil = require('../middlewares/auth');
 // 하루가 지나는 날(00:01 분에 업데이트 되는 data)
 // => 모임 d-day, 모임 미션 만료 여부 (null => 'y')
 cron.schedule(
-  '00 00 * * *',
+  '* * * * *',
   async () => {
+    console.log('크론 실행!!!!');
     await Group.update(
       {
         gDday: Sequelize.literal('gDday-1'),
@@ -98,10 +99,13 @@ exports.getMission = async (req, res) => {
       include: [{ model: Mission }],
     });
 
+    const isDoneArray = doneArray.map((done) => done.mSeq);
+
     res.json({
       uName,
       uCharImg,
       groupInfo,
+      isDone: isDoneArray,
     });
   } else {
     res.json({ result: false, message: '로그인 해주세요!' });
