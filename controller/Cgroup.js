@@ -1,124 +1,264 @@
-const dotenv = require('dotenv');
-dotenv.config({ path: __dirname + '/../config/.env' });
-const { User, Group, GroupUser, Mission } = require('../models');
-const { Op } = require('sequelize');
-
-// 로그인 된 사용자인지 아닌지 판별하려면 불러와야함
+const {
+  User,
+  Group,
+  GroupUser,
+  GroupBoard,
+  GroupBoardComment,
+  GroupBoardIcon,
+  Mission,
+} = require('../models');
+const Op = require('sequelize').Op;
 const jwt = require('../modules/jwt');
-const secretKey = require('../config/secretkey');
 
-// 모임 페이지 load
-exports.getGroup = async (req, res) => {
-  const groupSeq = req.params.gSeq;
-
-  // 모임 정보
-  const groupInfo = await Group.findOne({ where: { gSeq: groupSeq } });
-  const groupMission = await Mission.findAll({
-    where: { gSeq: groupSeq, guisBlackUser: { [Op.ne]: 'y' } },
-  });
-  const groupMem = await User.findAll({
-    include: [
-      {
-        model: GroupUser,
-        where: { gSeq: groupSeq },
-      },
-    ],
-    attributes: ['uName'],
-  });
-
-  console.log(groupMem);
-
-  const { gName, gDesc, gDday, gCategory, gCoverImg } = groupInfo;
-  const missionTitle = groupMission.map((mission) => {
-    mission.mTitle;
-  });
-  const missionContent = groupMission.map((gr) => {
-    gr.mContent;
-  });
-
-  // 회원인경우
-  if (req.headers) {
-    let token = req.headers.authorization.split('')[1];
-    const userInfo = await jwt.verify(token);
-    console.log('토큰 디코딩>>>>>', userInfo);
-
-    // 모임가입여부
-    let isMember = await GroupUser.findOne({
-      attributes: ['guIsLeader'],
-      where: { gSeq: groupSeq, uSeq: userInfo.uSeq },
-    });
-
-    if (isMember) {
-      let isLeader = isMember && isMember.guIsLeader === 'y';
-
-      return { isLeader, isMember: true };
-      // 모임장여부 : true/false
+// GET '/api/group/groups'
+// 모임 조회 (검색어 검색 / 카테고리 검색)
+exports.getGroups = async (req, res) => {
+  try {
+    let { search, category } = req.query;
+    if (!search) search = '';
+    if (!category || (Array.isArray(category) && category.length === 0)) {
+      category = ['ex', 're', 'st', 'eco', 'lan', 'cert', 'it', 'etc'];
     } else {
-      isMember = false;
+      category = category.split(',');
     }
-    console.log('리더여부', isLeader);
-    console.log('멤버여부', isMember);
 
-    res.json({
-      isLogin: true,
-      isMember,
-      isLeader,
-      missionTitle,
-      missionContent,
-      groupMem,
-      groupName: gName,
-      groupInfo: gDesc,
-      groupDday: gDday,
-      groupCategory: gCategory,
-      groupCoverImg: gCoverImg,
+    console.log(search);
+    console.log(category);
+
+    const selectGroups = await Group.findAndCountAll({
+      where: {
+        [Op.or]: [
+          {
+            gName: { [Op.like]: `%${search}%` },
+          },
+          {
+            gDesc: { [Op.like]: `%${search}%` },
+          },
+          {
+            gCategory: { [Op.in]: category },
+          },
+        ],
+      },
     });
-  }
-  // 비회원인경우
-  else {
-    res.json({
-      isLogin: false,
-      missionTitle,
-      missionContent,
-      groupMem,
-      groupName: gName,
-      groupInfo: gDesc,
-      groupDday: gDday,
-      groupCategory: gCategory,
-      groupCoverImg: gCoverImg,
-    });
+
+    if (selectGroups.count > 0) {
+      res.json({
+        count: selectGroups.count,
+        groupArray: selectGroups.rows,
+      });
+    } else {
+      res.json({ isSuccess: true, msg: '해당하는 모임이 없습니다.' });
+    }
+  } catch (err) {
+    console.error(err);
+    res.json({ isSuccess: false, msg: 'error' });
   }
 };
 
-exports.joinGroup = async (req, res) => {
-  const groupSeq = req.params.gSeq;
-  authUtil.checkToken(req, tokenRes);
+// POST '/api/group'
+// 모임 생성
+exports.postGroup = async (req, res) => {
+  // [3가지 로직을 구현]
+  // 1) 모임 생성 → gSeq
+  // 2) 모임장을 모임 참여 유저에 추가
+  // 3) 모임 생성 화면에서 등록한 미션 등록
+  try {
+    let token = req.headers.authorization.split(' ')[1];
+    const user = await jwt.verify(token);
+    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
-  // 비회원
-  if (tokenRes.user.error) {
-    res.json({ result: false, message: '회원가입이 필요합니다.' });
-  }
-  // 회원
-  if (tokenRes.user.uSeq) {
-    const userJoin = await GroupUser.create({
-      gSeq: groupSeq,
-      uSeq: tokenRes.user.uSeq,
+    const uSeq = user.uSeq;
+    console.log(uSeq);
+
+    const {
+      gName,
+      gDesc,
+      gDday,
+      gMaxMem,
+      gCategory,
+      gCoverImg,
+      mTitle,
+      mContent,
+      mLevel,
+    } = req.body;
+
+    // 1) 모임 생성 → gSeq
+    const insertOneGroup = await Group.create({
+      gName, // 모임명
+      gDesc, // 설명
+      gDday, // 디데이
+      gMaxMem, // 최대인원
+      gCategory, // 카테고리
+      gCoverImg, // 커버 이미지
     });
-    console.log(
-      '참여 요청-알림-수락의 경우 레디스/웹소켓이 필요할것으로 생각됨.'
-    );
+
+    console.log(insertOneGroup);
+
+    // 2) 모임장을 모임 참여 유저에 추가
+    if (insertOneGroup) {
+      const insertOneGroupUser = await GroupUser.create({
+        gSeq: insertOneGroup.gSeq,
+        uSeq,
+        guIsLeader: 'y',
+      });
+
+      console.log(insertOneGroupUser);
+
+      // 3) 모임 생성 화면에서 등록한 미션 등록
+      if (insertOneGroupUser) {
+        const insertOneMission = await Mission.create({
+          gSeq: insertOneGroup.gSeq,
+          mTitle, // 미션 제목
+          mContent, // 미션 내용
+          mLevel, // 난이도 (상: 5점, 중: 3점, 하: 1점)
+        });
+
+        console.log(insertOneMission);
+        if (insertOneMission) {
+          res.json({ isSuccess: true, msg: '모임 생성에 성공했습니다.' });
+        } else {
+          res.json({ isSuccess: false, msg: '모임 생성에 실패했습니다.' });
+        }
+      } else {
+        res.json({ isSuccess: false, msg: '모임 생성에 실패했습니다.' });
+      }
+    } else {
+      res.json({ isSuccess: false, msg: '모임 생성에 실패했습니다.' });
+    }
+  } catch (err) {
+    res.json({ isSuccess: false, msg: 'error' });
   }
 };
 
-exports.rankSystem = async (req, res) => {};
+// PATCH '/api/group'
+// 모임 수정
+exports.patchGroup = async (req, res) => {
+  try {
+    let token = req.headers.authorization.split(' ')[1];
+    const user = await jwt.verify(token);
+    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
-// 미션 점수(tb_group - mLevel) : 상=>5 /중=>3 /하=>1
+    const uSeq = user.uSeq;
+    console.log(uSeq);
 
-// 회원별 현재 점수(tb_groupUser : guNowScore)
-// => 미션완료시의 점수(tb_groupBoard: gSeq, mSeq, uSeq, gbIsDone(y) Join tb_mission(mSeq) = mLevel 총 합) + 회원의 현재점수(tb_groupUser : guNowScore)
+    const { gSeq, gName, gDesc, gDday, gMaxMem, gCategory, gCoverImg } =
+      req.body;
 
-// 회원별 누적 점수(tb_groupUser : guTotalScore)
-// => Dday 종료시 guNowScore + guTotalScore
-// [guNowScore, gTotalScore 모두 초기화/ 모임 미션 만료]
+    // 현재 모임을 수정하려는 사람이 모임장인지 확인
+    const selectOneGroupUser = await GroupUser.findOne({
+      where: {
+        gSeq,
+        uSeq,
+      },
+    });
 
-// 모임 미션 총 점수(tb_group : gTotalScore) : 모든 미션의 점수 총 합
-//  => gSeq의 mLevel 추출하여 모두 합한 값
+    if (selectOneGroupUser) {
+      const updateOneGroup = await Group.update(
+        {
+          gName,
+          gDesc,
+          gDday,
+          gMaxMem,
+          gCategory,
+          gCoverImg,
+        },
+        {
+          where: {
+            gSeq,
+          },
+        }
+      );
+
+      if (updateOneGroup) {
+        res.json({ isSuccess: true, msg: '모임 수정에 성공했습니다' });
+      } else {
+        res.json({ isSuccess: false, msg: '모임 수정에 실패했습니다' });
+      }
+    } else {
+      res.json({ isSuccess: false, msg: '모임장이 아닙니다.' });
+    }
+  } catch (err) {
+    console.error(err);
+    res.json({ isSuccess: false, msg: 'error' });
+  }
+};
+
+// DELETE '/api/group'
+// 모임 삭제
+exports.deleteGroup = async (req, res) => {
+  // [3가지 로직을 구현]
+  // 1) 현재 삭제하는 사람이 모임장인지 확인
+  // 2) 만약 모임장이라면, 모임장 위임 화면으로 이동
+  //    - 모임장을 포함한 모임원이 최소 2명 이상이면, 무조건 위임화면으로 이동해서 위임해야함
+  //     ※ 모임원이 혼자인 경우는 바로 삭제
+  // 3) 모임이 삭제되면 관련 정보는 전부 삭제
+  //    (1) 모임 정보
+  //    (2) 모임 참여 유저
+  //    (3) 미션
+  //    (4) 게시글
+  //    (5) 댓글
+  //    (6) 게시글에 대한 이모티콘 반응
+
+  try {
+    let token = req.headers.authorization.split(' ')[1];
+    const user = await jwt.verify(token);
+    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
+
+    const uSeq = user.uSeq;
+    console.log(uSeq);
+
+    const { gSeq } = req.body;
+
+    // 1) 현재 삭제하는 사람이 모임장인지 확인
+    const selectOneGroupUser = await GroupUser.findOne({
+      where: {
+        gSeq,
+      },
+    });
+
+    console.log(selectOneGroupUser);
+
+    // y = 모임장, null = 모임원
+    if (selectOneGroupUser.guIsLeader) {
+      // 2) 모임장을 포함한 모임 인원 확인 (2명 이상이면 모임장 위임 화면으로 이동)
+      const countGroupUser = await GroupUser.count({
+        where: {
+          gSeq,
+        },
+      });
+
+      console.log(countGroupUser);
+
+      // 모임원이 2명 이상이면 모임장 위임하는 화면으로 이동
+      if (countGroupUser > 1) {
+        res.json({ isSuccess: false, msg: '모임장 위임을 해야합니다.' });
+
+        // 모임장인데, 모임원이 모임장 혼자인 경우는 모임 관련 데이터 삭제
+      } else {
+        // 3) 모임 관련 정보 모두 삭제
+        //    (1) 모임 정보 삭제
+        //    (2) 모임 참여 유저 삭제
+        //    (3) 미션 삭제
+        //    (4) 게시글 삭제
+        //    (5) 댓글 삭제
+        //    (6) 게시글에 대한 이모티콘 반응 삭제
+        const deleteOneGroup = await Group.destroy({
+          where: {
+            gSeq,
+          },
+        });
+
+        if (deleteOneGroup) {
+          res.json({ isSuccess: true, msg: '모임 삭제에 성공했습니다' });
+        } else {
+          res.json({ isSuccess: false, msg: '모임 삭제에 실패했습니다' });
+        }
+      }
+    } else {
+      res.json({ isSuccess: false, msg: '모임장이 아닙니다.' });
+    }
+  } catch (err) {
+    console.error(err);
+    res.json({ isSuccess: false, msg: 'error' });
+  }
+};

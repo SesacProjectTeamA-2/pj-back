@@ -12,20 +12,32 @@ const GroupUser = (Sequelize, DataTypes) => {
       guIsLeader: {
         type: DataTypes.STRING(1),
         allowNull: true,
-        defaultValue: 'n',
-        comment: '모임장여부 / y: 모임장 / n: 모임원',
+        defaultValue: null,
+        comment: '모임장여부 (y: 모임장 / null: 모임원)',
       },
       guIsBlackUser: {
         type: DataTypes.STRING(1),
-        allowNull: false,
-        defaultValue: 'n',
-        comment: '블랙유저여부 / y: 블랙유저 / n: 화이트유저',
+        allowNull: true,
+        defaultValue: null,
+        comment: '블랙유저여부 (y: 블랙유저 / null: 화이트유저)',
       },
       guBanReason: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(100),
         allowNull: true,
         defaultValue: null,
         comment: '강퇴사유',
+      },
+      guNowScore: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+        comment: '현재점수',
+      },
+      guTotalScore: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+        comment: '누적점수',
       },
     },
     {

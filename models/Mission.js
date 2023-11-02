@@ -24,6 +24,11 @@ const Mission = (Sequelize, DataTypes) => {
         allowNull: true,
         comment: '미션 d-day 만료 여부',
       },
+      mLevel: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        comment: '난이도에 따른 점수 부여 차이',
+      },
     },
     {
       tableName: 'tb_mission',

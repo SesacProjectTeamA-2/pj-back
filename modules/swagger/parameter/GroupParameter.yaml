@@ -1,0 +1,28 @@
+###################################################
+################## [QueryString] ##################
+###################################################
+components:
+  parameters:
+
+    # 모임 조회시 필요한 QueryString
+    # 모임 이름 및 설명으로 검색
+    groupSearchParam:
+        in: query
+        name: search
+        required: false
+        description: 모임 이름 및 설명으로 검색
+        example: 스터디
+        schema:
+          type: string
+    # 모임 카테고리로 검색
+    groupCategoryParam:
+        in: query
+        name: category
+        required: false
+        description: 모임 카테고리로 검색
+        example: ['st', 'cert', 'it']
+        schema:
+          type: array
+          items:
+            type: string
+          

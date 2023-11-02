@@ -1,6 +1,10 @@
 const dotenv = require('dotenv');
 const axios = require('axios');
 dotenv.config({ path: __dirname + '/../config/.env' });
+// config
+const config = require(__dirname + '/../config/config.js')[process.env.NODE_ENV];
+const { serverUrl, serverPort } = config; // 서버 설정
+
 const { User } = require('../models');
 const { Op } = require('sequelize');
 
@@ -14,19 +18,26 @@ exports.getUsers = (req, res) => {
   res.send('ok');
 };
 
+// #################################################
+// ################# [LOGIN START] #################
+// #################################################
+// ################# [Kakao LOGIN] #################
+// #################################################
+// 카카오 로그인 화면
 exports.getOAuth = (req, res) => {
   const REST_API_KEY = process.env.REST_API_KEY;
-  const REDIRECT_URL = process.env.REDIRECT_URL;
+  const REDIRECT_URL = `${serverUrl}:${serverPort}` + process.env.REDIRECT_URL;
   const kakaoAuthURL = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URL}`;
   console.log(kakaoAuthURL);
   res.redirect(kakaoAuthURL);
   console.log(res.statusCode);
 };
 
+// 카카오 로그인 redirect
 exports.getKakao = async (req, res) => {
   const { code } = req.query; // 카카오로부터 전달받은 인증 코드
   const REST_API_KEY = process.env.REST_API_KEY;
-  const REDIRECT_URL = process.env.REDIRECT_URL;
+  const REDIRECT_URL = `${serverUrl}:${serverPort}` + process.env.REDIRECT_URL;
 
   // 액세스 토큰 요청을 위한 데이터 생성
   const data = new URLSearchParams();
@@ -35,7 +46,7 @@ exports.getKakao = async (req, res) => {
   data.append('redirect_uri', REDIRECT_URL);
   data.append('code', code);
 
-  console.log(code);
+  // console.log(data);
 
   try {
     // 카카오 OAuth 서버로 POST 요청 보내기
@@ -112,10 +123,13 @@ exports.getKakao = async (req, res) => {
   }
 };
 
+// #################################################
+// ################# [Naver LOGIN] #################
+// #################################################
 // 네이버 url로 연결.
 exports.getLoginNaver = (req, res) => {
   const NaverClientId = process.env.NAVER_CLIENT_ID;
-  const RedirectUri = 'http://localhost:8888/api/user/login/naver/callback';
+  const RedirectUri = `${serverUrl}:${serverPort}/api/user/login/naver/callback`;
   const State = 'test';
   const NaverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${NaverClientId}&state=${State}&redirect_uri=${RedirectUri}`;
   res.redirect(NaverAuthUrl);
@@ -125,7 +139,7 @@ exports.getLoginNaver = (req, res) => {
 exports.getLoginNaverRedirect = async (req, res) => {
   // 회원정보에 동일한 email이 있으면, session 생성
   // 없으면 회원가입위해 {nickname, email, profile Img} send
-  console.log(req.query);
+  // console.log(req.query);
   const NaverClientId = process.env.NAVER_CLIENT_ID;
   const NaverClientIdSecret = process.env.NAVER_CLIENT_SECRET;
 
@@ -228,6 +242,9 @@ exports.getLoginNaverRedirect = async (req, res) => {
     });
 };
 
+// #################################################
+// ################# [Google LOGIN] #################
+// #################################################
 // GET '/api/user/login/google'
 // 구글 로그인
 // 참고 자료 : https://velog.io/@mainfn/Node.js-express%EB%A1%9C-%EA%B5%AC%EA%B8%80-OAuth-%ED%9A%8C%EC%9B%90%EA%B0%80%EC%9E%85%EB%A1%9C%EA%B7%B8%EC%9D%B8-%EA%B5%AC%ED%98%84
@@ -239,7 +256,7 @@ exports.getLoginGoogle = (req, res) => {
   // OAuth API에서 발급받은 clinet_id 추가
   url += `?client_id=${process.env.GOOGLE_CLIENT_ID}`;
   // OAuth API에 등록한 redirect url
-  url += `&redirect_uri=${process.env.GOOGLE_LOGIN_REDIRECT_URI}`;
+  url += `&redirect_uri=${serverUrl}:${serverPort}${process.env.GOOGLE_LOGIN_REDIRECT_URI}`;
   // 필수 옵션
   url += `&response_type=code`;
   // 구글에 등록된 유저의 email, profile, openid을 가져오겠다고 명시
@@ -262,7 +279,7 @@ exports.getLoginGoogleRedirect = async (req, res) => {
       code,
       client_id: process.env.GOOGLE_CLIENT_ID,
       client_secret: process.env.GOOGLE_CLIENT_SECRET,
-      redirect_uri: process.env.GOOGLE_LOGIN_REDIRECT_URI,
+      redirect_uri: `${serverUrl}:${serverPort}` + process.env.GOOGLE_LOGIN_REDIRECT_URI,
       grant_type: 'authorization_code',
     });
 
@@ -331,6 +348,9 @@ exports.getLoginGoogleRedirect = async (req, res) => {
     res.send({ isSuccess: false, msg: 'error' }); // 에러
   }
 };
+// #################################################
+// ################# [// LOGIN END] ################
+// #################################################
 
 // POST '/api/user/register'
 // 회원가입
@@ -403,50 +423,74 @@ exports.postRegister = async (req, res) => {
   }
 };
 
-// 프로필 수정
+
+// 프로필 수정 화면
 exports.getProfile = async (req, res) => {
-  authUtil.checkToken();
-  // 보여줄 정보 : 닉네임, 설명, 캐릭터, 관심분야(null), 메인화면 설정(dday, 달성량), 커버이미지
-  const userSeq = req.params.uSeq;
+  // 로그인된 상태
+  if (req.headers) {
+    let token = req.headers.authorization.split(' ')[1];
+    const user = await jwt.verify(token);
+    console.log('디코딩된 유저 토큰!!', user);
 
-  const userInfo = await User.findOne({
-    where: { uSeq: userSeq },
-  });
+    // 보여줄 정보 : 닉네임, 설명, 캐릭터, 관심분야(null), 메인화면 설정(dday, 달성량), 커버이미지
+    const userSeq = user.uSeq;
+    const userInfo = await User.findOne({
+      where: { uSeq: userSeq },
+    });
 
-  const {
-    uEmail,
-    uName,
-    uImg,
-    uCharImg,
-    uCoverImg,
-    uDesc,
-    uPhrase,
-    uCategory1,
-    uCategory2,
-    uCategory3,
-    uSetDday,
-    uMainDday,
-    uMainGroup,
-  } = userInfo;
+    const {
+      uEmail,
+      uName,
+      uImg,
+      uCharImg,
+      uCoverImg,
+      uDesc,
+      uPhrase,
+      uCategory1,
+      uCategory2,
+      uCategory3,
+      uSetDday,
+      uMainDday,
+      uMainGroup,
+      isUse,
+    } = userInfo;
 
-  res.send({
-    nickname: uName,
-    userImg: uImg,
-    character: uCharImg,
-    coverImg: uCoverImg,
-    coverLetter: uDesc,
-    phrase: uPhrase,
-    category1: uCategory1,
-    category2: uCategory2,
-    category3: uCategory3,
-    setDday: uSetDday,
-    mainDday: uMainDday,
-    setMainGroup: uMainGroup,
-  });
+    if (isUse) {
+      res.json({
+        result: true,
+        isUse: true,
+        nickname: uName,
+        userImg: uImg,
+        character: uCharImg,
+        coverImg: uCoverImg,
+        coverLetter: uDesc,
+        phrase: uPhrase,
+        category1: uCategory1,
+        category2: uCategory2,
+        category3: uCategory3,
+        setDday: uSetDday,
+        mainDday: uMainDday,
+        setMainGroup: uMainGroup,
+      });
+    } else {
+      res.json({
+        result: true,
+        isUse: false,
+        message: '관리자에 의해 추방된 유저입니다.',
+      });
+    }
+    // 비로그인 상태
+  } else {
+    res.json({
+      result: false,
+      message: '로그인 해주세요!',
+    });
+  }
 };
 
 exports.editProfile = async (req, res) => {
-  const userSeq = req.params.uSeq;
+  let token = req.headers.authorization.split(' ')[1];
+  const user = await jwt.verify(token);
   const {
     uName,
     uDesc,
@@ -460,12 +504,12 @@ exports.editProfile = async (req, res) => {
   } = req.body;
 
   const isNickname = await User.findOne({
-    where: { uName: uName, uSeq: { [Op.ne]: userSeq } },
+    where: { uName: uName, uSeq: { [Op.ne]: user.uSeq } },
   });
 
   // 닉네임이 이미 존재하는 경우
   if (isNickname) {
-    res.send({ result: false, message: '이미 존재하는 닉네임입니다.' });
+    res.json({ result: false, message: '이미 존재하는 닉네임입니다.' });
   } else {
     await User.update(
       {
@@ -483,7 +527,7 @@ exports.editProfile = async (req, res) => {
         where: { uSeq: userSeq },
       }
     );
-    res.send({ result: true, message: '회원정보 수정 완료!' });
+    res.json({ result: true, message: '회원정보 수정 완료!' });
   }
 };
 

@@ -6,103 +6,102 @@ const authUtil = require('../middlewares/auth').checkToken;
 /**
  * @swagger
  * paths:
- *  /api/group/{gSeq}:
- *    get:
- *      summary: "모임 페이지"
- *      description: "모임 페이지 로드"
- *      tags: [userRouter]
+ *   /api/group:
+ *     get:
+ *       summary: 모임 조회 (검색어 검색 / 카테고리 검색)
+ *       description: 모임 조회 (검색어 검색 / 카테고리 검색)
+ *       tags: [Group]
  *       parameters:
- *       - in: path
- *         name: gSeq
- *         description: 모임 시퀀스
- *         required: true
- *         schema:
- *           type: integer
- *     responses:
- *       '200':
- *         description: "모임 정보 전송"
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 isLeader:
- *                   type: boolean
- *                   description: 모임장 여부 (true/false)
- *                 missionTitle:
- *                   type: array
- *                   description: 미션 제목 목록
- *                   items:
- *                     type: string
- *                 missionContent:
- *                   type: array
- *                   description: 미션 내용 목록
- *                   items:
- *                     type: string
- *                 groupMem:
- *                   type: array
- *                   description: 모임 멤버 정보 목록
- *                   items:
- *                     $ref: '#/components/schemas/User'
- *                 groupName:
- *                   type: string
- *                   description: 모임 이름
- *                 groupInfo:
- *                   type: string
- *                   description: 모임 설명
- *                 groupDday:
- *                   type: string
- *                   description: 모임 디데이
- *                 groupCategory:
- *                   type: string
- *                   description: 모임 카테고리
- *                 groupCoverImg:
- *                   type: string
- *                   description: 모임 커버 이미지 URL
+ *         - $ref: '#/components/parameters/groupSearchParam'
+ *         - $ref: '#/components/parameters/groupCategoryParam'
+ *       responses:
+ *         "200":
+ *           description: 조건에 해당하는 모임 조회
+ *           required: true
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/groupArray'
  */
-router.get('/group/:gSeq', authUtil, controller.getGroup); // 그룹페이지로 이동
+router.get('/', controller.getGroups); // 모임 조회 (검색어 검색 / 카테고리 검색)
 
 /**
  * @swagger
  * paths:
- *   /api/group/{gSeq}/join:
- *     get:
- *       summary: "모임 가입"
- *       description: "모임에 가입하는 요청을 처리합니다."
- *       tags: [userRouter]
- *       parameters:
- *         - in: path
- *           name: gSeq
- *           description: "모임 시퀀스"
- *           required: true
- *           schema:
- *             type: integer
+ *   /api/group:
+ *     post:
+ *       summary: 모임 생성
+ *       description: 모임 생성
+ *       tags: [Group]
+ *       requestBody:
+ *         description: 모임을 생성하기 위해 필요한 정보
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/postGroup'
  *       responses:
- *         '200':
- *           description: "모임 가입 성공"
+ *         "200":
+ *           description: 모임 생성에 대한 성공 여부/메시지
+ *           required: true
  *           content:
  *             application/json:
  *               schema:
- *                 type: object
- *                 properties:
- *                   result:
- *                     type: boolean
- *                     description: "요청 성공 여부"
- *                   message:
- *                     type: string
- *                     description: "결과 메시지"
- *         '401':
- *           description: "회원가입이 필요합니다."
- *           content:
- *             application/json:
- *               schema:
- *                 type: object
- *                 properties:
- *                   result:
- *                     type: boolean
- *                     description: "요청 실패 여부"
- *                   message:
- *                     type: string
- *                     description: "회원가입이 필요함을 알리는 메시지"
+ *                 $ref: '#/components/schemas/groupApiResult'
  */
-router.get('/group/:gSeq/join', authUtil, controller.getGroup); // 모임가입
+router.post('/', authUtil, controller.postGroup); // 모임 생성
+
+
+/**
+ * @swagger
+ * paths:
+ *   /api/group/:
+ *     patch:
+ *       summary: 모임 수정
+ *       description: 모임 수정
+ *       tags: [Group]
+ *       requestBody:
+ *         description: 모임을 수정하기 위해 필요한 정보
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/patchGroup'
+ *       responses:
+ *         "200":
+ *           description: 모임 수정에 대한 성공 여부/메시지
+ *           required: true
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/groupApiResult'
+ */
+router.patch('/', authUtil, controller.patchGroup); // 모임 수정
+
+/**
+ * @swagger
+ * paths:
+ *   /api/group/:
+ *     delete:
+ *       summary: 모임 삭제
+ *       description: 모임 삭제
+ *       tags: [Group]
+ *       requestBody:
+ *         description: 모임을 삭제하기 위해 필요한 정보
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/deleteGroup'
+ *       responses:
+ *         "200":
+ *           description: 모임 삭제에 대한 성공 여부/메시지
+ *           required: true
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/groupApiResult'
+ */
+router.delete('/', authUtil, controller.deleteGroup); // 모임 삭제
+
+module.exports = router;

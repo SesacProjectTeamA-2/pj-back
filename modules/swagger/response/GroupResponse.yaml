@@ -1,0 +1,80 @@
+###################################################
+################## [Responses] ####################
+###################################################
+components:
+  schemas:
+
+    # 기본적인 응답 object (성공 여부, 응답 메시지)
+    groupApiResult:
+      required:
+        - isSuccess
+        - msg
+      type: object
+      description: 기본적인 응답 object (성공 여부, 응답 메시지)
+      properties: # res.json으로 정의한 값 정의
+        isSuccess:
+          type: boolean
+          description: 성공 여부
+          example: true
+        msg:
+          type: string
+          description: 응답 메시지
+          example: 성공
+
+    # 모임 array
+    groupArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/groupInfo'
+
+    # 모임 정보 object
+    groupInfo:
+      type: object
+      description: 모임 정보
+      properties: # res.json으로 정의한 값 정의
+        gSeq:
+          type: integer
+          format: int64
+          description: 모임 시퀀스
+          example: 1
+        gName:
+          type: string
+          description: 모임명 (Unique)
+          example: 정보처리기사 실기 대비반 (중복 안됩니다!)
+        gDesc:
+          type: string
+          description: 모임에 대한 설명
+          example: 정보처리기사 실기 대비 오프라인 모임입니다!
+        gDday:
+          type: string
+          format: date-time
+          description: 모임 자체의 디데이
+          example: 2023-10-31
+        gMaxMem:
+          type: integer
+          format: int64
+          description: 모임 최대 인원
+          example: 20
+        gCategory:
+          type: string
+          description: ex = 운동 / re = 독서 / st = 스터디 / eco = 경제 / lan = 언어 / cert = 자격증 / it = IT / etc = 기타
+          example: cert
+        gCoverImg:
+          type: string
+          description: 모임 커버 이미지
+          example: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVnwfCZtvVrf0NdXWT4YQp_aVEFlZ5-kuUfw&usqp=CAU
+        gTotalScore:
+          type: integer
+          format: int64
+          description: 현재 미션 총 점수(현재 진행되는 미션에 대한 총 점수)
+          example: 15
+        createdAt:
+          type: string
+          format: date-time
+          description: 모임 생성 시간
+          example: 2023-10-28
+        updatedAt:
+          type: string
+          format: date-time
+          description: 모임 수정 시간
+          example: 2023-10-31

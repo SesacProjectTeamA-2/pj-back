@@ -7,7 +7,7 @@ const TOKEN_INVALID = -2;
 
 const authUtil = {
   checkToken: async (req, res, next) => {
-    console.log(req.headers);
+    // console.log(req.head/ers);
     console.log('====================================');
     var token = req.headers.authorization.split(' ')[1];
     // 토큰 없음
@@ -15,15 +15,16 @@ const authUtil = {
     // decode
     const user = await jwt.verify(token);
     console.log('디코딩 된 토큰 :', user);
+    console.log(' 토큰 :', token);
     // 유효기간 만료
     if (user === TOKEN_EXPIRED)
       return res.status(401).json({ error: '유효기간 만료된 토큰' });
     // 유효하지 않는 토큰
     if (user === TOKEN_INVALID)
       return res.status(402).json({ error: '유효하지 않는 토큰' });
-    if (user.idx === undefined)
-      return res.status(402).json({ error: '유효하지 않는 토큰' });
-    req.idx = user.idx;
+    if (user.uSeq === undefined)
+      return res.status(402).json({ error: '유효하지 않는 토큰@@' });
+    req.uSeq = user.uSeq;
     next();
   },
 };
