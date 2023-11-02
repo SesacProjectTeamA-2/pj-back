@@ -51,6 +51,7 @@ router.get('/', controller.getGroups); // 모임 조회 (검색어 검색 / 카�
  */
 router.post('/', authUtil, controller.postGroup); // 모임 생성
 
+
 /**
  * @swagger
  * paths:

@@ -423,6 +423,7 @@ exports.postRegister = async (req, res) => {
   }
 };
 
+
 // 프로필 수정 화면
 exports.getProfile = async (req, res) => {
   // 로그인된 상태

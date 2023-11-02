@@ -21,6 +21,7 @@ router.use('/user', userRouter); // 유저
  */
 router.use('/group', groupRouter); // 모임
 
+
 /**
  * @swagger
  * tags:
@@ -28,5 +29,15 @@ router.use('/group', groupRouter); // 모임
  *   description: 게시글 관련 API
  */
 router.use('/board', boardRouter); // 게시글
+
+
+/**
+ * @swagger
+ * tags:
+ *   name: Mission
+ *   description: 미션 관련 API
+ */
+router.use('/mission', missionRouter); // 미션
+
 
 module.exports = router;

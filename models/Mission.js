@@ -19,6 +19,11 @@ const Mission = (Sequelize, DataTypes) => {
         allowNull: false,
         comment: '미션 인증 방식',
       },
+      isExpired: {
+        type: DataTypes.STRING(1),
+        allowNull: true,
+        comment: '미션 d-day 만료 여부',
+      },
       mLevel: {
         type: DataTypes.INTEGER,
         allowNull: false,
