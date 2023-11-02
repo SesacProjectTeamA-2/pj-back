@@ -15,7 +15,7 @@ components:
         uName:
           type: string
           description: 유저 닉네임
-          example: 모티메이츠
+          example: sean
         uCharImg:
           type: string
           description: 캐릭터이미지
@@ -23,13 +23,12 @@ components:
         groupInfo:
           type: object
           description: gSeq(그룹시퀀스), gName(그룹명), gDday(그룹 디데이 날짜)
+          example: gSeq(그룹시퀀스), gName(그룹명), gDday(그룹 디데이 날짜)
         isDone:
           type: object
           description: mSeq(미션시퀀스)에 대하여는 완료한 미션에 해당함.
+          example: [1, 2, 3]
         missionArray:
           type: object
           description: gSeq(그룹시퀀스), mSeq(미션시퀀스), mTitle(미션제목)
-        doneArray:
-          type: string
-          description: 응답 메시지
-          example: 성공
+          example: [gSeq(그룹시퀀스), mSeq(미션시퀀스), mTitle(미션제목)]

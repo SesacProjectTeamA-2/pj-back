@@ -1,5 +1,5 @@
 const dotenv = require('dotenv');
-const axios = require('axios');
+
 const cron = require('node-cron');
 dotenv.config({ path: __dirname + '/../config/.env' });
 const { User, Group, Mission, GroupBoard, GroupUser } = require('../models');
@@ -26,41 +26,35 @@ function calculateDDay(targetDate) {
   return daysRemaining;
 }
 
-cron.schedule(
-  '* * * * *',
-  async () => {
-    console.log('크론 실행!!!!');
+cron.schedule('* * * * *', async () => {
+  console.log('크론 실행!!!!');
 
-    const today = new Date(); // 현재 날짜와 시간을 가져옵니다.
-    const year = today.getFullYear(); // 현재 연도를 가져옵니다.
-    const month = today.getMonth() + 1; // 현재 월을 가져옵니다 (0부터 시작하므로 1을 더해줍니다).
-    const day = today.getDate(); // 현재 날짜를 가져옵니다.
+  const today = new Date(); // 현재 날짜와 시간을 가져옵니다.
+  const year = today.getFullYear(); // 현재 연도를 가져옵니다.
+  const month = today.getMonth() + 1; // 현재 월을 가져옵니다 (0부터 시작하므로 1을 더해줍니다).
+  const day = today.getDate(); // 현재 날짜를 가져옵니다.
 
-    const exGroups = await Group.findAll({
-      where: {
-        gDday: {
-          [Op.lt]: new Date(year, month, day),
-        },
+  const exGroups = await Group.findAll({
+    where: {
+      gDday: {
+        [Op.lt]: new Date(year, month, day),
       },
-      include: [{ model: 'Mission', where: { isExpired: { [Op.not]: 'y' } } }],
-      attributes: ['uSeq'],
-    });
+    },
+    include: [{ model: 'Mission', where: { isExpired: { [Op.not]: 'y' } } }],
+    attributes: ['uSeq'],
+  });
 
-    if (exGroups) {
-      for (const group of exGroups) {
-        await Mission.update(
-          { isExpired: 'y' },
-          { where: { gSeq: group.gSeq } }
-        );
-      }
+  if (exGroups) {
+    for (const group of exGroups) {
+      await Mission.update({ isExpired: 'y' }, { where: { gSeq: group.gSeq } });
     }
-  },
-);
+  }
+});
 
 // 미션 리스트
 exports.getMission = async (req, res) => {
   // 1. 로그인 여부
-  if (req.headers) {
+  if (req.headers.authorization) {
     const token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
 
