@@ -72,7 +72,7 @@ app.get('*', (req, res) => {
   res.send('error');
 });
 
-db.sequelize.sync({ force: true }).then(() => {
+db.sequelize.sync({ force: false }).then(() => {
   app.listen(serverPort, () => {
     console.log(`${serverUrl}:${serverPort}`);
   });
