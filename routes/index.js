@@ -4,6 +4,7 @@ const router = express.Router();
 const userRouter = require('./user');
 const groupRouter = require('./group');
 const boardRouter = require('./board');
+const missionRouter = require('./mission');
 
 // index 라우터에는 각각의 라우터에 대한 태그와 설명을 작성
 /**
