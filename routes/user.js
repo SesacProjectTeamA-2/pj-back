@@ -115,7 +115,7 @@ router.post('/register', controller.postRegister); // 회원가입
  *                 $ref: '#/components/schemas/userMypageApiResult'
  */
 
-router.get('/mypage/:uSeq', authUtil, controller.getProfile);
+router.get('/mypage', authUtil, controller.getProfile);
 
 /**
  * @swagger
@@ -141,6 +141,6 @@ router.get('/mypage/:uSeq', authUtil, controller.getProfile);
  *               schema:
  *                 $ref: '#/components/schemas/editMypageAPIResult'
  */
-router.patch('/mypage/:uSeq', controller.editProfile);
+router.patch('/mypage', controller.editProfile);
 
 module.exports = router;
