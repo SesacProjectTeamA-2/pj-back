@@ -12,16 +12,24 @@ const authUtil = require('../middlewares/auth');
 
 // 하루가 지나는 날(00:01 분에 업데이트 되는 data)
 // => 모임 d-day, 모임 미션 만료 여부 (null => 'y')
+
+function calculateDDay(targetDate) {
+  const currentDate = new Date();
+  const target = new Date(targetDate);
+
+  // 날짜 차이를 밀리초 단위로 계산
+  const timeDiff = target - currentDate;
+
+  // 밀리초를 일(day)로 변환
+  const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+  return daysRemaining;
+}
+
 cron.schedule(
   '* * * * *',
   async () => {
     console.log('크론 실행!!!!');
-    await Group.update(
-      {
-        gDday: Sequelize.literal('gDday-1'),
-      },
-      { where: { gDday: { [Op.gte]: 0 } } }
-    );
 
     const exGroups = await Group.findAll({
       where: { gDday: 0 },
@@ -62,36 +70,13 @@ exports.getMission = async (req, res) => {
       include: [{ model: Group }, { attributes: ['gName', 'gDday'] }],
     });
 
-    console.log(groups);
-
     const gSeqArray = groups.map((group) => group.gSeq);
 
     const missionArray = await Mission.findAll({
       attributes: ['mSeq', 'gSeq', 'mTitle'],
       where: { gSeq: { [Op.in]: gSeqArray }, isExpired: { [Op.ne]: 'y' } },
+      group: 'gSeq',
     });
-    const groupMission = missionArray.map((mission) => mission.mTitle);
-
-    const groupInfo = gSeqArray.reduce((result, gSeq) => {
-      const group = groups.find((group) => group.gSeq === gSeq);
-      const groupMissions = missionArray.filter(
-        (mission) => mission.gSeq === gSeq
-      );
-
-      if (group && groupMissions.length > 0) {
-        result.push({
-          gSeq: gSeq,
-          // gName: group.Group.gName,
-          // gDday: group.Group.gDday,
-          missions: groupMissions.map((mission) => ({
-            mSeq: mission.mSeq,
-            mTitle: mission.mTitle,
-          })),
-        });
-      }
-
-      return result;
-    }, []);
 
     const doneArray = await GroupBoard.findAll({
       where: { gbIsDone: 'y' },
@@ -106,6 +91,8 @@ exports.getMission = async (req, res) => {
       uCharImg,
       groupInfo,
       isDone: isDoneArray,
+      missionArray,
+      doneArray,
     });
   } else {
     res.json({ result: false, message: '로그인 해주세요!' });
