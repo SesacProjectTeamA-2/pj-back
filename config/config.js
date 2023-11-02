@@ -23,7 +23,7 @@ const config = {
     dialect: process.env.DB_DIALECT,
     timezone: 'Asia/Seoul', // DB에 저장할 때 시간 설정
     // 서버 설정
-    serverUrl: process.env.SERVER_PROD_DOMAIN,
+    serverUrl: process.env.SERVER_PROD_URL,
     serverPort: process.env.SERVER_PROD_PORT,
   },
 };

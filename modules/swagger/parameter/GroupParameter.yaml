@@ -20,9 +20,7 @@ components:
         name: category
         required: false
         description: 모임 카테고리로 검색
-        example: ['st', 'cert', 'it']
+        example: st,cert,it
         schema:
-          type: array
-          items:
-            type: string
+          type: string
           

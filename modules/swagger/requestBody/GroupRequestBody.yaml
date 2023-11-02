@@ -12,9 +12,7 @@ components: # 컴포넌트 선언
         - gDday
         - gMaxMem
         - gCategory
-        - mTitle
-        - mContent
-        - mLevel
+        - missionArray
       type: object
       description: 모임 생성 시 필요한 정보
       properties: # req.body로 넘어온 값 정의
@@ -44,18 +42,23 @@ components: # 컴포넌트 선언
           type: string
           description: 모임 커버 이미지
           example: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSr1_J07ruu0QuBhaD6HSDkvbQdW_OOENXmiA&usqp=CAU
-        mTitle:
-          type: string
-          description: 미션 제목
-          example: Node.js 강의 듣기
-        mContent:
-          type: string
-          description: 미션 내용
-          example: Node.js 강의 쳅터 1 듣고 오기
-        mLevel:
-          type: integer
-          description: 난이도에 따른 점수 부여 (상 = 5점, 중 = 3점, 하 = 1점)
-          example: 5
+        missionArray:
+          type: array
+          items:
+            type: object
+            properties:
+              mTitle:
+                type: string
+                description: 미션 제목
+                example: Node.js 강의 듣기
+              mContent:
+                type: string
+                description: 미션 내용
+                example: Node.js 강의 쳅터 1 듣고 오기
+              mLevel:
+                type: integer
+                description: 난이도에 따른 점수 부여 (상 = 5점, 중 = 3점, 하 = 1점)
+                example: 5
 
     # 모임 수정시 필요한 req.body
     patchGroup: # PATCH '/api/group'
