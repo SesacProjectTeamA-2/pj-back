@@ -26,6 +26,25 @@ function calculateDDay(targetDate) {
   return daysRemaining;
 }
 
+const today = new Date(); // 현재 날짜와 시간을 가져옵니다.
+const year = today.getFullYear(); // 현재 연도를 가져옵니다.
+const month = today.getMonth() + 1; // 현재 월을 가져옵니다 (0부터 시작하므로 1을 더해줍니다).
+const day = today.getDate(); // 현재 날짜를 가져옵니다.
+
+// 예시로 createdAt를 가정합니다. 실제로는 데이터베이스에서 레코드의 createdAt 속성을 가져와야 합니다.
+const createdAt = new Date('2023-11-02'); // createdAt 속성으로부터 날짜를 가져옵니다.
+
+// createdAt에서 연도, 월, 일을 가져옵니다.
+const createdYear = createdAt.getFullYear();
+const createdMonth = createdAt.getMonth() + 1;
+const createdDay = createdAt.getDate();
+
+if (year === createdYear && month === createdMonth && day === createdDay) {
+  console.log('y'); // createdAt과 현재 날짜가 연도, 월, 일이 동일한 경우 'y'를 출력합니다.
+} else {
+  console.log('다른 경우에 대한 처리'); // 조건을 만족하지 않는 경우 다른 처리를 할 수 있습니다.
+}
+
 cron.schedule(
   '* * * * *',
   async () => {
