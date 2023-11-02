@@ -18,19 +18,26 @@ exports.getUsers = (req, res) => {
   res.send('ok');
 };
 
+// #################################################
+// ################# [LOGIN START] #################
+// #################################################
+// ################# [Kakao LOGIN] #################
+// #################################################
+// 카카오 로그인 화면
 exports.getOAuth = (req, res) => {
   const REST_API_KEY = process.env.REST_API_KEY;
-  const REDIRECT_URL = `${serverUrl}:${serverPort}/` + process.env.REDIRECT_URL;
+  const REDIRECT_URL = `${serverUrl}:${serverPort}` + process.env.REDIRECT_URL;
   const kakaoAuthURL = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URL}`;
   console.log(kakaoAuthURL);
   res.redirect(kakaoAuthURL);
   console.log(res.statusCode);
 };
 
+// 카카오 로그인 redirect
 exports.getKakao = async (req, res) => {
   const { code } = req.query; // 카카오로부터 전달받은 인증 코드
   const REST_API_KEY = process.env.REST_API_KEY;
-  const REDIRECT_URL = `${serverUrl}:${serverPort}/` + process.env.REDIRECT_URL;
+  const REDIRECT_URL = `${serverUrl}:${serverPort}` + process.env.REDIRECT_URL;
 
   // 액세스 토큰 요청을 위한 데이터 생성
   const data = new URLSearchParams();
@@ -39,7 +46,7 @@ exports.getKakao = async (req, res) => {
   data.append('redirect_uri', REDIRECT_URL);
   data.append('code', code);
 
-  console.log(code);
+  // console.log(data);
 
   try {
     // 카카오 OAuth 서버로 POST 요청 보내기
@@ -116,6 +123,9 @@ exports.getKakao = async (req, res) => {
   }
 };
 
+// #################################################
+// ################# [Naver LOGIN] #################
+// #################################################
 // 네이버 url로 연결.
 exports.getLoginNaver = (req, res) => {
   const NaverClientId = process.env.NAVER_CLIENT_ID;
@@ -129,7 +139,7 @@ exports.getLoginNaver = (req, res) => {
 exports.getLoginNaverRedirect = async (req, res) => {
   // 회원정보에 동일한 email이 있으면, session 생성
   // 없으면 회원가입위해 {nickname, email, profile Img} send
-  console.log(req.query);
+  // console.log(req.query);
   const NaverClientId = process.env.NAVER_CLIENT_ID;
   const NaverClientIdSecret = process.env.NAVER_CLIENT_SECRET;
 
@@ -232,6 +242,9 @@ exports.getLoginNaverRedirect = async (req, res) => {
     });
 };
 
+// #################################################
+// ################# [Google LOGIN] #################
+// #################################################
 // GET '/api/user/login/google'
 // 구글 로그인
 // 참고 자료 : https://velog.io/@mainfn/Node.js-express%EB%A1%9C-%EA%B5%AC%EA%B8%80-OAuth-%ED%9A%8C%EC%9B%90%EA%B0%80%EC%9E%85%EB%A1%9C%EA%B7%B8%EC%9D%B8-%EA%B5%AC%ED%98%84
@@ -335,6 +348,9 @@ exports.getLoginGoogleRedirect = async (req, res) => {
     res.send({ isSuccess: false, msg: 'error' }); // 에러
   }
 };
+// #################################################
+// ################# [// LOGIN END] ################
+// #################################################
 
 // POST '/api/user/register'
 // 회원가입

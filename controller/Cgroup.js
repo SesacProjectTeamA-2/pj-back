@@ -10,6 +10,51 @@ const {
 const Op = require('sequelize').Op;
 const jwt = require('../modules/jwt');
 
+// GET '/api/group/groups'
+// 모임 조회 (검색어 검색 / 카테고리 검색)
+exports.getGroups = async (req, res) => {
+  try {
+    let { search, category } = req.query;
+    if (!search) search = '';
+    if (!category || (Array.isArray(category) && category.length === 0)) {
+      category = ['ex', 're', 'st', 'eco', 'lan', 'cert', 'it', 'etc'];
+    } else {
+      category = category.split(',');
+    }
+
+    console.log(search);
+    console.log(category);
+
+    const selectGroups = await Group.findAndCountAll({
+      where: {
+        [Op.or]: [
+          {
+            gName: { [Op.like]: `%${search}%` },
+          },
+          {
+            gDesc: { [Op.like]: `%${search}%` },
+          },
+          {
+            gCategory: { [Op.in]: category },
+          },
+        ],
+      },
+    });
+
+    if (selectGroups.count > 0) {
+      res.json({
+        count: selectGroups.count,
+        groupArray: selectGroups.rows,
+      });
+    } else {
+      res.json({ isSuccess: true, msg: '해당하는 모임이 없습니다.' });
+    }
+  } catch (err) {
+    console.error(err);
+    res.json({ isSuccess: false, msg: 'error' });
+  }
+};
+
 // POST '/api/group'
 // 모임 생성
 exports.postGroup = async (req, res) => {
@@ -56,7 +101,7 @@ exports.postGroup = async (req, res) => {
         uSeq,
         guIsLeader: 'y',
       });
-      
+
       console.log(insertOneGroupUser);
 
       // 3) 모임 생성 화면에서 등록한 미션 등록
