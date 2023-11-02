@@ -103,4 +103,25 @@ router.patch('/', authUtil, controller.patchGroup); // 모임 수정
  */
 router.delete('/', authUtil, controller.deleteGroup); // 모임 삭제
 
+/**
+ * @swagger
+ * paths:
+ *   /api/group/:gSeq
+ *     get:
+ *       summary: 선택한 모임 메인화면
+ *       description: 선택한 모임 메인 화면
+ *       tags: [Group]
+ *       parameters:
+ *         - $ref: '#/components/parameters/groupSeqParam'
+ *       responses:
+ *         "200":
+ *           description: 해당 모임 시퀀스에 해당하는 모임 메인 화면 로드
+ *           required: true
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/groupMain'
+ */
+router.get('/:gSeq', controller.getGroupMain); // 모임 조회 (검색어 검색 / 카테고리 검색)
+
 module.exports = router;

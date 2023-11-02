@@ -1,3 +1,6 @@
+const dotenv = require('dotenv');
+dotenv.config({ path: __dirname + '/../config/.env' });
+
 const {
   User,
   Group,
@@ -262,3 +265,140 @@ exports.deleteGroup = async (req, res) => {
     res.json({ isSuccess: false, msg: 'error' });
   }
 };
+
+// 디데이 계산함수.
+function calculateDDay(targetDate) {
+  const currentDate = new Date();
+  const target = new Date(targetDate);
+
+  // 날짜 차이를 밀리초 단위로 계산
+  const timeDiff = target - currentDate;
+
+  // 밀리초를 일(day)로 변환
+  const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+  return daysRemaining;
+}
+
+// 모임 페이지 load
+exports.getGroupMain = async (req, res) => {
+  try {
+    const groupSeq = req.params.gSeq;
+
+    // 모임 정보
+    const groupInfo = await Group.findOne({ where: { gSeq: groupSeq } });
+
+    const { gName, gDesc, gDday, gMaxMem, gCategory, gCoverImg } = groupInfo;
+
+    const groupDday = calculateDDay(gDday);
+
+    const groupMission = await Mission.findAll({
+      where: { gSeq: groupSeq, isExpired: { [Op.ne]: 'y' } },
+    });
+
+    const memberArray = await User.findAll({
+      attributes: ['uName', 'uImg'],
+      include: [
+        {
+          model: GroupUser,
+          include: [{ model: Group }],
+        },
+      ],
+    });
+    const memberNickname = memberArray.map((gr) => gr.uName);
+    const memberImg = memberArray.map((mem) => mem.uImg);
+
+    // 회원인 경우
+    if (req.headers.authorization) {
+      let token = req.headers.authorization.split(' ')[1];
+      const user = await jwt.verify(token);
+      console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
+
+      const groupUser = await GroupUser.findOne({
+        attributes: ['guSeq', 'guIsLeader'],
+        where: { gSeq: groupSeq, uSeq: user.uSeq },
+      });
+
+      // 모임에 가입한 경우
+      let isLeader;
+      let isJoin;
+      if (groupUser.guSeq) {
+        isJoin = true;
+        // 모임장여부 : true/false
+        isLeader = groupUser && groupUser.guIsLeader === 'y' ? true : false;
+      } else {
+        // 모임 가입하지 않은 경우
+        isJoin = false;
+        isLeader = false;
+      }
+
+      res.json({
+        result: true,
+        isJoin,
+        isLeader,
+        groupMission,
+        memberNickname,
+        memberImg,
+        groupName: gName,
+        groupMaxMember: gMaxMem,
+        grInformation: gDesc,
+        groupDday: groupDday,
+        groupCategory: gCategory,
+        groupCoverImg: gCoverImg,
+      });
+      // 비회원인경우
+    } else {
+      res.json({
+        result: false,
+        groupMission,
+        memberNickname,
+        memberImg,
+        groupName: gName,
+        grInformation: gDesc,
+        groupDday: groupDday,
+        groupCategory: gCategory,
+        groupCoverImg: gCoverImg,
+      });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(err.statusCode || 500).send({
+      msg: err.message,
+      OK: false,
+    });
+  }
+};
+
+exports.joinGroup = async (req, res) => {
+  const groupSeq = req.params.gSeq;
+
+  // 로그인상태
+  if (req.headers.authorization) {
+    let token = req.headers.authorization.split(' ')[1];
+    const user = await jwt.verify(token);
+    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
+
+    const userJoin = await GroupUser.create({
+      gSeq: groupSeq,
+      uSeq: user.uSeq,
+    });
+    console.log(
+      '참여 요청-알림-수락의 경우 레디스/웹소켓이 필요할것으로 생각됨.'
+    );
+  } else {
+    res.json({ result: false, message: '먼저 로그인 해주세요.' });
+  }
+};
+
+exports.rankSystem = async (req, res) => {};
+
+// 랭킹 : 점수 = 완료개수 * 순서
+// gSeq, uSeq로 특정, mSeq 에 대한 점수는
+// 1. 모임의 미션 중 완료여부 y 인 것 추출 => updatedAt 으로 오름차순(과거부터 현재순)
+// 2. 점수 부여 : 모임 참여 유저의 gSeq 수가 해당 미션의 만점 : 이후 user는 for 문 -1 로 값 정의
+// 3. mSeq 반복
+// 4. 해당 uSeq 가진 값들의 총합 = 해당 유저의 총 점수
+// 5. 점수 순으로 내림차순 = 랭킹
+
+// 만점 = gSeq의 mSeq의 개수 * 모임참여 유저의 gSeq 수
+// 퍼센트 = uSeq의 총 점수/ 만점 * 100

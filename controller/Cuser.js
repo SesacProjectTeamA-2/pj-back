@@ -2,7 +2,9 @@ const dotenv = require('dotenv');
 const axios = require('axios');
 dotenv.config({ path: __dirname + '/../config/.env' });
 // config
-const config = require(__dirname + '/../config/config.js')[process.env.NODE_ENV];
+const config = require(__dirname + '/../config/config.js')[
+  process.env.NODE_ENV
+];
 const { serverUrl, serverPort } = config; // 서버 설정
 
 const { User } = require('../models');
@@ -279,7 +281,8 @@ exports.getLoginGoogleRedirect = async (req, res) => {
       code,
       client_id: process.env.GOOGLE_CLIENT_ID,
       client_secret: process.env.GOOGLE_CLIENT_SECRET,
-      redirect_uri: `${serverUrl}:${serverPort}` + process.env.GOOGLE_LOGIN_REDIRECT_URI,
+      redirect_uri:
+        `${serverUrl}:${serverPort}` + process.env.GOOGLE_LOGIN_REDIRECT_URI,
       grant_type: 'authorization_code',
     });
 
@@ -425,93 +428,84 @@ exports.postRegister = async (req, res) => {
 
 // 프로필 수정 화면
 exports.getProfile = async (req, res) => {
-  // 로그인된 상태
-  if (req.headers) {
-    let token = req.headers.authorization.split(' ')[1];
-    const user = await jwt.verify(token);
-    console.log('디코딩된 유저 토큰!!', user);
+  try {
+    // 로그인된 상태
+    if (req.headers.authorization) {
+      let token = req.headers.authorization.split(' ')[1];
+      const user = await jwt.verify(token);
+      console.log('디코딩된 유저 토큰!!', user);
 
-    // 보여줄 정보 : 닉네임, 설명, 캐릭터, 관심분야(null), 메인화면 설정(dday, 달성량), 커버이미지
-    const userSeq = user.uSeq;
-    const userInfo = await User.findOne({
-      where: { uSeq: userSeq },
-    });
-
-    const {
-      uEmail,
-      uName,
-      uImg,
-      uCharImg,
-      uCoverImg,
-      uDesc,
-      uPhrase,
-      uCategory1,
-      uCategory2,
-      uCategory3,
-      uSetDday,
-      uMainDday,
-      uMainGroup,
-      isUse,
-    } = userInfo;
-
-    if (isUse) {
-      res.json({
-        result: true,
-        isUse: true,
-        nickname: uName,
-        userImg: uImg,
-        character: uCharImg,
-        coverImg: uCoverImg,
-        coverLetter: uDesc,
-        phrase: uPhrase,
-        category1: uCategory1,
-        category2: uCategory2,
-        category3: uCategory3,
-        setDday: uSetDday,
-        mainDday: uMainDday,
-        setMainGroup: uMainGroup,
+      // 보여줄 정보 : 닉네임, 설명, 캐릭터, 관심분야(null), 메인화면 설정(dday, 달성량), 커버이미지
+      const userSeq = user.uSeq;
+      const userInfo = await User.findOne({
+        where: { uSeq: userSeq },
       });
+
+      const {
+        uEmail,
+        uName,
+        uImg,
+        uCharImg,
+        uCoverImg,
+        uDesc,
+        uPhrase,
+        uCategory1,
+        uCategory2,
+        uCategory3,
+        uSetDday,
+        uMainDday,
+        uMainGroup,
+        isUse,
+      } = userInfo;
+
+      if (isUse) {
+        res.json({
+          result: true,
+          isBlock: true,
+          nickname: uName,
+          userImg: uImg,
+          character: uCharImg,
+          coverImg: uCoverImg,
+          coverLetter: uDesc,
+          phrase: uPhrase,
+          category1: uCategory1,
+          category2: uCategory2,
+          category3: uCategory3,
+          setDday: uSetDday,
+          mainDday: uMainDday,
+          setMainGroup: uMainGroup,
+        });
+      } else {
+        res.json({
+          result: true,
+          isBlock: false,
+          message: '관리자에 의해 추방된 유저입니다.',
+        });
+      }
+      // 비로그인 상태
     } else {
       res.json({
-        result: true,
-        isUse: false,
-        message: '관리자에 의해 추방된 유저입니다.',
+        result: false,
+        message: '로그인 해주세요!',
       });
     }
-    // 비로그인 상태
-  } else {
-    res.json({
-      result: false,
-      message: '로그인 해주세요!',
+  } catch (err) {
+    console.log(err);
+    res.status(err.statusCode || 500).send({
+      msg: err.message,
+      OK: false,
     });
   }
 };
 
 exports.editProfile = async (req, res) => {
-  let token = req.headers.authorization.split(' ')[1];
-  const user = await jwt.verify(token);
-  const {
-    uName,
-    uDesc,
-    uPhrase,
-    uCategory1,
-    uCategory2,
-    uCategory3,
-    uSetDday,
-    uMainDday,
-    uMainGroup,
-  } = req.body;
-
-  const isNickname = await User.findOne({
-    where: { uName: uName, uSeq: { [Op.ne]: user.uSeq } },
-  });
-
-  // 닉네임이 이미 존재하는 경우
-  if (isNickname) {
-    res.json({ result: false, message: '이미 존재하는 닉네임입니다.' });
-  } else {
-    await User.update(
-      {
+  try {
+    // 로그인된 상태
+    if (req.headers.authorization) {
+      let token = req.headers.authorization.split(' ')[1];
+      const user = await jwt.verify(token);
+      console.log('디코딩된 유저 토큰!!', user);
+      const {
         uName,
         uDesc,
         uPhrase,
@@ -521,12 +515,43 @@ exports.editProfile = async (req, res) => {
         uSetDday,
         uMainDday,
         uMainGroup,
-      },
-      {
-        where: { uSeq: userSeq },
+      } = req.body;
+
+      const isNickname = await User.findOne({
+        where: { uName: uName, uSeq: { [Op.ne]: user.uSeq } },
+      });
+
+      // 닉네임이 이미 존재하는 경우
+      if (isNickname) {
+        res.json({ result: false, message: '이미 존재하는 닉네임입니다.' });
+      } else {
+        await User.update(
+          {
+            uName,
+            uDesc,
+            uPhrase,
+            uCategory1,
+            uCategory2,
+            uCategory3,
+            uSetDday,
+            uMainDday,
+            uMainGroup,
+          },
+          {
+            where: { uSeq: userSeq },
+          }
+        );
+        res.json({ result: true, message: '회원정보 수정 완료!' });
       }
-    );
-    res.json({ result: true, message: '회원정보 수정 완료!' });
+    } else {
+      res.json({ result: false, message: '로그인 해주세요!' });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(err.statusCode || 500).send({
+      msg: err.message,
+      OK: false,
+    });
   }
 };
 
