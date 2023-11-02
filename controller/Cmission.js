@@ -55,9 +55,6 @@ cron.schedule(
       }
     }
   },
-  {
-    timezone: Asia / Seoul,
-  }
 );
 
 // 미션 리스트

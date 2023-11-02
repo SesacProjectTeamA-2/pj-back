@@ -22,3 +22,5 @@ const controller = require('../controller/Cmission');
  */
 // 미션 조회
 router.get('/', controller.getMission);
+
+module.exports = router;
