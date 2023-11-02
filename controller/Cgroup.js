@@ -10,7 +10,11 @@ const {
 const Op = require('sequelize').Op;
 const jwt = require('../modules/jwt');
 
-// GET '/api/group/groups'
+// GET '/api/group/:id'
+// 모임 정보 조회(상세 화면)
+exports.getGroup = (req, res) => {};
+
+// GET '/api/group?search=###&category=###'
 // 모임 조회 (검색어 검색 / 카테고리 검색)
 exports.getGroups = async (req, res) => {
   try {
@@ -55,6 +59,18 @@ exports.getGroups = async (req, res) => {
   }
 };
 
+// GET '/api/group/joined'
+// 현재 참여하고 있는 모임
+exports.getJoined = (req, res) => {};
+
+// GET '/api/group/made'
+// 내가 생성한 모임
+exports.getMade = (req, res) => {};
+
+// GET '/api/group/recommend'
+// 추천 모임
+exports.getRecommend = (req, res) => {};
+
 // POST '/api/group'
 // 모임 생성
 exports.postGroup = async (req, res) => {
@@ -70,17 +86,8 @@ exports.postGroup = async (req, res) => {
     const uSeq = user.uSeq;
     console.log(uSeq);
 
-    const {
-      gName,
-      gDesc,
-      gDday,
-      gMaxMem,
-      gCategory,
-      gCoverImg,
-      mTitle,
-      mContent,
-      mLevel,
-    } = req.body;
+    const { gName, gDesc, gDday, gMaxMem, gCategory, gCoverImg, missionArray } =
+      req.body;
 
     // 1) 모임 생성 → gSeq
     const insertOneGroup = await Group.create({
@@ -105,16 +112,19 @@ exports.postGroup = async (req, res) => {
       console.log(insertOneGroupUser);
 
       // 3) 모임 생성 화면에서 등록한 미션 등록
+      let mCnt = 0;
       if (insertOneGroupUser) {
-        const insertOneMission = await Mission.create({
-          gSeq: insertOneGroup.gSeq,
-          mTitle, // 미션 제목
-          mContent, // 미션 내용
-          mLevel, // 난이도 (상: 5점, 중: 3점, 하: 1점)
-        });
+        for (let missionInfo of missionArray) {
+          await Mission.create({
+            gSeq: insertOneGroup.gSeq,
+            mTitle: missionInfo.mTitle, // 미션 제목
+            mContent: missionInfo.mContent, // 미션 내용
+            mLevel: missionInfo.mLevel, // 난이도 (상: 5점, 중: 3점, 하: 1점)
+          });
+          mCnt++;
+        }
 
-        console.log(insertOneMission);
-        if (insertOneMission) {
+        if (missionArray.length === mCnt) {
           res.json({ isSuccess: true, msg: '모임 생성에 성공했습니다.' });
         } else {
           res.json({ isSuccess: false, msg: '모임 생성에 실패했습니다.' });
@@ -126,6 +136,7 @@ exports.postGroup = async (req, res) => {
       res.json({ isSuccess: false, msg: '모임 생성에 실패했습니다.' });
     }
   } catch (err) {
+    console.error(err);
     res.json({ isSuccess: false, msg: 'error' });
   }
 };
