@@ -68,15 +68,14 @@ exports.getMission = async (req, res) => {
     const groupInfo = await GroupUser.findAll({
       where: { uSeq: user.uSeq },
       attributes: ['gSeq'],
-      include: [{ model: Group }, { attributes: ['gName', 'gDday'] }],
+      include: [{ model: Group, attributes: ['gName', 'gDday'] }],
     });
 
-    const gSeqArray = groups.map((group) => group.gSeq);
+    const gSeqArray = groupInfo.map((group) => group.gSeq);
 
     const missionArray = await Mission.findAll({
       attributes: ['mSeq', 'gSeq', 'mTitle'],
       where: { gSeq: { [Op.in]: gSeqArray }, isExpired: { [Op.ne]: 'y' } },
-      group: 'gSeq',
     });
 
     const doneArray = await GroupBoard.findAll({
