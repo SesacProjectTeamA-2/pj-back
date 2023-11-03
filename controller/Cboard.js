@@ -194,6 +194,42 @@ exports.getGroupMissionBoard = async (req, res) => {
   }
 };
 
+// 그룹의 미션 게시글 상세
+exports.getGroupMissionDetail = async (req, res) => {
+  try {
+    const gSeq = req.params.gSeq;
+    const category = 'mission';
+    const mSeq = req.params.mSeq;
+    const gbSeq = req.params.gbSeq;
+
+    console.log('getGroupMissionDetail : ', gSeq, category, mSeq, gbSeq);
+
+    const groupInfo = await GroupBoard.findOne({
+      where: { gSeq: gSeq, gbCategory: category, mSeq: mSeq, gbSeq: gbSeq },
+    });
+
+    if (groupInfo) {
+      // 게시글을 찾았을 경우
+      res.status(200).send({
+        success: true,
+        msg: '게시글 조회 성공',
+        groupInfo,
+      });
+    } else {
+      // 게시글을 찾지 못했을 경우
+      res.status(404).send({
+        success: false,
+        msg: '게시글을 찾을 수 없습니다.',
+      });
+    }
+  } catch {
+    res.status(405).send({
+      success: false,
+      msg: 'gSeq 혹은 mSeq를 찾을 수 없습니다.',
+    });
+  }
+};
+
 // 새 게시글 생성 페이지 렌더링
 // /board/create
 exports.getCreateBoard = async (req, res) => {

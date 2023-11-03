@@ -117,7 +117,31 @@ router.get('/:gSeq/free/:gbSeq', controller.getGroupFreeDetail);
  */
 router.get('/:gSeq/mission/:mSeq', controller.getGroupMissionBoard);
 
-// 게시글 작성 페이지 작성
+// 그룹의 미션 게시판
+// /board/:gSeq/mission/:mSeq
+/**
+ * @swagger
+ * paths:
+ *   /api/board/{gSeq}/mission/{mSeq}/{gbSeq}:
+ *     get:
+ *       summary: 모임의 미션 게시글 상세
+ *       description: 모임의 미션 게시글 상세
+ *       tags: [Board]
+ *       parameters:
+ *        - $ref: '#/components/parameters/gSeqPath'
+ *        - $ref: '#/components/parameters/mSeqPath'
+ *        - $ref: '#/components/parameters/gbSeqPath'
+ *       responses:
+ *         200:
+ *           description: Successful response
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/boardApiResult'
+ */
+router.get('/:gSeq/mission/:mSeq/:gbSeq', controller.getGroupMissionDetail);
+
+// 게시글 작성 페이지
 // /board/create
 /**
  * @swagger
@@ -152,6 +176,7 @@ router.get('/create', authUtil, controller.getCreateBoard);
  *       parameters:
  *        - $ref: '#/components/parameters/gSeqQuery'
  *        - $ref: '#/components/parameters/categoryQuery'
+ *        - $ref: '#/components/parameters/mSeqQuery'
  *       requestBody:
  *         description: 게시글 작성 위해 필요한 정보
  *         required: true

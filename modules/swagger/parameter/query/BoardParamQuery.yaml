@@ -21,3 +21,11 @@ components:
       example: notice
       schema:
         type: string
+    mSeqQuery:
+      in: query
+      name: mSeq
+      required: false
+      description: 미션 게시글의 경우 mSeq 값 (미션 게시글일 때만 필요)
+      example: 1
+      schema:
+        type: integer
