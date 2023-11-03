@@ -13,6 +13,8 @@ const config = {
     // 서버 설정
     serverUrl: process.env.SERVER_DEV_URL,
     serverPort: process.env.SERVER_DEV_PORT,
+    // 프론트 설정
+    frontPort: process.env.FRONT_DEV_PORT,
   },
   production: {
     // DB 설정
@@ -25,6 +27,8 @@ const config = {
     // 서버 설정
     serverUrl: process.env.SERVER_PROD_DOMAIN,
     serverPort: process.env.SERVER_PROD_PORT,
+    // 프론트 설정
+    frontPort: process.env.FRONT_PROD_PORT,
   },
 };
 

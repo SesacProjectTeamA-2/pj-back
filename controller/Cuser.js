@@ -5,7 +5,7 @@ dotenv.config({ path: __dirname + '/../config/.env' });
 const config = require(__dirname + '/../config/config.js')[
   process.env.NODE_ENV
 ];
-const { serverUrl, serverPort } = config; // 서버 설정
+const { serverUrl, serverPort, frontPort } = config; // 서버 설정
 
 const { User } = require('../models');
 const { Op } = require('sequelize');
@@ -101,7 +101,7 @@ exports.getKakao = async (req, res) => {
       console.log(jwtToken.token);
 
       // ****************** 토큰을 들고 메인 페이지로 렌더링해야함
-      let redirectUrl = `${serverUrl}/main`;
+      let redirectUrl = `${serverUrl}:${frontPort}/main`;
       redirectUrl += `?userImg=${userImg}`;
       redirectUrl += `&userName=${userName}`;
       redirectUrl += `&userEmail=${userEmail}`;
@@ -110,7 +110,7 @@ exports.getKakao = async (req, res) => {
     } else {
       // 최초 로그인 하는 유저
       // *************** 토큰 발급 없이 회원가입 창으로 렌더링 필요
-      let redirectUrl = `${serverUrl}/join`;
+      let redirectUrl = `${serverUrl}:${frontPort}/join`;
       redirectUrl += `?userImg=${userImg}`;
       redirectUrl += `&userName=${userName}`;
       redirectUrl += `&userEmail=${userEmail}`;
@@ -118,8 +118,9 @@ exports.getKakao = async (req, res) => {
     }
   } catch (error) {
     // 에러 처리
-    console.error('액세스 토큰 요청 중 오류 발생:', error);
-    res.status(500).json({ error: '액세스 토큰 요청 중 오류 발생' });
+    let redirectUrl = `${serverUrl}:${frontPort}/main`;
+    redirectUrl += `?msg=액세스 토큰 요청 중 오류 발생`;
+    res.status(500).redirect(redirectUrl);
   }
 };
 
@@ -216,7 +217,7 @@ exports.getLoginNaverRedirect = async (req, res) => {
         console.log(jwtToken.token);
 
         // ****************** 토큰을 들고 메인 페이지로 렌더링해야함
-        let redirectUrl = `${serverUrl}/main`;
+        let redirectUrl = `${serverUrl}:${frontPort}/main`;
         redirectUrl += `?userImg=${userImg}`;
         redirectUrl += `&userName=${userName}`;
         redirectUrl += `&userEmail=${userEmail}`;
@@ -225,7 +226,7 @@ exports.getLoginNaverRedirect = async (req, res) => {
       } else {
         // 최초 로그인 하는 유저
         // *************** 토큰 발급 없이 회원가입 창으로 렌더링 필요
-        let redirectUrl = `${serverUrl}/join`;
+        let redirectUrl = `${serverUrl}:${frontPort}/join`;
         redirectUrl += `?userImg=${userImg}`;
         redirectUrl += `&userName=${userName}`;
         redirectUrl += `&userEmail=${userEmail}`;
@@ -314,7 +315,7 @@ exports.getLoginGoogleRedirect = async (req, res) => {
         });
         console.log(jwtToken.token);
 
-        let redirectUrl = `${serverUrl}/main`;
+        let redirectUrl = `${serverUrl}:${frontPort}/main`;
         redirectUrl += `?userImg=${picture}`;
         redirectUrl += `&userName=${name}`;
         redirectUrl += `&userEmail=${email}`;
@@ -324,30 +325,30 @@ exports.getLoginGoogleRedirect = async (req, res) => {
       } else {
         // 4-1) 검증(확인)된 메일일 경우에만 회원 가입 진행
         if (verified_email) {
-          let redirectUrl = `${serverUrl}/join`;
+          let redirectUrl = `${serverUrl}:${frontPort}/join`;
           redirectUrl += `?userImg=${picture}`;
           redirectUrl += `&userName=${name}`;
           redirectUrl += `&userEmail=${email}`;
           res.status(200).redirect(redirectUrl);
         } else {
-          let redirectUrl = `${serverUrl}/main`;
+          let redirectUrl = `${serverUrl}:${frontPort}/main`;
           redirectUrl += `?isSuccess=${false}`;
           redirectUrl += `&msg=검증되지 않은 Gmail입니다.`;
           res.status(401).redirect(redirectUrl); // 검증(확인)된 메일 X
         }
       }
     } else {
-      let redirectUrl = `${serverUrl}/main`;
+      let redirectUrl = `${serverUrl}:${frontPort}/main`;
       redirectUrl += `?isSuccess=${false}`;
       redirectUrl += `&msg=해당 Gmail은 존재하지 않습니다.`;
       res.status(401).redirect(redirectUrl); // 구글 계정 정보 존재 X
     }
   } catch (err) {
     console.error(err);
-    let redirectUrl = `${serverUrl}/main`;
+    let redirectUrl = `${serverUrl}:${frontPort}/main`;
     redirectUrl += `?isSuccess=${false}`;
     redirectUrl += `&msg=error`;
-    res.status(501).redirect(redirectUrl); // 에러
+    res.status(500).redirect(redirectUrl); // 에러
   }
 };
 // #################################################
