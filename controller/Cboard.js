@@ -24,8 +24,28 @@ exports.getGroupNotiBoard = async (req, res) => {
     console.log(req.params); // gSeq값
 
     const groupInfo = await GroupBoard.findAll({
-      where: { gSeq: gSeq, gbCategory: category },
+      where: { gSeq, gbCategory: category },
+      include: [
+        {
+          model: GroupBoardComment,
+          attributes: ['gbSeq'],
+        },
+      ],
+      attributes: {
+        exclude: ['tb_groupBoardComments'], // 'tb_groupBoardComments' 필드 제외->반복제거
+      },
     });
+
+    // groupInfo에 대한 댓글 수 가져오기
+    for (const group of groupInfo) {
+      const gbSeq = group.gbSeq;
+      const commentVal = await GroupBoardComment.findAndCountAll({
+        where: { gbSeq },
+      });
+      group.dataValues.commentCount = commentVal.count;
+      delete group.dataValues.tb_groupBoardComments;
+    }
+
     console.log(groupInfo);
 
     if (groupInfo) {
@@ -45,7 +65,7 @@ exports.getGroupNotiBoard = async (req, res) => {
   } catch {
     res.status(405).send({
       success: false,
-      msg: 'gSeq를 찾을 수 없습니다.',
+      msg: 'db 에러',
     });
   }
 };
@@ -63,6 +83,7 @@ exports.getGroupNotiDetail = async (req, res) => {
     // gSeq 및 category로 공지사항 게시글 필터링
     const groupInfo = await GroupBoard.findOne({
       where: { gSeq: gSeq, gbCategory: category, gbSeq: gbSeq },
+      include: [GroupBoardComment], // 댓글 배열형태로 가져오기
     });
 
     if (groupInfo) {
@@ -97,8 +118,29 @@ exports.getGroupFreeBoard = async (req, res) => {
     console.log(req.params); // gSeq값
 
     const groupInfo = await GroupBoard.findAll({
-      where: { gSeq: gSeq, gbCategory: category },
+      where: { gSeq, gbCategory: category },
+      include: [
+        {
+          model: GroupBoardComment,
+          attributes: ['gbSeq'],
+        },
+      ],
+      attributes: {
+        exclude: ['tb_groupBoardComments'], // 'tb_groupBoardComments' 필드 제외->반복제거
+      },
     });
+
+    // groupInfo에 대한 댓글 수 가져오기
+    for (const group of groupInfo) {
+      const gbSeq = group.gbSeq;
+      const commentVal = await GroupBoardComment.findAndCountAll({
+        where: { gbSeq },
+      });
+      group.dataValues.commentCount = commentVal.count;
+      delete group.dataValues.tb_groupBoardComments;
+    }
+
+    console.log(groupInfo);
 
     if (groupInfo) {
       // 게시글을 찾았을 경우
@@ -135,6 +177,7 @@ exports.getGroupFreeDetail = async (req, res) => {
     // gSeq 및 category로 공지사항 게시글 필터링
     const groupInfo = await GroupBoard.findOne({
       where: { gSeq: gSeq, gbCategory: category, gbSeq: gbSeq },
+      include: [GroupBoardComment], // 댓글 배열형태로 가져오기
     });
 
     if (groupInfo) {
@@ -170,7 +213,28 @@ exports.getGroupMissionBoard = async (req, res) => {
 
     const groupInfo = await GroupBoard.findAll({
       where: { gSeq: gSeq, gbCategory: category, mSeq: mSeq },
+      include: [
+        {
+          model: GroupBoardComment,
+          attributes: ['gbSeq'],
+        },
+      ],
+      attributes: {
+        exclude: ['tb_groupBoardComments'], // 'tb_groupBoardComments' 필드 제외->반복제거
+      },
     });
+
+    // groupInfo에 대한 댓글 수 가져오기
+    for (const group of groupInfo) {
+      const gbSeq = group.gbSeq;
+      const commentVal = await GroupBoardComment.findAndCountAll({
+        where: { gbSeq },
+      });
+      group.dataValues.commentCount = commentVal.count;
+      delete group.dataValues.tb_groupBoardComments;
+    }
+
+    console.log(groupInfo);
 
     if (groupInfo) {
       // 게시글을 찾았을 경우
@@ -206,6 +270,7 @@ exports.getGroupMissionDetail = async (req, res) => {
 
     const groupInfo = await GroupBoard.findOne({
       where: { gSeq: gSeq, gbCategory: category, mSeq: mSeq, gbSeq: gbSeq },
+      include: [GroupBoardComment], // 댓글 배열형태로 가져오기
     });
 
     if (groupInfo) {
@@ -330,15 +395,16 @@ exports.createBoard = async (req, res) => {
     const groupUser = await GroupUser.findOne({
       where: { uSeq: uSeq },
     });
-    const guSeq = groupUser.guSeq;
-    console.log('uSeq의 guSeq : ', guSeq);
 
     if (!groupUser) {
       res.status(402).send({
         success: false,
         msg: '그룹에 참여한 유저 X or 비정상적인 접근',
       });
+      return;
     }
+    const guSeq = groupUser.guSeq;
+    console.log('uSeq의 guSeq : ', guSeq);
 
     if (category == 'mission') {
       const mSeq = req.query.mSeq;
@@ -501,7 +567,7 @@ exports.editBoard = async (req, res) => {
 
     // uSeq로 게시글 소유자 여부 확인(권한 확인)
     if (beforeEdit.dataValues.uSeq !== uSeq) {
-      res.status(401).send({
+      res.status(403).send({
         success: false,
         msg: '게시글의 소유자가 아님',
       });
