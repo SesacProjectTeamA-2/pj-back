@@ -60,23 +60,22 @@ exports.getMission = async (req, res) => {
 
     // 2. 유저 닉네임/캐릭터
     const userInfo = await User.findOne({
-      where: { uSeq: user.uSeq },
+      where: { uSeq: 1 },
     });
     const { uName, uCharImg } = userInfo;
 
     // 3. 그룹별 미션 load(), group [디데이, 모임명 - join], mission [미션 제목, 미션만료x(null)], group board[미션완료여부(y) mission join]
     const groupInfo = await GroupUser.findAll({
-      where: { uSeq: user.uSeq },
+      where: { uSeq: 1 },
       attributes: ['gSeq'],
-      include: [{ model: Group }, { attributes: ['gName', 'gDday'] }],
+      include: [{ model: Group, attributes: ['gName', 'gDday'] }],
     });
 
-    const gSeqArray = groups.map((group) => group.gSeq);
+    const gSeqArray = groupInfo.map((group) => group.gSeq);
 
     const missionArray = await Mission.findAll({
       attributes: ['mSeq', 'gSeq', 'mTitle'],
       where: { gSeq: { [Op.in]: gSeqArray }, isExpired: { [Op.ne]: 'y' } },
-      group: 'gSeq',
     });
 
     const doneArray = await GroupBoard.findAll({
