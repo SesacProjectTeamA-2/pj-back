@@ -393,9 +393,12 @@ exports.joinGroup = async (req, res) => {
 exports.rankSystem = async (req, res) => {};
 
 // 랭킹 : 점수 = 완료개수 * 순서
+
 // gSeq, uSeq로 특정, mSeq 에 대한 점수는
-// 1. 모임의 미션 중 완료여부 y 인 것 추출 => updatedAt 으로 오름차순(과거부터 현재순)
-// 2. 점수 부여 : 모임 참여 유저의 gSeq 수가 해당 미션의 만점 : 이후 user는 for 문 -1 로 값 정의
+// 1. 모임의 미션 중 만료되지 않은 것(null) + 완료여부 y 인 것 추출 => 해당 유저(token), 해당 그룹(gSeq), 해당 미션(mSeq)
+// 현재 점수 =>[ groupboard : gSeq, uSeq, gbIsDone  +  mission :gSeq, isExpired ] = mLevel 총 합
+// update groupuser: [uSeq, gSeq], guNowScore
+
 // 3. mSeq 반복
 // 4. 해당 uSeq 가진 값들의 총합 = 해당 유저의 총 점수
 // 5. 점수 순으로 내림차순 = 랭킹
