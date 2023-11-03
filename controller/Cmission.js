@@ -60,13 +60,13 @@ exports.getMission = async (req, res) => {
 
     // 2. 유저 닉네임/캐릭터
     const userInfo = await User.findOne({
-      where: { uSeq: 1 },
+      where: { uSeq: user.uSeq },
     });
     const { uName, uCharImg } = userInfo;
 
     // 3. 그룹별 미션 load(), group [디데이, 모임명 - join], mission [미션 제목, 미션만료x(null)], group board[미션완료여부(y) mission join]
     const groupInfo = await GroupUser.findAll({
-      where: { uSeq: 1 },
+      where: { uSeq: user.uSeq },
       attributes: ['gSeq'],
       include: [{ model: Group, attributes: ['gName', 'gDday'] }],
     });
