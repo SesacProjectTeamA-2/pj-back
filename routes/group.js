@@ -12,15 +12,16 @@ const authUtil = require('../middlewares/auth').checkToken;
  *       description: 모임 정보 조회(상세 화면)
  *       tags: [Group]
  *       parameters:
- *         - $ref: '#/components/parameters/groupSeqParamPath'
+ *         - $ref: '#/components/parameters/gSeqParamPath'
  *       responses:
  *         "200":
- *           description: 조건에 해당하는 모임 조회
+ *           description: 모임 정보 / 진행 중인 미션 / 현재 랭킹 / 누적 랭킹 / 현재 모임에 있는 모임원 정보
  *           required: true
  *           content:
  *             application/json:
  *               schema:
  *                 $ref: '#/components/schemas/groupInfo'
+ *                 $ref: '#/components/schemas/userArray'
  */
 router.get('/:gSeq', controller.getGroup); // 모임 정보 조회(상세 화면)
 

@@ -48,8 +48,7 @@ const User = (Sequelize, DataTypes) => {
       },
       uCategory1: {
         type: DataTypes.STRING(10),
-        allowNull: true,
-        defaultValue: null,
+        allowNull: false,
         comment: '관심분야1',
       },
       uCategory2: {
@@ -87,13 +86,13 @@ const User = (Sequelize, DataTypes) => {
         defaultValue: null,
         comment: '대표모임달성률',
       },
-      isAdmin: {
+      uIsAdmin: {
         type: DataTypes.STRING(1),
         allowNull: true,
         defaultValue: null,
         comment: '관리자여부',
       },
-      isUse: {
+      uIsUse: {
         type: DataTypes.STRING(1),
         allowNull: true,
         defaultValue: null,

@@ -4,8 +4,8 @@
 components:
   parameters:
 
-    # gSeq
-    groupSeqParamPath:
+    # :gSeq
+    gSeqParamPath:
       in: path
       name: gSeq
       required: true

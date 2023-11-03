@@ -14,6 +14,7 @@ components:
       example: 스터디
       schema:
         type: string
+        
     # 모임 카테고리로 검색
     groupCategoryParamQuery:
       in: query

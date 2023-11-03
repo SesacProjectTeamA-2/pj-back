@@ -12,14 +12,81 @@ const jwt = require('../modules/jwt');
 
 // GET '/api/group/:id'
 // 모임 정보 조회(상세 화면)
-exports.getGroup = (req, res) => {
-  res.send('ok');
+exports.getGroup = async (req, res) => {
+  // 1) 모임 정보
+  // 2) 진행 중인 미션
+  // 3) 현재 랭킹
+  // 4) 누적 랭킹
+  // 5) 현재 모임에 있는 모임원 정보
+  try {
+    let token = req.headers.authorization.split(' ')[1];
+    const user = await jwt.verify(token);
+    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
+
+    const uSeq = user.uSeq;
+    console.log(uSeq);
+
+    if (!uSeq) {
+      res.status(401).send({
+        success: false,
+        msg: '로그인X or 비정상적인 접근',
+      });
+      return;
+    }
+
+    // 1) 모임 정보
+    const { gSeq } = req.body;
+    const groupInfo = await Group.findOne({
+      where: {
+        gSeq,
+      },
+    });
+
+    // 2) 진행 중인 미션
+    const missionArray = await Mission.findAndCountAll({
+      where: {
+        gSeq,
+        [Op.is]: null, // null이면 현재 진행중인 미션, y면 d-day 만료(종료)된 미션
+      },
+    });
+
+    // 3) 현재 랭킹
+    // 4) 누적 랭킹
+    // 랭킹 개발 중
+
+    // 5) 현재 모임에 있는 모임원 정보
+    const groupUserArray = await GroupUser.findAndCountAll({
+      where: {
+        gSeq,
+      },
+    });
+
+    res.json({ groupInfo, missionArray, groupUserArray });
+  } catch (err) {
+    console.error(err);
+    res.json({ isSuccess: false, msg: 'error' });
+  }
 };
 
 // GET '/api/group?search=###&category=###'
 // 모임 조회 (검색어 검색 / 카테고리 검색)
 exports.getGroups = async (req, res) => {
   try {
+    let token = req.headers.authorization.split(' ')[1];
+    const user = await jwt.verify(token);
+    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
+
+    const uSeq = user.uSeq;
+    console.log(uSeq);
+
+    if (!uSeq) {
+      res.status(401).send({
+        success: false,
+        msg: '로그인X or 비정상적인 접근',
+      });
+      return;
+    }
+
     let { search, category } = req.query;
     if (!search) search = '';
     if (!category || (Array.isArray(category) && category.length === 0)) {
@@ -88,6 +155,14 @@ exports.postGroup = async (req, res) => {
     const uSeq = user.uSeq;
     console.log(uSeq);
 
+    if (!uSeq) {
+      res.status(401).send({
+        success: false,
+        msg: '로그인X or 비정상적인 접근',
+      });
+      return;
+    }
+
     const { gName, gDesc, gDday, gMaxMem, gCategory, gCoverImg, missionArray } =
       req.body;
 
@@ -154,6 +229,14 @@ exports.patchGroup = async (req, res) => {
     const uSeq = user.uSeq;
     console.log(uSeq);
 
+    if (!uSeq) {
+      res.status(401).send({
+        success: false,
+        msg: '로그인X or 비정상적인 접근',
+      });
+      return;
+    }
+
     const { gSeq, gName, gDesc, gDday, gMaxMem, gCategory, gCoverImg } =
       req.body;
 
@@ -219,6 +302,14 @@ exports.deleteGroup = async (req, res) => {
 
     const uSeq = user.uSeq;
     console.log(uSeq);
+
+    if (!uSeq) {
+      res.status(401).send({
+        success: false,
+        msg: '로그인X or 비정상적인 접근',
+      });
+      return;
+    }
 
     const { gSeq } = req.body;
 

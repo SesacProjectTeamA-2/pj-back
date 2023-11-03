@@ -24,6 +24,7 @@ components:
     # 모임 array
     groupArray:
       type: array
+      description: 모임 정보(object)가 담긴 array
       items:
         $ref: '#/components/schemas/groupInfo'
 
