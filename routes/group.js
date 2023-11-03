@@ -11,8 +11,8 @@ const authUtil = require('../middlewares/auth').checkToken;
  *       summary: 모임 정보 조회(상세 화면)
  *       description: 모임 정보 조회(상세 화면)
  *       tags: [Group]
- *       operationId: gSeq
- *       required: true
+ *       parameters:
+ *         - $ref: '#/components/parameters/groupSeqParamPath'
  *       responses:
  *         "200":
  *           description: 조건에 해당하는 모임 조회
@@ -33,8 +33,8 @@ router.get('/:gSeq', controller.getGroup); // 모임 정보 조회(상세 화면
  *       description: 모임 조회 (검색어 검색 / 카테고리 검색)
  *       tags: [Group]
  *       parameters:
- *         - $ref: '#/components/parameters/groupSearchParam'
- *         - $ref: '#/components/parameters/groupCategoryParam'
+ *         - $ref: '#/components/parameters/groupSearchParamQuery'
+ *         - $ref: '#/components/parameters/groupCategoryParamQuery'
  *       responses:
  *         "200":
  *           description: 조건에 해당하는 모임 조회

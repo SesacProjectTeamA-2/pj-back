@@ -1,0 +1,16 @@
+###################################################
+################# [Path Variable] #################
+###################################################
+components:
+  parameters:
+
+    # gSeq
+    groupSeqParamPath:
+      in: path
+      name: gSeq
+      required: true
+      description: 모임 시퀀스
+      example: 1
+      schema:
+        type: integer
+        format: int64

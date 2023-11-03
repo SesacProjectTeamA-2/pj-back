@@ -12,7 +12,9 @@ const jwt = require('../modules/jwt');
 
 // GET '/api/group/:id'
 // 모임 정보 조회(상세 화면)
-exports.getGroup = (req, res) => {};
+exports.getGroup = (req, res) => {
+  res.send('ok');
+};
 
 // GET '/api/group?search=###&category=###'
 // 모임 조회 (검색어 검색 / 카테고리 검색)
