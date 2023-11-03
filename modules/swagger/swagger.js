@@ -26,6 +26,27 @@ const options = {
         url: `${serverUrl}:${serverPort}`, // 요청 URL
       },
     ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
+    // security: [
+    //   {
+    //     bearerAuth: [],
+    //   },
+    // ],
+    // securityDefinitions: {
+    //   jwt: {
+    //     type: 'jwt',
+    //     in: 'header',
+    //     name: 'Authorization',
+    //   },
+    // },
   },
   apis: ['./routes/*.js', './modules/swagger/**/*.yaml'], // swagger와 연동할 파일 작성
 };

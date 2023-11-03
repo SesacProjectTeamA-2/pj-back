@@ -1,0 +1,41 @@
+###################################################
+################## [Path Variable] ##################
+###################################################
+components:
+  parameters:
+    gSeqPath:
+      # operationId: gSeq
+      in: path
+      name: gSeq
+      required: true
+      description: 어떤 그룹인지 알려주기 위한 gSeq
+      example: 1
+      schema:
+        type: integer
+        format: int64
+    gbSeqPath:
+      in: path
+      name: gbSeq
+      required: true
+      description: 어떤 그룹의 게시글인지 알려주기 위한 gbSeq
+      example: 1
+      schema:
+        type: integer
+        format: int64
+    mSeqPath:
+      in: path
+      name: mSeq
+      required: true
+      description: 어떤 그룹의 미션인지 알려주기 위한 mSeq
+      example: 1
+      schema:
+        type: integer
+        format: int64
+    categoryPath:
+      in: path
+      name: category
+      required: false
+      description: 게시글의 카테고리 (notice, free, mission)
+      example: notice
+      schema:
+        type: string

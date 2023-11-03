@@ -1,0 +1,23 @@
+###################################################
+################## [Query Variable] ##################
+###################################################
+components:
+  parameters:
+    gSeqQuery:
+      # operationId: gSeq
+      in: query
+      name: gSeq
+      required: true
+      description: 어떤 그룹인지 알려주기 위한 gSeq
+      example: 1
+      schema:
+        type: integer
+        format: int64
+    categoryQuery:
+      in: query
+      name: category
+      required: false
+      description: 게시글의 카테고리 (notice, free, mission)
+      example: notice
+      schema:
+        type: string
