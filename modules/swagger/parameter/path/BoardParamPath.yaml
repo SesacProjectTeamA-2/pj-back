@@ -39,3 +39,12 @@ components:
       example: notice
       schema:
         type: string
+    gbcSeqPath:
+      in: path
+      name: gbcSeq
+      required: true
+      description: 어떤 댓글인지 알려주기 위한 gbcSeq
+      example: 1
+      schema:
+        type: integer
+        format: int64

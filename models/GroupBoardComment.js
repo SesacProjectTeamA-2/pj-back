@@ -14,12 +14,12 @@ const GroupBoardComment = (Sequelize, DataTypes) => {
         allowNull: false,
         comment: '댓글 내용',
       },
-      gbcDepth1: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-        defaultValue: null,
-        comment: '댓글인지 대댓글인지 판단/null:댓글/1:대댓글',
-      },
+      // gbcDepth1: {
+      //   type: DataTypes.INTEGER,
+      //   allowNull: true,
+      //   defaultValue: null,
+      //   comment: '댓글인지 대댓글인지 판단/null:댓글/1:대댓글',
+      // },
     },
     {
       tableName: 'tb_groupBoardComment',

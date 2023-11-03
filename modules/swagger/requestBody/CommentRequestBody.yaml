@@ -1,0 +1,28 @@
+###################################################
+################## [RequestBody] ##################
+###################################################
+components: # 컴포넌트 선언
+  schemas: # 스키마 정의
+    # 댓글 작성 요청시 필요한 req.body
+    createComment: # POST '/api/comment/create/{gbSeq}'
+      required:
+        - gbcContent
+      type: object
+      description: 댓글 작성 요청시 필요한 정보
+      properties: # req.body로 넘어온 값 정의
+        gbcContent:
+          type: string
+          description: 댓글
+          example: 댓글입니다
+
+    # 댓글 수정시 필요한 req.body
+    patchComment: # PATCH '/api/comment/edit'
+      required:
+        - gbcContent
+      type: object
+      description: 댓글 수정 시 필요한 정보
+      properties: # req.body로 넘어온 값 정의
+        gbcContent:
+          type: string
+          description: 댓글 내용
+          example: 댓글입니다

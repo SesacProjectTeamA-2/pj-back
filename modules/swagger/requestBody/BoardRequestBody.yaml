@@ -42,16 +42,3 @@ components: # 컴포넌트 선언
           type: string
           description: 게시글 내용
           example: 내용입니다
-
-    # 게시글 삭제시 필요한 req.body
-    deleteBoard: # DELETE '/api/board/delete'
-      required:
-        - gbSeq
-      type: object
-      description: 게시글 삭제 시 필요한 정보
-      properties: # req.body로 넘어온 값 정의
-        gSeq:
-          type: integer
-          format: int64
-          description: 게시글 시퀀스
-          example: 1

@@ -117,7 +117,7 @@ router.get('/:gSeq/free/:gbSeq', controller.getGroupFreeDetail);
  */
 router.get('/:gSeq/mission/:mSeq', controller.getGroupMissionBoard);
 
-// 그룹의 미션 게시판
+// 그룹의 미션 게시판 상세
 // /board/:gSeq/mission/:mSeq
 /**
  * @swagger
@@ -265,13 +265,6 @@ router.patch('/edit/:gbSeq', authUtil, controller.editBoard);
  *         - bearerAuth: []
  *       parameters:
  *        - $ref: '#/components/parameters/gbSeqPath'
- *       requestBody:
- *         description: 게시글 삭제하기 위해 필요한 정보
- *         required: true
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/deleteBoard'
  *       responses:
  *         "200":
  *           description: 게시글 삭제에 대한 성공 여부/메시지
