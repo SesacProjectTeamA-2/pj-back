@@ -281,7 +281,7 @@ function calculateDDay(targetDate) {
 }
 
 // 모임 페이지 load
-exports.getGroupMain = async (req, res) => {
+exports.getGroupDetail = async (req, res) => {
   console.log('실행실행');
   try {
     const groupSeq = req.params.gSeq;
@@ -389,19 +389,3 @@ exports.joinGroup = async (req, res) => {
     res.json({ result: false, message: '먼저 로그인 해주세요.' });
   }
 };
-
-exports.rankSystem = async (req, res) => {};
-
-// 랭킹 : 점수 = 완료개수 * 순서
-
-// gSeq, uSeq로 특정, mSeq 에 대한 점수는
-// 1. 모임의 미션 중 만료되지 않은 것(null) + 완료여부 y 인 것 추출 => 해당 유저(token), 해당 그룹(gSeq), 해당 미션(mSeq)
-// 현재 점수 =>[ groupboard : gSeq, uSeq, gbIsDone  +  mission :gSeq, isExpired ] = mLevel 총 합
-// update groupuser: [uSeq, gSeq], guNowScore
-
-// 3. mSeq 반복
-// 4. 해당 uSeq 가진 값들의 총합 = 해당 유저의 총 점수
-// 5. 점수 순으로 내림차순 = 랭킹
-
-// 만점 = gSeq의 mSeq의 개수 * 모임참여 유저의 gSeq 수
-// 퍼센트 = uSeq의 총 점수/ 만점 * 100

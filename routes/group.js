@@ -6,7 +6,7 @@ const authUtil = require('../middlewares/auth').checkToken;
 /**
  * @swagger
  * paths:
- *   /api/group/main/{gSeq}:
+ *   /api/group/detail/{gSeq}:
  *     get:
  *       summary: 선택한 모임 메인화면
  *       description: 선택한 모임 메인 화면
@@ -22,7 +22,7 @@ const authUtil = require('../middlewares/auth').checkToken;
  *               schema:
  *                 $ref: '#/components/schemas/groupMain'
  */
-router.get('/main/:gSeq', controller.getGroupMain); // 모임 메인 화면
+router.get('/detail/:gSeq', controller.getGroupDetail); // 모임 상세 화면
 
 /**
  * @swagger
