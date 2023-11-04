@@ -1,3 +1,16 @@
+const dotenv = require('dotenv');
+
+const cron = require('node-cron');
+dotenv.config({ path: __dirname + '/../config/.env' });
+const { User, Group, Mission, GroupBoard, GroupUser } = require('../models');
+const sequelize = require('sequelize');
+const { Op } = require('sequelize');
+
+// 로그인 된 사용자인지 아닌지 판별하려면 불러와야함
+const jwt = require('../modules/jwt');
+const authUtil = require('../middlewares/auth');
+
+// 하루가 지나는 날(00:01 분에 업데이트 되는 data)
 cron.schedule('1 0 * * *', async () => {
   try {
     // 현재 날짜를 얻기
@@ -49,3 +62,51 @@ cron.schedule('1 0 * * *', async () => {
     });
   }
 });
+
+// 미션 리스트
+exports.getMission = async (req, res) => {
+  // 1. 로그인 여부
+  if (req.headers.authorization) {
+    const token = req.headers.authorization.split(' ')[1];
+    const user = await jwt.verify(token);
+
+    // 2. 유저 닉네임/캐릭터
+    const userInfo = await User.findOne({
+      where: { uSeq: user.uSeq },
+    });
+    const { uName, uCharImg } = userInfo;
+
+    // 3. 그룹별 미션 load(), group [디데이, 모임명 - join], mission [미션 제목, 미션만료x(null)], group board[미션완료여부(y) mission join]
+    const groupInfo = await GroupUser.findAll({
+      where: { uSeq: user.uSeq },
+      attributes: ['gSeq'],
+      include: [{ model: Group, attributes: ['gName', 'gDday'] }],
+    });
+
+    const gSeqArray = groupInfo.map((group) => group.gSeq);
+
+    const missionArray = await Mission.findAll({
+      attributes: ['mSeq', 'gSeq', 'mTitle'],
+      where: { gSeq: { [Op.in]: gSeqArray }, isExpired: { [Op.ne]: 'y' } },
+    });
+
+    const doneArray = await GroupBoard.findAll({
+      where: { gbIsDone: 'y' },
+      attributes: ['mSeq'],
+      include: [{ model: Mission }],
+    });
+
+    const isDoneArray = doneArray.map((done) => done.mSeq);
+
+    res.json({
+      result: true,
+      uName,
+      uCharImg,
+      groupInfo,
+      isDone: isDoneArray,
+      missionArray,
+    });
+  } else {
+    res.json({ result: false, message: '로그인 해주세요!' });
+  }
+};

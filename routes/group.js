@@ -8,8 +8,8 @@ const authUtil = require('../middlewares/auth').checkToken;
  * paths:
  *   /api/group/detail/{gSeq}:
  *     get:
- *       summary: 선택한 모임 메인화면
- *       description: 선택한 모임 메인 화면
+ *       summary: 선택한 모임 상세 화면
+ *       description: 선택한 모임 상세화면
  *       tags: [Group]
  *       parameters:
  *         - $ref: '#/components/parameters/groupSeqParam'
@@ -27,14 +27,14 @@ router.get('/detail/:gSeq', controller.getGroupDetail); // 모임 상세 화면
 /**
  * @swagger
  * paths:
- *   /api/group:
+ *   /api/group?search=search&category=category:
  *     get:
  *       summary: 모임 조회 (검색어 검색 / 카테고리 검색)
  *       description: 모임 조회 (검색어 검색 / 카테고리 검색)
  *       tags: [Group]
  *       parameters:
- *         - $ref: '#/components/parameters/groupSearchParam'
- *         - $ref: '#/components/parameters/groupCategoryParam'
+ *         - $ref: '#/components/parameters/groupSearchParamQuery'
+ *         - $ref: '#/components/parameters/groupCategoryParamQuery'
  *       responses:
  *         "200":
  *           description: 조건에 해당하는 모임 조회

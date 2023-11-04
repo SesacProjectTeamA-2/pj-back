@@ -1,0 +1,44 @@
+###################################################
+################## [RequestBody] ##################
+###################################################
+components: # 컴포넌트 선언
+  schemas: # 스키마 정의
+    # 게시글 작성 요청시 필요한 req.body
+    createBoard: # POST '/api/board/create'
+      required:
+        - gbTitle
+        - gbContent
+        - gbCategory
+      type: object
+      description: 게시글 작성 요청시 필요한 정보
+      properties: # req.body로 넘어온 값 정의
+        gbTitle:
+          type: string
+          description: 게시글 제목
+          example: 제목입니다
+        gbContent:
+          type: string
+          description: 게시글 내용
+          example: 내용입니다
+        gbCategory:
+          type: string
+          description: free, notice-> mSeq 필요 X , mission인 경우에는 필요
+          example: free
+
+    # 게시글 수정시 필요한 req.body
+    patchBoard: # PATCH '/api/board/edit'
+      required:
+        - gbTitle
+        - gbContent
+        - gbCategory
+      type: object
+      description: 게시글 수정 시 필요한 정보
+      properties: # req.body로 넘어온 값 정의
+        gbTitle:
+          type: string
+          description: 게시글 제목
+          example: 제목입니다
+        gbContent:
+          type: string
+          description: 게시글 내용
+          example: 내용입니다

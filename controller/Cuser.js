@@ -5,7 +5,8 @@ dotenv.config({ path: __dirname + '/../config/.env' });
 const config = require(__dirname + '/../config/config.js')[
   process.env.NODE_ENV
 ];
-const { serverUrl, serverPort } = config; // 서버 설정
+
+const { serverUrl, serverPort, frontPort } = config; // 서버 설정
 
 const { User } = require('../models');
 const { Op } = require('sequelize');
@@ -101,27 +102,26 @@ exports.getKakao = async (req, res) => {
       console.log(jwtToken.token);
 
       // ****************** 토큰을 들고 메인 페이지로 렌더링해야함
-      res.status(200).send({
-        alreadyUser: true,
-        token: jwtToken.token,
-        userEmail: userEmail,
-        userName: userName,
-        userImg: userImg,
-      });
+      let redirectUrl = `${serverUrl}:${frontPort}/main`;
+      redirectUrl += `?userImg=${userImg}`;
+      redirectUrl += `&userName=${userName}`;
+      redirectUrl += `&userEmail=${userEmail}`;
+      redirectUrl += `&token=${jwtToken.token}`;
+      res.status(200).redirect(redirectUrl);
     } else {
       // 최초 로그인 하는 유저
       // *************** 토큰 발급 없이 회원가입 창으로 렌더링 필요
-      res.status(200).send({
-        alreadyUser: false,
-        userEmail: userEmail,
-        userName: userName,
-        userImg: userImg,
-      });
+      let redirectUrl = `${serverUrl}:${frontPort}/join`;
+      redirectUrl += `?userImg=${userImg}`;
+      redirectUrl += `&userName=${userName}`;
+      redirectUrl += `&userEmail=${userEmail}`;
+      res.status(200).redirect(redirectUrl);
     }
   } catch (error) {
     // 에러 처리
-    console.error('액세스 토큰 요청 중 오류 발생:', error);
-    res.status(500).json({ error: '액세스 토큰 요청 중 오류 발생' });
+    let redirectUrl = `${serverUrl}:${frontPort}/main`;
+    redirectUrl += `?msg=액세스 토큰 요청 중 오류 발생`;
+    res.status(500).redirect(redirectUrl);
   }
 };
 
@@ -218,29 +218,21 @@ exports.getLoginNaverRedirect = async (req, res) => {
         console.log(jwtToken.token);
 
         // ****************** 토큰을 들고 메인 페이지로 렌더링해야함
-        res.status(200).send({
-          alreadyUser: true,
-          token: jwtToken.token,
-          userEmail: userEmail,
-          userName: userName,
-          userImg: userImg,
-        });
+        let redirectUrl = `${serverUrl}:${frontPort}/main`;
+        redirectUrl += `?userImg=${userImg}`;
+        redirectUrl += `&userName=${userName}`;
+        redirectUrl += `&userEmail=${userEmail}`;
+        redirectUrl += `&token=${jwtToken.token}`;
+        res.status(200).redirect(redirectUrl);
       } else {
         // 최초 로그인 하는 유저
         // *************** 토큰 발급 없이 회원가입 창으로 렌더링 필요
-        res.status(200).send({
-          alreadyUser: false,
-          userEmail: userEmail,
-          userName: userName,
-          userImg: userImg,
-        });
+        let redirectUrl = `${serverUrl}:${frontPort}/join`;
+        redirectUrl += `?userImg=${userImg}`;
+        redirectUrl += `&userName=${userName}`;
+        redirectUrl += `&userEmail=${userEmail}`;
+        res.status(200).redirect(redirectUrl);
       }
-
-      // res.send({
-      //   userEmail: userEmail,
-      //   userName: userName,
-      //   userImg: userImg,
-      // });
     });
 };
 
@@ -311,14 +303,11 @@ exports.getLoginGoogleRedirect = async (req, res) => {
 
       // 3) 회원
       if (alreadyUser) {
-        const userEmail = googleUserInfo.data.email;
-        const userName = googleUserInfo.data.name;
-
         // 해당 3개의 값 가지는 토큰 생성
         const jwtToken = await jwt.sign({
           uSeq: alreadyUser.uSeq,
-          userName: userName,
-          userEmail: userEmail,
+          userName: name,
+          userEmail: email,
         });
         res.cookie('token', jwtToken.token, {
           httpOnly: true,
@@ -327,28 +316,40 @@ exports.getLoginGoogleRedirect = async (req, res) => {
         });
         console.log(jwtToken.token);
 
-        res.send({ isSuccess: true, alreadyUser: true, token: jwtToken.token });
+        let redirectUrl = `${serverUrl}:${frontPort}/main`;
+        redirectUrl += `?userImg=${picture}`;
+        redirectUrl += `&userName=${name}`;
+        redirectUrl += `&userEmail=${email}`;
+        redirectUrl += `&token=${jwtToken.token}`;
+        res.status(200).redirect(redirectUrl);
         // 4) 비회원
       } else {
         // 4-1) 검증(확인)된 메일일 경우에만 회원 가입 진행
         if (verified_email) {
-          res.send({
-            isSuccess: true,
-            alreadyUser: false,
-            email,
-            name,
-            img: picture,
-          });
+          let redirectUrl = `${serverUrl}:${frontPort}/join`;
+          redirectUrl += `?userImg=${picture}`;
+          redirectUrl += `&userName=${name}`;
+          redirectUrl += `&userEmail=${email}`;
+          res.status(200).redirect(redirectUrl);
         } else {
-          res.send({ isSuccess: false, msg: '검증되지 않은 Gmail입니다.' }); // 검증(확인)된 메일 X
+          let redirectUrl = `${serverUrl}:${frontPort}/main`;
+          redirectUrl += `?isSuccess=${false}`;
+          redirectUrl += `&msg=검증되지 않은 Gmail입니다.`;
+          res.status(401).redirect(redirectUrl); // 검증(확인)된 메일 X
         }
       }
     } else {
-      res.send({ isSuccess: false, msg: '해당 Gmail은 존재하지 않습니다.' }); // 구글 계정 정보 존재 X
+      let redirectUrl = `${serverUrl}:${frontPort}/main`;
+      redirectUrl += `?isSuccess=${false}`;
+      redirectUrl += `&msg=해당 Gmail은 존재하지 않습니다.`;
+      res.status(401).redirect(redirectUrl); // 구글 계정 정보 존재 X
     }
   } catch (err) {
     console.error(err);
-    res.send({ isSuccess: false, msg: 'error' }); // 에러
+    let redirectUrl = `${serverUrl}:${frontPort}/main`;
+    redirectUrl += `?isSuccess=${false}`;
+    redirectUrl += `&msg=error`;
+    res.status(500).redirect(redirectUrl); // 에러
   }
 };
 // #################################################

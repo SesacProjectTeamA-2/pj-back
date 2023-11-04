@@ -1,0 +1,63 @@
+###################################################
+################## [Responses] ####################
+###################################################
+components:
+  schemas:
+    # 기본적인 응답 object (성공 여부, 응답 메시지)
+    boardApiResult:
+      required:
+        - status
+        - success
+        - msg
+      type: object
+      description: 기본적인 응답 object (성공 여부, 응답 메시지, 상태 코드)
+      properties:
+        status:
+          type: integer
+          description: 상태코드
+          example: 200
+        success:
+          type: boolean
+          description: 성공여부
+          example: true
+        msg:
+          type: string
+          description: 메세지
+          example: Success
+
+    # 작성한 게시글 정보
+    postBoardResult: # POST '/api/board/create'
+      type: object
+      description: 작성한 게시글 정보
+      properties: # res.json으로 정의한 값 정의
+        gbSeq:
+          type: integer
+          format: int64
+          description: 게시글 시퀀스
+          example: 1
+        gbTitle:
+          type: string
+          description: 게시글 제목
+          example: 게시글 제목입니다
+        gbContent:
+          type: text
+          description: 게시글 내용
+          example: 게시글 내용입니다
+        gbIsDone:
+          type: string(1)
+          description: 완료여부, mSeq == null이면 그 게시글은 공지 혹은 자유 / mSeq있으면 미션
+          example: y
+        gbCategory:
+          type: string
+          description: 카테고리/notice=공지,free=자유,mission=미션
+          example: notice
+        createdAt:
+          type: string
+          format: date-time
+          description: 게시글 작성 시간
+          example: 2023-10-28
+        updatedAt:
+          type: string
+          format: date-time
+          description: 게시글 수정 시간
+          example: 2023-10-28
