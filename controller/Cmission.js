@@ -1,10 +1,4 @@
-console.log('');
-
 cron.schedule('1 0 * * *', async () => {
-  console.log(
-    '1. 누적 점수 업데이트!!!! 2. 미션만료!!! 3. 모임 미션 점수 초기화!!!'
-  );
-
   try {
     // 현재 날짜를 얻기
     const currentDate = new Date();
@@ -41,6 +35,9 @@ cron.schedule('1 0 * * *', async () => {
           { where: { gSeq: group.gSeq } }
         );
         await Group.update({ gTotalScore: 0 }, { where: { gSeq: group.gSeq } });
+        console.log(
+          '1. 누적 점수 업데이트!!!! 2. 미션만료!!! 3. 모임 미션 점수 초기화!!!'
+        );
       }
     }
   } catch (error) {

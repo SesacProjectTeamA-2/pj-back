@@ -30,26 +30,9 @@ module.exports = {
     );
   },
 
-  // 달성률 로직
-  //   doneRate: async (gSeq, uSeq) => {
-  //     // 현재 점수 % 그룹 미션 총 점수 *100
-  //     const missionTotal = await Group.findOne({
-  //       where: { gSeq: gSeq },
-  //       attributes: ['gTotalScore'],
-  //     });
-
-  //     const userScore = await GroupUser.findOne({
-  //       where: { uSeq: uSeq, gSeq: gSeq },
-  //       attributes: ['guNowScore'],
-  //     });
-
-  //     let userDoneRate = (userScore / missionTotal) * 100;
-
-  //     return userDoneRate;
-
-  //   },
-
   doneRate: async (gSeq, uSeqArray) => {
+    // 달성률
+    // 현재 점수 % 그룹 미션 총 점수 *100
     // 그룹 미션 총 점수
     const missionTotal = await Group.findOne({
       where: { gSeq: gSeq },
@@ -68,7 +51,7 @@ module.exports = {
         (userScore.guNowScore / missionTotal.gTotalScore) * 100;
       userDoneRates.push(userDoneRate);
     }
-
+    console.log(userDoneRates);
     return userDoneRates;
   },
 
