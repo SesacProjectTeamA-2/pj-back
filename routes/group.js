@@ -12,7 +12,7 @@ const authUtil = require('../middlewares/auth').checkToken;
  *       description: 선택한 모임 상세화면
  *       tags: [Group]
  *       parameters:
- *         - $ref: '#/components/parameters/groupSeqParam'
+ *         - $ref: '#/components/parameters/groupSeqParamPath'
  *       responses:
  *         "200":
  *           description: 해당 모임 시퀀스에 해당하는 모임 메인 화면 로드

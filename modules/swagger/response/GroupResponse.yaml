@@ -99,20 +99,24 @@ components:
           type: object
           description: 모임 미션(mTitle:미션 제목, mContent:미션 내용)
           example: (mTitle:미션 제목, mContent:미션 내용)
+                      {
+              'mTitle': '코딩',
+              'mContent': '코딩하기',
+            }
         memberNickname:
           type: array
           description: 모임 멤버 닉네임
-          example: sean
+          example: ['sean', 'chitty']
         memberImg:
           type: array
-          description: 모임 멤버 이미지
-          example: 닉네임 배열의 인덱스와 동일
+          description: 모임 멤버 이미지(닉네임 배열의 인덱스와 동일)
+          example: ['./123', './asdgv']
         groupName:
           type: string
           description: 모임 이름
           example: sesac
         groupMaxMember:
-          type: number
+          type: integer
           description: 모임 최대인원
           example: 20
         grInformation:
@@ -121,6 +125,7 @@ components:
           example: 코딩모임이에요
         groupDday:
           type: number
+          format: date
           description: 모임 디데이
           example: 2023-11-20
         groupCategory:
