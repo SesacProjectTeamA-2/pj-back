@@ -5,6 +5,7 @@ dotenv.config({ path: __dirname + '/../config/.env' });
 const { User, Group, Mission, GroupBoard, GroupUser } = require('../models');
 const sequelize = require('sequelize');
 const { Op } = require('sequelize');
+const score = require('../modules/rankSystem');
 
 // 로그인 된 사용자인지 아닌지 판별하려면 불러와야함
 const jwt = require('../modules/jwt');
@@ -27,11 +28,11 @@ cron.schedule('1 0 * * *', async () => {
           [Op.lte]: currentDate.toISOString().slice(0, 10), // 현재 날짜 이전인 경우
         },
       },
-      include: [{ model: 'Mission', where: { isExpired: { [Op.ne]: 'y' } } }],
+      include: [{ model: Mission, where: { isExpired: { [Op.is]: null } } }],
       attributes: ['gSeq'],
     });
 
-    if (Groups) {
+    if (Groups.length > 0) {
       for (const group of Groups) {
         // 미션 만료
         await Mission.update(
@@ -41,9 +42,12 @@ cron.schedule('1 0 * * *', async () => {
         // 누적 점수 업데이트, 현재 점수 초기화
         await GroupUser.update(
           {
-            guNowScore: 0,
             guTotalScore: sequelize.literal('guTotalScore+guNowScore'),
           },
+          { where: { gSeq: group.gSeq } }
+        );
+        await GroupUser.update(
+          { guNowScore: 0 },
           { where: { gSeq: group.gSeq } }
         );
         await Group.update({ gTotalScore: 0 }, { where: { gSeq: group.gSeq } });
@@ -64,17 +68,25 @@ cron.schedule('1 0 * * *', async () => {
 
 // 유저 미션 리스트
 exports.getMission = async (req, res) => {
-  try {
-    // 1. 로그인 여부
-    if (req.headers.authorization) {
-      const token = req.headers.authorization.split(' ')[1];
-      const user = await jwt.verify(token);
 
-      // 2. 유저 닉네임/캐릭터
-      const userInfo = await User.findOne({
-        where: { uSeq: user.uSeq },
-      });
-      const { uName, uCharImg } = userInfo;
+  // 1. 로그인 여부
+  if (req.headers.authorization) {
+    const token = req.headers.authorization.split(' ')[1];
+    const user = await jwt.verify(token);
+    const uSeq = user.uSeq;
+    // 2. 유저 닉네임/캐릭터
+    const userInfo = await User.findOne({
+      where: { uSeq },
+    });
+    const { uName, uCharImg } = userInfo;
+
+    // 3. 그룹별 미션 load(), group [디데이, 모임명 - join], mission [미션 제목, 미션만료x(null)], group board[미션완료여부(y) mission join]
+    const groupInfo = await GroupUser.findAll({
+      where: { uSeq },
+      attributes: ['gSeq'],
+      include: [{ model: Group, attributes: ['gName', 'gDday'] }],
+    });
+
 
       // 3. 그룹별 미션 load(), group [디데이, 모임명 - join], mission [미션 제목, 미션만료x(null)], group board[미션완료여부(y) mission join]
       const groupInfo = await GroupUser.findAll({
@@ -83,7 +95,18 @@ exports.getMission = async (req, res) => {
         include: [{ model: Group, attributes: ['gName', 'gDday'] }],
       });
 
-      const gSeqArray = groupInfo.map((group) => group.gSeq);
+
+    // 그룹별 달성률
+    const groupDoneRates = [];
+    for (const groupSeq of gSeqArray) {
+      score.doneRate(groupSeq, uSeq);
+    }
+
+    const missionArray = await Mission.findAll({
+      attributes: ['mSeq', 'gSeq', 'mTitle'],
+      where: { gSeq: { [Op.in]: gSeqArray }, isExpired: { [Op.is]: null } },
+    });
+
 
       const missionArray = await Mission.findAll({
         attributes: ['mSeq', 'gSeq', 'mTitle'],

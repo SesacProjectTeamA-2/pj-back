@@ -85,8 +85,8 @@ router.post('/register', controller.postRegister); // 회원가입
 /**
  * @swagger
  * paths:
- *   /api/user/:
- *     delete:
+ *   /api/user/mypage:
+ *     get:
  *       summary: 유저 마이페이지
  *       description: 마이페이지 로드
  *       tags: [User]

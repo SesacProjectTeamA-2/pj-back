@@ -12,6 +12,7 @@ const {
 const jwt = require('../modules/jwt');
 const authUtil = require('../middlewares/auth');
 const { token } = require('morgan');
+const score = require('../modules/rankSystem');
 
 // 그룹의 공지 게시판
 exports.getGroupNotiBoard = async (req, res) => {
@@ -419,6 +420,9 @@ exports.createBoard = async (req, res) => {
         uSeq: uSeq,
         guSeq: guSeq,
       });
+
+      score.currentScore(guSeq, mSeq);
+
       res.status(200).send({
         success: true,
         msg: '게시글 (미션) 생성 처리 성공',
