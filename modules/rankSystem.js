@@ -18,7 +18,7 @@ module.exports = {
   currentScore: async (guSeq, mSeq) => {
     // 게시글 작성시 => 현재 점수에 미션 난이도에 따른 점수 추가
     const score = await Mission.findOne({
-      where: { mSeq: mSeq, isExpired: { [Op.ne]: 'y' } },
+      where: { mSeq: mSeq, isExpired: { [Op.is]: null } },
       attributes: ['mLevel'],
     });
 
