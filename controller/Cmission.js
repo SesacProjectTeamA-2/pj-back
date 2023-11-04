@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 const cron = require('node-cron');
 dotenv.config({ path: __dirname + '/../config/.env' });
 const { User, Group, Mission, GroupBoard, GroupUser } = require('../models');
-const Sequelize = require('sequelize');
+const sequelize = require('sequelize');
 const { Op } = require('sequelize');
 
 // 로그인 된 사용자인지 아닌지 판별하려면 불러와야함
@@ -11,43 +11,55 @@ const jwt = require('../modules/jwt');
 const authUtil = require('../middlewares/auth');
 
 // 하루가 지나는 날(00:01 분에 업데이트 되는 data)
-// => 모임 d-day, 모임 미션 만료 여부 (null => 'y')
+cron.schedule('1 0 * * *', async () => {
+  try {
+    // 현재 날짜를 얻기
+    const currentDate = new Date();
 
-function calculateDDay(targetDate) {
-  const currentDate = new Date();
-  const target = new Date(targetDate);
+    // 현재 날짜에서 하루를 빼서 이전 날짜를 계산
+    const previousDate = new Date(currentDate);
+    previousDate.setDate(previousDate.getDate() - 1);
 
-  // 날짜 차이를 밀리초 단위로 계산
-  const timeDiff = target - currentDate;
-
-  // 밀리초를 일(day)로 변환
-  const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-
-  return daysRemaining;
-}
-
-cron.schedule('* * * * *', async () => {
-  console.log('크론 실행!!!!');
-
-  const today = new Date(); // 현재 날짜와 시간을 가져옵니다.
-  const year = today.getFullYear(); // 현재 연도를 가져옵니다.
-  const month = today.getMonth() + 1; // 현재 월을 가져옵니다 (0부터 시작하므로 1을 더해줍니다).
-  const day = today.getDate(); // 현재 날짜를 가져옵니다.
-
-  const exGroups = await Group.findAll({
-    where: {
-      gDday: {
-        [Op.lt]: new Date(year, month, day),
+    // 미션 만료된 모임 추출
+    const Groups = await Group.findAll({
+      where: {
+        gDday: {
+          [Op.gte]: previousDate.toISOString().slice(0, 10), // 이전 날짜 이후인 경우
+          [Op.lte]: currentDate.toISOString().slice(0, 10), // 현재 날짜 이전인 경우
+        },
       },
-    },
-    include: [{ model: 'Mission', where: { isExpired: { [Op.not]: 'y' } } }],
-    attributes: ['uSeq'],
-  });
+      include: [{ model: 'Mission', where: { isExpired: { [Op.ne]: 'y' } } }],
+      attributes: ['gSeq'],
+    });
 
-  if (exGroups) {
-    for (const group of exGroups) {
-      await Mission.update({ isExpired: 'y' }, { where: { gSeq: group.gSeq } });
+    if (Groups) {
+      for (const group of Groups) {
+        // 미션 만료
+        await Mission.update(
+          { isExpired: 'y' },
+          { where: { gSeq: group.gSeq } }
+        );
+        // 누적 점수 업데이트, 현재 점수 초기화
+        await GroupUser.update(
+          {
+            guNowScore: 0,
+            guTotalScore: sequelize.literal('guTotalScore+guNowScore'),
+          },
+          { where: { gSeq: group.gSeq } }
+        );
+        await Group.update({ gTotalScore: 0 }, { where: { gSeq: group.gSeq } });
+        console.log(
+          '1. 누적 점수 업데이트!!!! 2. 미션만료!!! 3. 모임 미션 점수 초기화!!!'
+        );
+      }
     }
+  } catch (error) {
+    // 기타 데이터베이스 오류
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      msg: '서버에러 발생',
+    });
   }
 });
 
