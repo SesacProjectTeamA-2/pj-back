@@ -87,11 +87,18 @@ exports.getMission = async (req, res) => {
         include: [{ model: Group, attributes: ['gName', 'gDday'] }],
       });
 
+      const gSeqArray = groupInfo.map((group) => group.gSeq);
+
       // 그룹별 달성률
-      // const groupDoneRates = [];
-      // for (const groupSeq of gSeqArray) {
-      //   score.doneRate(groupSeq, uSeq);
-      // }
+      const groupDoneRates = [];
+      for (const groupSeq of gSeqArray) {
+        const doneRate = await score.doneRate(groupSeq, uSeq);
+        if (Array.isArray(doneRate)) {
+          groupDoneRates.push(...doneRate);
+        } else {
+          groupDoneRates.push(doneRate);
+        }
+      }
 
       const missionArray = await Mission.findAll({
         attributes: ['mSeq', 'gSeq', 'mTitle'],
@@ -113,6 +120,7 @@ exports.getMission = async (req, res) => {
         groupInfo,
         isDone: isDoneArray,
         missionArray,
+        doneRates: groupDoneRates,
       });
     } else {
       res.json({ result: false, message: '로그인 해주세요!' });

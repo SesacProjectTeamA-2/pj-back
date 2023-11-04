@@ -20,7 +20,7 @@ const authUtil = require('../middlewares/auth').checkToken;
  *           content:
  *             application/json:
  *               schema:
- *                 $ref: '#/components/schemas/groupMain'
+ *                 $ref: '#/components/schemas/groupDetail'
  */
 router.get('/detail/:gSeq', controller.getGroupDetail); // 모임 상세 화면
 

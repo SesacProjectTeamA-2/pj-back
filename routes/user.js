@@ -105,7 +105,7 @@ router.get('/mypage', authUtil, controller.getProfile);
 /**
  * @swagger
  * paths:
- *   /api/user:
+ *   /api/user/mypage:
  *     patch:
  *       summary: 마이페이지 수정
  *       description: 마이페이지 수정

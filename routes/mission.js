@@ -11,7 +11,6 @@ const authUtil = require('../middlewares/auth').checkToken;
  *       summary: 유저 미션 조회
  *       description: 유저 미션 조회
  *       tags: [Mission]
- *
  *       responses:
  *         "200":
  *           description: 회원 미션 조회
