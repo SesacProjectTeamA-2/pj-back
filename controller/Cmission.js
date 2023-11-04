@@ -68,45 +68,30 @@ cron.schedule('1 0 * * *', async () => {
 
 // 유저 미션 리스트
 exports.getMission = async (req, res) => {
-
-  // 1. 로그인 여부
-  if (req.headers.authorization) {
-    const token = req.headers.authorization.split(' ')[1];
-    const user = await jwt.verify(token);
-    const uSeq = user.uSeq;
-    // 2. 유저 닉네임/캐릭터
-    const userInfo = await User.findOne({
-      where: { uSeq },
-    });
-    const { uName, uCharImg } = userInfo;
-
-    // 3. 그룹별 미션 load(), group [디데이, 모임명 - join], mission [미션 제목, 미션만료x(null)], group board[미션완료여부(y) mission join]
-    const groupInfo = await GroupUser.findAll({
-      where: { uSeq },
-      attributes: ['gSeq'],
-      include: [{ model: Group, attributes: ['gName', 'gDday'] }],
-    });
-
+  try {
+    // 1. 로그인 여부
+    if (req.headers.authorization) {
+      const token = req.headers.authorization.split(' ')[1];
+      const user = await jwt.verify(token);
+      const uSeq = user.uSeq;
+      // 2. 유저 닉네임/캐릭터
+      const userInfo = await User.findOne({
+        where: { uSeq },
+      });
+      const { uName, uCharImg } = userInfo;
 
       // 3. 그룹별 미션 load(), group [디데이, 모임명 - join], mission [미션 제목, 미션만료x(null)], group board[미션완료여부(y) mission join]
       const groupInfo = await GroupUser.findAll({
-        where: { uSeq: user.uSeq },
+        where: { uSeq },
         attributes: ['gSeq'],
         include: [{ model: Group, attributes: ['gName', 'gDday'] }],
       });
 
-
-    // 그룹별 달성률
-    const groupDoneRates = [];
-    for (const groupSeq of gSeqArray) {
-      score.doneRate(groupSeq, uSeq);
-    }
-
-    const missionArray = await Mission.findAll({
-      attributes: ['mSeq', 'gSeq', 'mTitle'],
-      where: { gSeq: { [Op.in]: gSeqArray }, isExpired: { [Op.is]: null } },
-    });
-
+      // 그룹별 달성률
+      // const groupDoneRates = [];
+      // for (const groupSeq of gSeqArray) {
+      //   score.doneRate(groupSeq, uSeq);
+      // }
 
       const missionArray = await Mission.findAll({
         attributes: ['mSeq', 'gSeq', 'mTitle'],
