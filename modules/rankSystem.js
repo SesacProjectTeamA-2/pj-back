@@ -56,16 +56,4 @@ module.exports = {
   },
 
   ranking: async (gSeq) => {},
-
-  // 그룹 미션 총 점수
-  // => 그룹 미션 생성시: 작성된 리스트만으로 점수 총 합 / 그룹 미션 추가시: 현재 미션 총 점수 + 추가된 미션 점수
-  groupTotalScore: async (req, res) => {
-    const missionTotal = await Mission.sum('mLevel', {
-      where: { gSeq: groupSeq, isExpired: { [Op.ne]: y } },
-    });
-    await Group.update({
-      gTotalScore: missionTotal,
-      where: { gSeq: groupSeq },
-    });
-  },
 };
