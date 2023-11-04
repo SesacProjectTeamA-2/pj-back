@@ -6,7 +6,8 @@ const config = require(__dirname + '/../config/config.js')[
   process.env.NODE_ENV
 ];
 
-const { serverUrl, serverPort, frontPort } = config; // 서버 설정
+const { serverUrl, serverPort, frontPort, naverClientId, naverClientSecret } =
+  config; // 서버 설정
 
 const { User } = require('../models');
 const { Op } = require('sequelize');
@@ -130,7 +131,7 @@ exports.getKakao = async (req, res) => {
 // #################################################
 // 네이버 url로 연결.
 exports.getLoginNaver = (req, res) => {
-  const NaverClientId = process.env.NAVER_CLIENT_ID;
+  const NaverClientId = naverClientId;
   const RedirectUri = encodeURI(
     `${serverUrl}:${serverPort}/api/user/login/naver/callback`
   );
@@ -144,8 +145,8 @@ exports.getLoginNaverRedirect = async (req, res) => {
   // 회원정보에 동일한 email이 있으면, session 생성
   // 없으면 회원가입위해 {nickname, email, profile Img} send
 
-  const NaverClientId = process.env.NAVER_CLIENT_ID;
-  const NaverClientIdSecret = process.env.NAVER_CLIENT_SECRET;
+  const NaverClientId = naverClientId;
+  const NaverClientIdSecret = naverClientSecret;
   const RedirectUri = encodeURI(
     `${serverUrl}:${serverPort}/api/user/login/naver/callback`
   );
