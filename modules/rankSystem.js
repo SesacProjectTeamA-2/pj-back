@@ -15,6 +15,7 @@ const sequelize = require('sequelize');
 
 module.exports = {
   currentScore: async (guSeq, mSeq) => {
+
     try {
       // 게시글 작성시 => 현재 점수에 미션 난이도에 따른 점수 추가
       const score = await Mission.findOne({
@@ -28,12 +29,13 @@ module.exports = {
         },
         { where: { guSeq } }
       );
-    } catch (error) {
-      if (err.message === 'jwt expired') {
-        console.log('expired token');
-        return TOKEN_EXPIRED;
-      }
+    } catch (err) {
+ 
+        console.log('서버 에러');
+     
+     
     }
+
   },
 
   doneRate: async (gSeq, uSeqArray) => {

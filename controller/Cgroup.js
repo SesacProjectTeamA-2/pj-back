@@ -304,7 +304,6 @@ function calculateDDay(targetDate) {
 
 // 모임 페이지 load
 exports.getGroupDetail = async (req, res) => {
-  console.log('실행실행');
   try {
     const groupSeq = req.params.gSeq;
     // 모임 정보
@@ -315,7 +314,7 @@ exports.getGroupDetail = async (req, res) => {
     const groupDday = calculateDDay(gDday);
 
     const groupMission = await Mission.findAll({
-      where: { gSeq: groupSeq, isExpired: { [Op.ne]: 'y' } },
+      where: { gSeq: groupSeq, isExpired: { [Op.is]: null } },
     });
 
     const memberArray = await User.findAll({
@@ -331,57 +330,57 @@ exports.getGroupDetail = async (req, res) => {
     const memberImg = memberArray.map((mem) => mem.uImg);
 
     // 회원인 경우
-    // if (req.headers.authorization) {
-    //   let token = req.headers.authorization.split(' ')[1];
-    //   const user = await jwt.verify(token);
-    //   console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
+    if (req.headers.authorization) {
+      let token = req.headers.authorization.split(' ')[1];
+      const user = await jwt.verify(token);
+      console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
-    const groupUser = await GroupUser.findOne({
-      attributes: ['guSeq', 'guIsLeader'],
-      where: { gSeq: groupSeq, uSeq: 1 },
-    });
+      const groupUser = await GroupUser.findOne({
+        attributes: ['guSeq', 'guIsLeader'],
+        where: { gSeq: groupSeq, uSeq: 1 },
+      });
 
-    // 모임에 가입한 경우
-    let isLeader;
-    let isJoin;
-    if (groupUser) {
-      isJoin = true;
-      // 모임장여부 : true/false
-      isLeader = groupUser && groupUser.guIsLeader === 'y' ? true : false;
+      // 모임에 가입한 경우
+      let isLeader;
+      let isJoin;
+      if (groupUser) {
+        isJoin = true;
+        // 모임장여부 : true/false
+        isLeader = groupUser && groupUser.guIsLeader === 'y' ? true : false;
+      } else {
+        // 모임 가입하지 않은 경우
+        isJoin = false;
+        isLeader = false;
+      }
+
+      res.json({
+        result: true,
+        isJoin,
+        isLeader,
+        groupMission,
+        memberNickname,
+        memberImg,
+        groupName: gName,
+        groupMaxMember: gMaxMem,
+        grInformation: gDesc,
+        groupDday: groupDday,
+        groupCategory: gCategory,
+        groupCoverImg: gCoverImg,
+      });
+      // 비회원인경우
     } else {
-      // 모임 가입하지 않은 경우
-      isJoin = false;
-      isLeader = false;
+      res.json({
+        result: false,
+        groupMission,
+        memberNickname,
+        memberImg,
+        groupName: gName,
+        grInformation: gDesc,
+        groupDday: groupDday,
+        groupCategory: gCategory,
+        groupCoverImg: gCoverImg,
+      });
     }
-
-    res.json({
-      result: true,
-      isJoin,
-      isLeader,
-      groupMission,
-      memberNickname,
-      memberImg,
-      groupName: gName,
-      groupMaxMember: gMaxMem,
-      grInformation: gDesc,
-      groupDday: groupDday,
-      groupCategory: gCategory,
-      groupCoverImg: gCoverImg,
-    });
-    // 비회원인경우
-    // } else {
-    //   res.json({
-    //     result: false,
-    //     groupMission,
-    //     memberNickname,
-    //     memberImg,
-    //     groupName: gName,
-    //     grInformation: gDesc,
-    //     groupDday: groupDday,
-    //     groupCategory: gCategory,
-    //     groupCoverImg: gCoverImg,
-    //   });
-    // }
   } catch (err) {
     console.log(err);
     res.status(err.statusCode || 500).send({
