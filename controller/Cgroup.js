@@ -11,6 +11,7 @@ const {
   Mission,
 } = require('../models');
 const Op = require('sequelize').Op;
+const sequelize = require('sequelize');
 const jwt = require('../modules/jwt');
 
 // GET '/api/group/:id'
@@ -126,6 +127,14 @@ exports.postGroup = async (req, res) => {
             mContent: missionInfo.mContent, // 미션 내용
             mLevel: missionInfo.mLevel, // 난이도 (상: 5점, 중: 3점, 하: 1점)
           });
+
+          await Group.update({
+            gTotalScore: sequelize.literal(
+              `gTotalScore + ${missionInfo.mLevel}`
+            ),
+            where: { gSeq: insertOneGroup.gSeq },
+          });
+
           mCnt++;
         }
 
