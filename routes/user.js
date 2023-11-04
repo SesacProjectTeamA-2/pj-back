@@ -35,24 +35,9 @@ router.get('/login/google/redirect', controller.getLoginGoogleRedirect); // 구�
  *                uName:
  *                  type: string
  *                  description: "유저 닉네임"
- *                uImg:
- *                  type: string
- *                  description: "프로필 이미지 URL"
  *                uCharImg:
  *                  type: string
  *                  description: "캐릭터 이미지 URL"
- *                uDesc:
- *                  type: string
- *                  description: "자기소개"
- *                uCategory1:
- *                  type: string
- *                  description: "관심분야1"
- *                uCategory2:
- *                  type: string
- *                  description: "관심분야2"
- *                uCategory3:
- *                  type: string
- *                  description: "관심분야3"
  *      responses:
  *        "200":
  *          description: "회원가입 성공"
@@ -115,7 +100,7 @@ router.post('/register', controller.postRegister); // 회원가입
  *                 $ref: '#/components/schemas/userMypageApiResult'
  */
 
-router.get('/mypage/:uSeq', authUtil, controller.getProfile);
+router.get('/mypage', authUtil, controller.getProfile);
 
 /**
  * @swagger
@@ -141,6 +126,6 @@ router.get('/mypage/:uSeq', authUtil, controller.getProfile);
  *               schema:
  *                 $ref: '#/components/schemas/editMypageAPIResult'
  */
-router.patch('/mypage/:uSeq', controller.editProfile);
+router.patch('/mypage', controller.editProfile);
 
 module.exports = router;

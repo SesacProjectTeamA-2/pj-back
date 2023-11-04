@@ -5,7 +5,9 @@ dotenv.config({ path: __dirname + '/../config/.env' });
 const config = require(__dirname + '/../config/config.js')[
   process.env.NODE_ENV
 ];
-const { serverUrl, serverPort, frontPort } = config; // 서버 설정
+
+const { serverUrl, serverPort, frontPort, naverClientId, naverClientSecret } =
+  config; // 서버 설정
 
 const { User } = require('../models');
 const { Op } = require('sequelize');
@@ -98,7 +100,7 @@ exports.getKakao = async (req, res) => {
         secure: true,
         sameSite: 'None',
       });
-      console.log(jwtToken.token);
+      console.log('토큰>>>>>>>>>>>>>', jwtToken.token);
 
       // ****************** 토큰을 들고 메인 페이지로 렌더링해야함
       let redirectUrl = `${serverUrl}:${frontPort}/main`;
@@ -129,8 +131,10 @@ exports.getKakao = async (req, res) => {
 // #################################################
 // 네이버 url로 연결.
 exports.getLoginNaver = (req, res) => {
-  const NaverClientId = process.env.NAVER_CLIENT_ID;
-  const RedirectUri = `${serverUrl}:${serverPort}/api/user/login/naver/callback`;
+  const NaverClientId = naverClientId;
+  const RedirectUri = encodeURI(
+    `${serverUrl}:${serverPort}/api/user/login/naver/callback`
+  );
   const State = 'test';
   const NaverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${NaverClientId}&state=${State}&redirect_uri=${RedirectUri}`;
   res.redirect(NaverAuthUrl);
@@ -140,10 +144,12 @@ exports.getLoginNaver = (req, res) => {
 exports.getLoginNaverRedirect = async (req, res) => {
   // 회원정보에 동일한 email이 있으면, session 생성
   // 없으면 회원가입위해 {nickname, email, profile Img} send
-  // console.log(req.query);
-  const NaverClientId = process.env.NAVER_CLIENT_ID;
-  const NaverClientIdSecret = process.env.NAVER_CLIENT_SECRET;
 
+  const NaverClientId = naverClientId;
+  const NaverClientIdSecret = naverClientSecret;
+  const RedirectUri = encodeURI(
+    `${serverUrl}:${serverPort}/api/user/login/naver/callback`
+  );
   // 발급된 code 변수할당.
   // code 값은 토큰 발급 요청에 사용됨.
   let code = req.query.code;
@@ -170,8 +176,7 @@ exports.getLoginNaverRedirect = async (req, res) => {
     },
   })
     .then((tokenRes) => {
-      console.log('토큰정보', tokenRes.data);
-
+      console.log('토큰레스>>>>>>>>>>>>>>>>>', tokenRes.data);
       return axios({
         method: 'get',
         url: 'https://openapi.naver.com/v1/nid/me',
@@ -183,38 +188,32 @@ exports.getLoginNaverRedirect = async (req, res) => {
       });
     })
 
-    .then((userRes) => {
-      const { id, nickname, profile_image, email } = userRes.data.response;
-
+    .then(async (userRes) => {
       const userEmail = userRes.data.response.email;
       const userName = userRes.data.response.nickname;
       const userImg = userRes.data.response.profile_image;
 
-      const alreadyUser = User.findOne({
+      const alreadyUser = await User.findOne({
         where: {
-          uEmail: email,
+          uEmail: userEmail,
         },
       });
 
       // db에 값 있으면 이미 회원가입 한 유저
       if (alreadyUser) {
-        console.log('db에서 가져온 uSeq', alreadyUser.uSeq);
-        console.log(userEmail, userName, profile_image);
-
         // 해당 3개의 값 가지는 토큰 생성
-        const jwtToken = jwt.sign({
+        const jwtToken = await jwt.sign({
           uSeq: alreadyUser.uSeq,
           userName: userName,
           userEmail: userEmail,
         });
-        // console.log(jwtToken);
 
         res.cookie('token', jwtToken.token, {
           httpOnly: true,
           secure: true,
           sameSite: 'None',
         });
-        console.log(jwtToken.token);
+        console.log('토큰값<<<<<<<<<<<<', jwtToken.token);
 
         // ****************** 토큰을 들고 메인 페이지로 렌더링해야함
         let redirectUrl = `${serverUrl}:${frontPort}/main`;
@@ -224,6 +223,7 @@ exports.getLoginNaverRedirect = async (req, res) => {
         redirectUrl += `&token=${jwtToken.token}`;
         res.status(200).redirect(redirectUrl);
       } else {
+        console.log('최초로그인 실행>>>>>>>>>>>>>>');
         // 최초 로그인 하는 유저
         // *************** 토큰 발급 없이 회원가입 창으로 렌더링 필요
         let redirectUrl = `${serverUrl}:${frontPort}/join`;
@@ -313,7 +313,7 @@ exports.getLoginGoogleRedirect = async (req, res) => {
           secure: true,
           sameSite: 'None',
         });
-        console.log(jwtToken.token);
+        console.log('토큰>>>>>>>>>>>>>>>>>>>>>>>>', jwtToken.token);
 
         let redirectUrl = `${serverUrl}:${frontPort}/main`;
         redirectUrl += `?userImg=${picture}`;
@@ -428,93 +428,84 @@ exports.postRegister = async (req, res) => {
 
 // 프로필 수정 화면
 exports.getProfile = async (req, res) => {
-  // 로그인된 상태
-  if (req.headers) {
-    let token = req.headers.authorization.split(' ')[1];
-    const user = await jwt.verify(token);
-    console.log('디코딩된 유저 토큰!!', user);
+  try {
+    // 로그인된 상태
+    if (req.headers.authorization) {
+      let token = req.headers.authorization.split(' ')[1];
+      const user = await jwt.verify(token);
+      console.log('디코딩된 유저 토큰!!', user);
 
-    // 보여줄 정보 : 닉네임, 설명, 캐릭터, 관심분야(null), 메인화면 설정(dday, 달성량), 커버이미지
-    const userSeq = user.uSeq;
-    const userInfo = await User.findOne({
-      where: { uSeq: userSeq },
-    });
-
-    const {
-      uEmail,
-      uName,
-      uImg,
-      uCharImg,
-      uCoverImg,
-      uDesc,
-      uPhrase,
-      uCategory1,
-      uCategory2,
-      uCategory3,
-      uSetDday,
-      uMainDday,
-      uMainGroup,
-      isUse,
-    } = userInfo;
-
-    if (isUse) {
-      res.json({
-        result: true,
-        isUse: true,
-        nickname: uName,
-        userImg: uImg,
-        character: uCharImg,
-        coverImg: uCoverImg,
-        coverLetter: uDesc,
-        phrase: uPhrase,
-        category1: uCategory1,
-        category2: uCategory2,
-        category3: uCategory3,
-        setDday: uSetDday,
-        mainDday: uMainDday,
-        setMainGroup: uMainGroup,
+      // 보여줄 정보 : 닉네임, 설명, 캐릭터, 관심분야(null), 메인화면 설정(dday, 달성량), 커버이미지
+      const userSeq = user.uSeq;
+      const userInfo = await User.findOne({
+        where: { uSeq: userSeq },
       });
+
+      const {
+        uEmail,
+        uName,
+        uImg,
+        uCharImg,
+        uCoverImg,
+        uDesc,
+        uPhrase,
+        uCategory1,
+        uCategory2,
+        uCategory3,
+        uSetDday,
+        uMainDday,
+        uMainGroup,
+        isUse,
+      } = userInfo;
+
+      if (isUse) {
+        res.json({
+          result: true,
+          isBlock: true,
+          nickname: uName,
+          userImg: uImg,
+          character: uCharImg,
+          coverImg: uCoverImg,
+          coverLetter: uDesc,
+          phrase: uPhrase,
+          category1: uCategory1,
+          category2: uCategory2,
+          category3: uCategory3,
+          setDday: uSetDday,
+          mainDday: uMainDday,
+          setMainGroup: uMainGroup,
+        });
+      } else {
+        res.json({
+          result: true,
+          isBlock: false,
+          message: '관리자에 의해 추방된 유저입니다.',
+        });
+      }
+      // 비로그인 상태
     } else {
       res.json({
-        result: true,
-        isUse: false,
-        message: '관리자에 의해 추방된 유저입니다.',
+        result: false,
+        message: '로그인 해주세요!',
       });
     }
-    // 비로그인 상태
-  } else {
-    res.json({
-      result: false,
-      message: '로그인 해주세요!',
+  } catch (err) {
+    console.log(err);
+    res.status(err.statusCode || 500).send({
+      msg: err.message,
+      OK: false,
     });
   }
 };
 
 exports.editProfile = async (req, res) => {
-  let token = req.headers.authorization.split(' ')[1];
-  const user = await jwt.verify(token);
-  const {
-    uName,
-    uDesc,
-    uPhrase,
-    uCategory1,
-    uCategory2,
-    uCategory3,
-    uSetDday,
-    uMainDday,
-    uMainGroup,
-  } = req.body;
-
-  const isNickname = await User.findOne({
-    where: { uName: uName, uSeq: { [Op.ne]: user.uSeq } },
-  });
-
-  // 닉네임이 이미 존재하는 경우
-  if (isNickname) {
-    res.json({ result: false, message: '이미 존재하는 닉네임입니다.' });
-  } else {
-    await User.update(
-      {
+  try {
+    // 로그인된 상태
+    if (req.headers.authorization) {
+      let token = req.headers.authorization.split(' ')[1];
+      const user = await jwt.verify(token);
+      console.log('디코딩된 유저 토큰!!', user);
+      const {
         uName,
         uDesc,
         uPhrase,
@@ -524,12 +515,43 @@ exports.editProfile = async (req, res) => {
         uSetDday,
         uMainDday,
         uMainGroup,
-      },
-      {
-        where: { uSeq: userSeq },
+      } = req.body;
+
+      const isNickname = await User.findOne({
+        where: { uName: uName, uSeq: { [Op.ne]: user.uSeq } },
+      });
+
+      // 닉네임이 이미 존재하는 경우
+      if (isNickname) {
+        res.json({ result: false, message: '이미 존재하는 닉네임입니다.' });
+      } else {
+        await User.update(
+          {
+            uName,
+            uDesc,
+            uPhrase,
+            uCategory1,
+            uCategory2,
+            uCategory3,
+            uSetDday,
+            uMainDday,
+            uMainGroup,
+          },
+          {
+            where: { uSeq: userSeq },
+          }
+        );
+        res.json({ result: true, message: '회원정보 수정 완료!' });
       }
-    );
-    res.json({ result: true, message: '회원정보 수정 완료!' });
+    } else {
+      res.json({ result: false, message: '로그인 해주세요!' });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(err.statusCode || 500).send({
+      msg: err.message,
+      OK: false,
+    });
   }
 };
 

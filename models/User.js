@@ -95,8 +95,9 @@ const User = (Sequelize, DataTypes) => {
       uIsUse: {
         type: DataTypes.STRING(1),
         allowNull: true,
-        defaultValue: null,
-        comment: '사용 가능 여부(y: 현재 서비스 가능한 유저 / null: 관리자로 부터 추방된 유저)',
+        defaultValue: 'y',
+        comment:
+          '사용 가능 여부(y: 현재 서비스 가능한 유저 / null: 관리자로 부터 추방된 유저)',
       },
     },
     {

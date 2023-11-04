@@ -6,10 +6,10 @@ const authUtil = require('../middlewares/auth').checkToken;
 /**
  * @swagger
  * paths:
- *   /api/group/{gSeq}:
+ *   /api/group/detail/{gSeq}:
  *     get:
- *       summary: 모임 정보 조회(상세 화면)
- *       description: 모임 정보 조회(상세 화면)
+ *       summary: 선택한 모임 상세 화면
+ *       description: 선택한 모임 상세화면
  *       tags: [Group]
  *       parameters:
  *         - $ref: '#/components/parameters/gSeqParamPath'
@@ -23,7 +23,7 @@ const authUtil = require('../middlewares/auth').checkToken;
  *                 $ref: '#/components/schemas/groupInfo'
  *                 $ref: '#/components/schemas/userArray'
  */
-router.get('/:gSeq', controller.getGroup); // 모임 정보 조회(상세 화면)
+router.get('/detail/:gSeq', controller.getGroupDetail); // 모임 상세 화면
 
 /**
  * @swagger
@@ -72,7 +72,6 @@ router.get('/', controller.getGroups); // 모임 조회 (검색어 검색 / 카�
  *                 $ref: '#/components/schemas/groupApiResult'
  */
 router.post('/', authUtil, controller.postGroup); // 모임 생성
-
 
 /**
  * @swagger
