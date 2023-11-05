@@ -14,6 +14,8 @@ const Op = require('sequelize').Op;
 const sequelize = require('sequelize');
 const jwt = require('../modules/jwt');
 const ranking = require('../modules/rankSystem');
+const { v4: uuidv4 } = require('uuid'); // 모임 링크 생성
+
 
 // GET '/api/group/:id'
 // 모임 정보 조회(상세 화면)
@@ -107,6 +109,9 @@ exports.postGroup = async (req, res) => {
     });
 
     console.log(insertOneGroup);
+
+    // db에 모임 정보 저장 후 gSeq로 링크 생성
+    const inviteLink = generateInviteLink(insertOneGroup.gSeq);
 
     // 2) 모임장을 모임 참여 유저에 추가
     if (insertOneGroup) {

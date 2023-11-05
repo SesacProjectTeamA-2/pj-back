@@ -20,10 +20,6 @@ components: # 컴포넌트 선언
           type: string
           description: 게시글 내용
           example: 내용입니다
-        gbCategory:
-          type: string
-          description: free, notice-> mSeq 필요 X , mission인 경우에는 필요
-          example: free
 
     # 게시글 수정시 필요한 req.body
     patchBoard: # PATCH '/api/board/edit'
