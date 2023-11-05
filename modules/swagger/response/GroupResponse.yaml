@@ -3,6 +3,61 @@
 ###################################################
 components:
   schemas:
+    # 모임 상세화면 정보
+    groupDetail:
+      type: object
+      description: 모임 정보
+      properties: # res.json으로 정의한 값 정의
+        result:
+          type: boolean
+          description: 회원/비회원 여부
+          example: true
+        isJoin:
+          type: boolean
+          description: 모임가입/ 비가입 여부
+          example: true
+        isLeader:
+          type: boolean
+          description: 모임장인지 여부
+          example: true
+        groupMission:
+          type: object
+          description: 모임 미션(mTitle:미션 제목, mContent:미션 내용)
+          example: { 'mTitle': '코딩', 'mContent': '코딩하기' }
+        memberNickname:
+          type: array
+          description: 모임 멤버 닉네임
+          example: ['sean', 'chitty']
+        memberImg:
+          type: array
+          description: 모임 멤버 이미지(닉네임 배열의 인덱스와 동일)
+          example: ['./123', './asdgv']
+        groupName:
+          type: string
+          description: 모임 이름
+          example: sesac
+        groupMaxMember:
+          type: integer
+          description: 모임 최대인원
+          example: 20
+        grInformation:
+          type: string
+          description: 모임 설명
+          example: 코딩모임이에요
+        groupDday:
+          type: number
+          format: date
+          description: 모임 디데이
+          example: 2023-11-20
+        groupCategory:
+          type: string
+          description: ex = 운동 / re = 독서 / st = 스터디 / eco = 경제 / lan = 언어 / cert = 자격증 / it = IT / etc = 기타
+          example: ex = 운동 / re = 독서 / st = 스터디 / eco = 경제 / lan = 언어 / cert = 자격증 / it = IT / etc = 기타
+        groupCoverImg:
+          type: string
+          description: 모임 커버 이미지 경로
+          example: ./1234/bcd
+
     # 기본적인 응답 object (성공 여부, 응답 메시지)
     groupApiResult:
       required:
@@ -77,62 +132,3 @@ components:
           format: date-time
           description: 모임 수정 시간
           example: 2023-10-31
-
-    # 모임 메인화면 정보 object
-    groupMain:
-      type: object
-      description: 모임 정보
-      properties: # res.json으로 정의한 값 정의
-        result:
-          type: boolean
-          description: 회원/비회원 여부
-          example: true
-        isJoin:
-          type: boolean
-          description: 모임가입/ 비가입 여부
-          example: true
-        isLeader:
-          type: boolean
-          description: 모임장인지 여부
-          example: true
-        groupMission:
-          type: object
-          description: 모임 미션(mTitle:미션 제목, mContent:미션 내용)
-          example: (mTitle:미션 제목, mContent:미션 내용)
-                      {
-              'mTitle': '코딩',
-              'mContent': '코딩하기',
-            }
-        memberNickname:
-          type: array
-          description: 모임 멤버 닉네임
-          example: ['sean', 'chitty']
-        memberImg:
-          type: array
-          description: 모임 멤버 이미지(닉네임 배열의 인덱스와 동일)
-          example: ['./123', './asdgv']
-        groupName:
-          type: string
-          description: 모임 이름
-          example: sesac
-        groupMaxMember:
-          type: integer
-          description: 모임 최대인원
-          example: 20
-        grInformation:
-          type: string
-          description: 모임 설명
-          example: 코딩모임이에요
-        groupDday:
-          type: number
-          format: date
-          description: 모임 디데이
-          example: 2023-11-20
-        groupCategory:
-          type: string
-          description: ex = 운동 / re = 독서 / st = 스터디 / eco = 경제 / lan = 언어 / cert = 자격증 / it = IT / etc = 기타
-          example: ex = 운동 / re = 독서 / st = 스터디 / eco = 경제 / lan = 언어 / cert = 자격증 / it = IT / etc = 기타
-        groupCoverImg:
-          type: string
-          description: 모임 커버 이미지 경로
-          example: ./1234/bcd

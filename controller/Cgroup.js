@@ -318,7 +318,8 @@ exports.getGroupDetail = async (req, res) => {
     });
 
     const memberArray = await User.findAll({
-      attributes: ['uName', 'uImg'],
+      attributes: ['guSeq', 'uName', 'uImg'],
+      order: [['guSeq', 'ASC']],
       include: [
         {
           model: GroupUser,
@@ -326,8 +327,6 @@ exports.getGroupDetail = async (req, res) => {
         },
       ],
     });
-    const memberNickname = memberArray.map((gr) => gr.uName);
-    const memberImg = memberArray.map((mem) => mem.uImg);
 
     // 회원인 경우
     if (req.headers.authorization) {
@@ -337,7 +336,7 @@ exports.getGroupDetail = async (req, res) => {
 
       const groupUser = await GroupUser.findOne({
         attributes: ['guSeq', 'guIsLeader'],
-        where: { gSeq: groupSeq, uSeq: 1 },
+        where: { gSeq: groupSeq, uSeq: user.uSeq },
       });
 
       // 모임에 가입한 경우
@@ -358,8 +357,7 @@ exports.getGroupDetail = async (req, res) => {
         isJoin,
         isLeader,
         groupMission,
-        memberNickname,
-        memberImg,
+        groupMember: memberArray,
         groupName: gName,
         groupMaxMember: gMaxMem,
         grInformation: gDesc,
@@ -372,8 +370,7 @@ exports.getGroupDetail = async (req, res) => {
       res.json({
         result: false,
         groupMission,
-        memberNickname,
-        memberImg,
+        groupMember: memberArray,
         groupName: gName,
         grInformation: gDesc,
         groupDday: groupDday,

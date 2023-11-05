@@ -10,8 +10,9 @@ const authUtil = require('../middlewares/auth').checkToken;
  *     get:
  *       summary: 유저 미션 조회
  *       description: 유저 미션 조회
+ *       security:
+ *         - bearerAuth: []
  *       tags: [Mission]
- *
  *       responses:
  *         "200":
  *           description: 회원 미션 조회
@@ -53,6 +54,8 @@ router.get('/group/:gSeq', authUtil, controller.getGroupMission);
  *     patch:
  *       summary: 미션 수정
  *       description: 미션 수정
+ *       security:
+ *         - bearerAuth: []
  *       tags: [Mission]
  *       parameters:
  *         - $ref: '#/components/parameters/groupSeqParamPath'

@@ -87,6 +87,8 @@ router.post('/register', controller.postRegister); // 회원가입
  * paths:
  *   /api/user/mypage:
  *     get:
+ *       security:
+ *         - bearerAuth: []
  *       summary: 유저 마이페이지
  *       description: 마이페이지 로드
  *       tags: [User]
@@ -105,10 +107,12 @@ router.get('/mypage', authUtil, controller.getProfile);
 /**
  * @swagger
  * paths:
- *   /api/user:
+ *   /api/user/mypage:
  *     patch:
  *       summary: 마이페이지 수정
  *       description: 마이페이지 수정
+ *       security:
+ *         - bearerAuth: []
  *       tags: [User]
  *       requestBody:
  *         description: 마이페이지 수정 위해 필요한 정보
