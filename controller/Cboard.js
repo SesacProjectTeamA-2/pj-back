@@ -371,9 +371,11 @@ exports.createBoard = async (req, res) => {
     const uSeq = user.uSeq;
     console.log(uSeq);
 
-    // 클라이언트에서 요청 보낼때 query로 mSeq, gSeq, category 값 넣어서 보내주기
+    // 클라이언트에서 요청 보낼때 query로 mSeq, gSeq, gbCategory 값 넣어서 보내주기
     const gSeq = req.query.gSeq;
-    const category = req.query.category;
+    const gbCategory = req.query.gbCategory;
+    // console.log('377번째줄 :', gbCategory);
+    // console.log('378번째줄 :', req.query.gbCategory);
 
     if (!token) {
       res.status(401).send({
@@ -407,14 +409,17 @@ exports.createBoard = async (req, res) => {
     const guSeq = groupUser.guSeq;
     console.log('uSeq의 guSeq : ', guSeq);
 
-    if (category == 'mission') {
+    if (gbCategory == 'mission') {
       const mSeq = req.query.mSeq;
+
+      // console.log('416번째줄 :', gbCategory);
+      // console.log('417번째줄 :', req.query.gbCategory);
 
       // 미션이면 미션의 mSeq 있어야함
       const newBoard = await GroupBoard.create({
         gbTitle: req.body.gbTitle,
         gbContent: req.body.gbContent,
-        gbCategory: req.query.category,
+        gbCategory: req.query.gbCategory,
         mSeq: mSeq,
         gSeq: gSeq,
         uSeq: uSeq,
@@ -432,12 +437,14 @@ exports.createBoard = async (req, res) => {
           gbSeq: newBoard.dataValues.gbSeq,
         },
       });
-    } else if (category === 'notice' || category === 'free') {
+    } else if (gbCategory === 'notice' || gbCategory === 'free') {
+      // console.log('442번째줄 :', gbCategory);
+      // console.log('443번째줄 :', req.query.gbCategory);
       // DB작업
       const newBoard = await GroupBoard.create({
         gbTitle: req.body.gbTitle,
         gbContent: req.body.gbContent,
-        gbCategory: req.query.category,
+        gbCategory: req.query.gbCategory,
         gSeq: gSeq,
         uSeq: uSeq,
         guSeq: guSeq,
