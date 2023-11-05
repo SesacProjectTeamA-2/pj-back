@@ -13,6 +13,7 @@ const {
 const Op = require('sequelize').Op;
 const sequelize = require('sequelize');
 const jwt = require('../modules/jwt');
+const ranking = require('../modules/rankSystem');
 
 // GET '/api/group/:id'
 // 모임 정보 조회(상세 화면)
@@ -317,16 +318,21 @@ exports.getGroupDetail = async (req, res) => {
       where: { gSeq: groupSeq, isExpired: { [Op.is]: null } },
     });
 
-    const memberArray = await User.findAll({
-      attributes: ['guSeq', 'uName', 'uImg'],
+    const memberArray = await GroupUser.findAll({
+      attributes: ['guSeq', 'uSeq', 'guIsLeader'],
       order: [['guSeq', 'ASC']],
+      where: { gSeq: groupSeq },
       include: [
         {
-          model: GroupUser,
-          include: [{ model: Group }],
+          model: User,
+          attributes: ['uName', 'uImg', 'uCharImg'],
         },
       ],
     });
+
+    const groupRanking = await ranking.groupRanking(groupSeq);
+
+    console.log('그룹 랭킹>>>>>>>>>>', groupRanking);
 
     // 회원인 경우
     if (req.headers.authorization) {
@@ -364,6 +370,7 @@ exports.getGroupDetail = async (req, res) => {
         groupDday: groupDday,
         groupCategory: gCategory,
         groupCoverImg: gCoverImg,
+        groupRanking,
       });
       // 비회원인경우
     } else {
@@ -376,6 +383,7 @@ exports.getGroupDetail = async (req, res) => {
         groupDday: groupDday,
         groupCategory: gCategory,
         groupCoverImg: gCoverImg,
+        groupRanking,
       });
     }
   } catch (err) {
