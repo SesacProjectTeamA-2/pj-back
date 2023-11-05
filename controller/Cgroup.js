@@ -317,13 +317,14 @@ exports.getGroupDetail = async (req, res) => {
       where: { gSeq: groupSeq, isExpired: { [Op.is]: null } },
     });
 
-    const memberArray = await User.findAll({
-      attributes: ['guSeq', 'uName', 'uImg'],
+    const memberArray = await GroupUser.findAll({
+      attributes: ['guSeq', 'uSeq', 'guIsLeader'],
       order: [['guSeq', 'ASC']],
+      where: { gSeq: groupSeq },
       include: [
         {
-          model: GroupUser,
-          include: [{ model: Group }],
+          model: User,
+          attributes: ['uName', 'uImg', 'uCharImg'],
         },
       ],
     });
