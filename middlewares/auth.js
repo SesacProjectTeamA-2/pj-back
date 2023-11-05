@@ -7,10 +7,11 @@ const TOKEN_INVALID = -2;
 
 const authUtil = {
   checkToken: async (req, res, next) => {
-    // console.log(req.head/ers);
+    console.log(req.headers);
     console.log('====================================');
     try {
       var token = req.headers.authorization.split(' ')[1];
+
       // 토큰 없음
       if (!token) return res.status(400).json({ error: '토큰 없음' });
       // decode

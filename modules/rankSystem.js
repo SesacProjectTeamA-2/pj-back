@@ -29,7 +29,7 @@ module.exports = {
         { where: { guSeq } }
       );
     } catch (err) {
-      console.log('에러');
+      console.error('currentScore 에러:', err.message);
     }
   },
 
@@ -68,12 +68,33 @@ module.exports = {
         return userDoneRate;
       }
     } catch (err) {
-      console.log('에러');
+      console.error('doneRate 에러:', err.message);
     }
   },
 
-  ranking: async (gSeq) => {
-    // 누적 점수 랭킹
-    // 달성률 랭킹
+  groupRanking: async (gSeq) => {
+    // 그룹시퀀스
+    // 유저시퀀스 => groupUser where: gseq, attributes: useq
+    try {
+      const uSeqArray = [];
+
+      const nowRanking = await GroupUser.findAll({
+        where: { gSeq },
+        attributes: ['uSeq'],
+        order: [['guNowScore', 'DESC']],
+        include: [{ model: User, attributes: ['uName'] }],
+      });
+
+      const totalRanking = await GroupUser.findAll({
+        where: { gSeq },
+        attributes: ['uSeq'],
+        order: [['guTotalScore', 'DESC']],
+        include: [{ model: User, attributes: ['uName'] }],
+      });
+
+      const doneRates = this.doneRate(gSeq, uSeqArray);
+    } catch (err) {
+      console.error('doneRate 에러:', err.message);
+    }
   },
 };

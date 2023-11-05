@@ -9,6 +9,8 @@ const authUtil = require('../middlewares/auth').checkToken;
  *   /api/group/detail/{gSeq}:
  *     get:
  *       summary: 선택한 모임 상세 화면
+ *       security:
+ *         - bearerAuth: []
  *       description: 선택한 모임 상세화면
  *       tags: [Group]
  *       parameters:
@@ -53,6 +55,8 @@ router.get('/', controller.getGroups); // 모임 조회 (검색어 검색 / 카�
  *     post:
  *       summary: 모임 생성
  *       description: 모임 생성
+ *       security:
+ *         - bearerAuth: []
  *       tags: [Group]
  *       requestBody:
  *         description: 모임을 생성하기 위해 필요한 정보
@@ -79,6 +83,8 @@ router.post('/', authUtil, controller.postGroup); // 모임 생성
  *     patch:
  *       summary: 모임 수정
  *       description: 모임 수정
+ *       security:
+ *         - bearerAuth: []
  *       tags: [Group]
  *       requestBody:
  *         description: 모임을 수정하기 위해 필요한 정보
@@ -105,6 +111,8 @@ router.patch('/', authUtil, controller.patchGroup); // 모임 수정
  *     delete:
  *       summary: 모임 삭제
  *       description: 모임 삭제
+ *       security:
+ *         - bearerAuth: []
  *       tags: [Group]
  *       requestBody:
  *         description: 모임을 삭제하기 위해 필요한 정보
