@@ -13,6 +13,7 @@ const {
 const Op = require('sequelize').Op;
 const sequelize = require('sequelize');
 const jwt = require('../modules/jwt');
+const ranking = require('../modules/rankSystem');
 
 // GET '/api/group/:id'
 // 모임 정보 조회(상세 화면)
@@ -329,6 +330,10 @@ exports.getGroupDetail = async (req, res) => {
       ],
     });
 
+    const groupRanking = await ranking.groupRanking(groupSeq);
+
+    console.log('그룹 랭킹>>>>>>>>>>', groupRanking);
+
     // 회원인 경우
     if (req.headers.authorization) {
       let token = req.headers.authorization.split(' ')[1];
@@ -365,6 +370,7 @@ exports.getGroupDetail = async (req, res) => {
         groupDday: groupDday,
         groupCategory: gCategory,
         groupCoverImg: gCoverImg,
+        groupRanking,
       });
       // 비회원인경우
     } else {
@@ -377,6 +383,7 @@ exports.getGroupDetail = async (req, res) => {
         groupDday: groupDday,
         groupCategory: gCategory,
         groupCoverImg: gCoverImg,
+        groupRanking,
       });
     }
   } catch (err) {

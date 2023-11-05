@@ -15,6 +15,7 @@ const { Op } = require('sequelize');
 // 로그인 된 사용자인지 아닌지 판별하려면 불러와야함
 const jwt = require('../modules/jwt');
 const authUtil = require('../middlewares/auth');
+const score = require('../modules/rankSystem');
 
 // GET '/api/user/users'
 // 모든 유저 조회

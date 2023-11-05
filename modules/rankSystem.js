@@ -49,7 +49,7 @@ module.exports = {
         for (const uSeq of uSeqArray) {
           const userScore = await GroupUser.findOne({
             where: { uSeq: uSeq, gSeq },
-            attributes: ['guNowScore'],
+            attributes: ['guNowScore', 'DESC'],
           });
           const userDoneRate =
             (userScore.guNowScore / missionTotal.gTotalScore) * 100;
@@ -73,28 +73,44 @@ module.exports = {
   },
 
   groupRanking: async (gSeq) => {
-    // 그룹시퀀스
-    // 유저시퀀스 => groupUser where: gseq, attributes: useq
     try {
       const uSeqArray = [];
 
-      const nowRanking = await GroupUser.findAll({
+      const groupMem = await GroupUser.findAll({
         where: { gSeq },
         attributes: ['uSeq'],
+      });
+
+      for (const member of groupMem) {
+        uSeqArray.push(member.uSeq);
+      }
+
+      console.log('그룹멤버>>>>>>>>>>', groupMem);
+
+      const nowRanking = await GroupUser.findAll({
+        where: { gSeq },
+        attributes: ['uSeq', 'guNowScore'],
         order: [['guNowScore', 'DESC']],
         include: [{ model: User, attributes: ['uName'] }],
       });
 
+      console.log('모임 랭킹>>>>>>>>>>>>>', nowRanking);
+
       const totalRanking = await GroupUser.findAll({
         where: { gSeq },
-        attributes: ['uSeq'],
+        attributes: ['uSeq', 'guTotalScore'],
         order: [['guTotalScore', 'DESC']],
         include: [{ model: User, attributes: ['uName'] }],
       });
 
-      const doneRates = this.doneRate(gSeq, uSeqArray);
+      console.log('토탈 랭킹>>>>>>>>>>>>>', totalRanking);
+
+      const doneRates = await module.exports.doneRate(gSeq, uSeqArray);
+      console.log('달성률>>>>>>>>>>>>>', doneRates);
+
+      return { nowRanking, totalRanking, doneRates };
     } catch (err) {
-      console.error('doneRate 에러:', err.message);
+      console.error('groupRanking 에러:', err.message);
     }
   },
 };
