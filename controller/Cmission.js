@@ -161,7 +161,7 @@ exports.getGroupMission = async (req, res) => {
 exports.editMission = async (req, res) => {
   try {
     const gSeq = req.params.gSeq;
-    const { mSeq, gDday, mTitle, mContent, mLevel } = req.body;
+    const { missionArray } = req.body;
     // 로그인 여부 확인
     if (req.headers.authorization) {
       let token = req.headers.authorization.split(' ')[1];
@@ -175,18 +175,31 @@ exports.editMission = async (req, res) => {
         where: { gSeq, uSeq },
         attributes: ['guIsBlackUser'],
       });
-      if (isLeader) {
-        const task1 = Mission.update(
-          {
-            mTitle, // 미션 제목
-            mContent, // 미션 내용
-            mLevel, // 난이도 (상: 5점, 중: 3점, 하: 1점)
-          },
-          { where: { mSeq } }
-        );
-        const task2 = Group.update({ gDday }, { where: { gSeq } });
 
-        await Promise.all([task1, task2]);
+      if (isLeader) {
+        // 기존 미션 수정시
+        for (let missionInfo of missionArray) {
+          if (missionInfo.mSeq) {
+            await Mission.update(
+              {
+                mTitle: missionInfo.mTitle, // 미션 제목
+                mContent: missionInfo.mContent, // 미션 내용
+                mLevel: missionInfo.mLevel, // 난이도 (상: 5점, 중: 3점, 하: 1점)
+              },
+              { where: { mSeq: missionInfo.mSeq } }
+            );
+          } else {
+            // 새로운 미션 추가시
+            await Mission.create({
+              gSeq,
+              mTitle: missionInfo.mTitle, // 미션 제목
+              mContent: missionInfo.mContent, // 미션 내용
+              mLevel: missionInfo.mLevel, // 난이도 (상: 5점, 중: 3점, 하: 1점)
+            });
+          }
+        }
+        const gDday = missionArray[0].gDday;
+        await Group.update({ gDday }, { where: { gSeq } });
 
         res.json({ result: true, message: '수정완료' });
       } else {
