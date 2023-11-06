@@ -75,27 +75,37 @@ const options = {
     methods: ['GET', 'POST'],
   },
 };
+
+// 정적 파일을 제공하기 위한 미들웨어 설정
+app.use(express.static('public'));
+
+// socket.io
 const io = require('socket.io')(server, options);
+// Socket.io와 Express 애플리케이션을 설정하고 사용합니다.
+app.use((req, res, next) => {
+  req.io = io; // req.io에 Socket.io 객체를 할당합니다.
+  next();
+});
 
 // 그룹 채팅 라우트
-app.get('/api/group/chat/:chatRoomNumber', (req, res) => {
-  // 채팅방 번호를 가져오는 부분
-  const chatRoomNumber = req.params.chatRoomNumber;
-  res.sendFile(__dirname + '/index.html'); // 렌더링할 HTML 파일을 보내줄 수 있음
-});
+// app.get('/api/group/chat/:chatRoomNumber', (req, res) => {
+//   // 채팅방 번호를 가져오는 부분
+//   const chatRoomNumber = req.params.chatRoomNumber;
+//   res.sendFile(__dirname + '/index.html'); // 렌더링할 HTML 파일을 보내줄 수 있음
+// });
 
-// Socket.IO 연결
-io.on('connection', (socket) => {
-  console.log('소켓 연결이 이루어졌습니다.');
+// // Socket.IO 연결
+// io.on('connection', (socket) => {
+//   console.log('소켓 연결이 이루어졌습니다.');
 
-  socket.on('chat message', (msg) => {
-    io.emit('chat message', msg); // 모든 클라이언트에 메시지를 전송
-  });
+//   socket.on('chat message', (msg) => {
+//     io.emit('chat message', msg); // 모든 클라이언트에 메시지를 전송
+//   });
 
-  socket.on('disconnect', () => {
-    console.log('소켓 연결이 끊어졌습니다.');
-  });
-});
+//   socket.on('disconnect', () => {
+//     console.log('소켓 연결이 끊어졌습니다.');
+//   });
+// });
 
 /**
  * @path {GET} ${URL}:${PORT}/api

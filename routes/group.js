@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const controller = require('../controller/Cgroup');
 const authUtil = require('../middlewares/auth').checkToken;
-const socketUtil = require('../middlewares/socketIo');
 
 /**
  * @swagger

@@ -429,9 +429,6 @@ exports.joinGroup = async (req, res) => {
 exports.getGroupChat = async (req, res) => {
   try {
     const { gSeq } = req.params;
-    console.log('------------------------');
-    console.log(gSeq);
-    console.log('------------------------');
     // let token = req.headers.authorization.split(' ')[1];
     let token =
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1TmFtZSI6ImV1bmcgZW8iLCJ1RW1haWwiOiJlb2V1bmcxMTNAZ21haWwuY29tIiwidVNlcSI6MSwiaWF0IjoxNjk5MjYxNTMxfQ.UkGZrK0HKrpbzecPL6AGmk_qLLSwG_gnLJ-1e4if0ag';
@@ -482,31 +479,48 @@ exports.getGroupChat = async (req, res) => {
     if (groupInfo) {
       // Socket.io를 사용하여 클라이언트와 통신할 수 있음
       const io = req.io;
+      io.on('connection', (socket) => {
+        console.log('소켓 연결이 이루어졌습니다.');
 
-      // namespace /chat{gSeq}에 접속
-      const chatNamespace = io.of(`/chat${gSeq}`).on('connection', (socket) => {
-        // 클라이언트가 접속한 경우
-        socket.on('login', (data) => {
-          console.log(data);
-          // room에 join되어 있는 클라이언트에게 메시지 전송
-          chatNamespace.emit('login', `${user.uName}님이 입장하셨습니다.`);
-        });
-
-        // 메시지 수신시
         socket.on('chat message', (msg) => {
-          chatNamespace.emit('chat message', `${user.uName} : ${msg}`);
+          io.emit('chat message', msg); // 모든 클라이언트에 메시지를 전송
         });
 
-        // 연결 종료 시
         socket.on('disconnect', () => {
-          console.log(`${socket.name}님이 모임 채팅에서 퇴장하셨습니다.`);
+          console.log('소켓 연결이 끊어졌습니다.');
         });
       });
+      // namespace /chat{gSeq}에 접속
+      // const chat = io.of(`/chat${gSeq}`).on('connection', function (socket) {
+      //   // 클라이언트가 접속한 경우
+      //   socket.on('login', function (data) {
+      //     console.log(
+      //       `★${groupInfo.gName}모임에 ${groupInfo.uName}님이 입장하셨습니다. \n(모임번호: ${gSeq})`
+      //     );
+
+      //     // socket에 클라이언트/채팅방 정보를 저장
+      //     const name = (socket.name = user.uName);
+      //     const room = (socket.room = `chat${gSeq}`);
+
+      //     // room에 join
+      //     socket.join(room);
+      //     // room에 join되어 있는 클라이언트에게 메시지 전송
+      //     chat.to(room).emit('login', `${name}님이 입장하셨습니다.`);
+      //   });
+
+      //   // 메시지 수신시
+      //   socket.on('chat', function (data) {
+      //     chat.to(room).emit('chat', `${socket.name} : ${data.msg}`);
+      //   });
+
+      //   // 연결 종료 시
+      //   socket.on('disconnect', function () {
+      //     console.log(`${socket.name}님이 퇴장하셨습니다.`);
+      //   });
+      // });
       // res.status(200).json({ isSuccess: true });
-      // 간단한 HTML 파일을 응답으로 전송
-      const fs = require('fs');
-      const html = fs.readFileSync('public/index.html', 'utf8');
-      res.send(html);
+      const { join } = require('node:path');
+      res.sendFile(join(__dirname, '/../public/chat.html'));
     } else {
       res
         .status(401)
