@@ -51,6 +51,78 @@ router.get('/', controller.getGroups); // 모임 조회 (검색어 검색 / 카�
 /**
  * @swagger
  * paths:
+ *   /api/group/joined:
+ *     get:
+ *       summary: 내가 가입한 모임 리스트
+ *       description: 내가 가입한 모임 리스트
+ *       tags: [Group]
+ *       security:
+ *         - bearerAuth: []
+ *       responses:
+ *         "200":
+ *           description: 조건에 해당하는 모임 조회
+ *           required: true
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/groupArray'
+ */
+router.get('/joined', authUtil, controller.getJoined); // 내가 가입한 모임 리스트
+
+/**
+ * @swagger
+ * paths:
+ *   /api/group/made:
+ *     get:
+ *       summary: 내가 생성한 모임 리스트
+ *       description: 내가 생성한 모임 리스트
+ *       tags: [Group]
+ *       security:
+ *         - bearerAuth: []
+ *       responses:
+ *         "200":
+ *           description: 조건에 해당하는 모임 조회
+ *           required: true
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/groupArray'
+ */
+router.get('/made', authUtil, controller.getMade); // 내가 생성한 모임 리스트
+
+/**
+ * @swagger
+ * paths:
+ *   /api/group/quit/{gSeq}:
+ *     delete:
+ *       summary: 모임 탈퇴
+ *       description: 모임 탈퇴
+ *       tags: [Group]
+ *       security:
+ *         - bearerAuth: []
+ *       parameters:
+ *        - $ref: '#/components/parameters/gSeqPath'
+ *       requestBody:
+ *         description: 모임 탈퇴 시, 모임장 위임이 필요한 경우 req.body
+ *         required: false
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/changeGroupLeader'
+ *       responses:
+ *         "200":
+ *           description: 조건에 해당하는 모임 탈퇴 요청 성공
+ *           required: true
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/groupArray'
+ */
+router.delete('/quit/:gSeq', authUtil, controller.deleteQuitGroup); // 모임 탈퇴
+
+/**
+ * @swagger
+ * paths:
  *   /api/group:
  *     post:
  *       summary: 모임 생성

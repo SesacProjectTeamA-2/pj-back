@@ -18,9 +18,9 @@ const { v4: uuidv4 } = require('uuid'); // 모임 링크 생성
 
 // GET '/api/group/:id'
 // 모임 정보 조회(상세 화면)
-exports.getGroup = (req, res) => {
-  res.send('ok');
-};
+// exports.getGroup = (req, res) => {
+//   res.send('ok');
+// };
 
 // GET '/api/group?search=###&category=###'
 // 모임 조회 (검색어 검색 / 카테고리 검색)
@@ -69,15 +69,281 @@ exports.getGroups = async (req, res) => {
 
 // GET '/api/group/joined'
 // 현재 참여하고 있는 모임
-exports.getJoined = (req, res) => {};
+exports.getJoined = async (req, res) => {
+  try {
+    let token = req.headers.authorization.split(' ')[1];
+    const user = await jwt.verify(token);
+    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
+
+    const uSeq = user.uSeq;
+    console.log(uSeq);
+
+    if (!token) {
+      res.status(401).send({
+        success: false,
+        msg: '토큰 X',
+      });
+    }
+    if (!uSeq) {
+      res.status(402).send({
+        success: false,
+        msg: '로그인X or 비정상적인 접근',
+      });
+      return;
+    }
+
+    // uSeq로 GroupUser 테이블에서 모임에 참여 중인 gSeq 찾기
+    const groupUserList = await GroupUser.findAll({
+      where: { uSeq, guIsLeader: { [Op.ne]: 'y' } }, // 모임장은 제외 -> 생성한 모임에서 보여주도록
+      attributes: ['gSeq'],
+    });
+    // 참여중인 모임이 없으면
+    if (!groupUserList || groupUserList.length === 0) {
+      res.status(200).send({
+        success: true,
+        msg: '현재 참여 중인 모임이 없습니다.',
+        data: {
+          user: uSeq,
+        },
+      });
+      return;
+    }
+
+    // 가져온 gSeq 목록으로 각 모임의 정보 가져오기
+    const groupInfo = await Group.findAll({
+      where: { gSeq: groupUserList.map((groupUser) => groupUser.gSeq) },
+    });
+
+    res.status(200).send({
+      success: true,
+      msg: '현재 참여 중인 모임 정보 조회 성공',
+      groupInfo,
+      data: {
+        user: uSeq,
+      },
+    });
+  } catch (error) {
+    // 기타 데이터베이스 오류
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      msg: '서버 에러',
+    });
+  }
+};
 
 // GET '/api/group/made'
 // 내가 생성한 모임
-exports.getMade = (req, res) => {};
+exports.getMade = async (req, res) => {
+  try {
+    let token = req.headers.authorization.split(' ')[1];
+    const user = await jwt.verify(token);
+    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
+
+    const uSeq = user.uSeq;
+    console.log(uSeq);
+
+    if (!token) {
+      res.status(401).send({
+        success: false,
+        msg: '토큰 X',
+      });
+    }
+    if (!uSeq) {
+      res.status(402).send({
+        success: false,
+        msg: '로그인X or 비정상적인 접근',
+      });
+      return;
+    }
+
+    // 내가 생성한 그룹의 gSeq 목록 가져오기
+    const groupList = await GroupUser.findAll({
+      where: { uSeq, guIsLeader: 'y' }, // 모임장인 그룹만
+      attributes: ['gSeq'],
+    });
+
+    if (!groupList || groupList.length === 0) {
+      res.status(200).send({
+        success: true,
+        msg: '생성한 그룹이 없습니다.',
+        data: {
+          user: uSeq,
+        },
+      });
+      return;
+    }
+
+    // 가져온 gSeq 목록으로 각 그룹의 정보 출력
+    const groupInfo = await Group.findAll({
+      where: { gSeq: groupList.map((group) => group.gSeq) },
+    });
+
+    res.status(200).send({
+      success: true,
+      msg: '내가 생성한 그룹 정보 조회 성공',
+      groupInfo,
+      data: {
+        user: uSeq,
+      },
+    });
+  } catch (error) {
+    // 기타 데이터베이스 오류
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      msg: '서버 에러',
+    });
+  }
+};
+
+// 모임장 위임
+async function changeGroupLeader(currentLeaderUSeq, gSeq, newLeaderUSeq) {
+  try {
+    console.log(gSeq, currentLeaderUSeq, newLeaderUSeq);
+    if (currentLeaderUSeq === newLeaderUSeq) {
+      return { success: false };
+    }
+    // 현재 모임의 모임장을 모임원으로 변경
+    await GroupUser.update(
+      { guIsLeader: 'n' },
+      {
+        where: { gSeq, uSeq: currentLeaderUSeq },
+      }
+    );
+
+    // 새로운 모임장으로 위임
+    await GroupUser.update(
+      { guIsLeader: 'y' },
+      {
+        where: { gSeq, uSeq: newLeaderUSeq },
+      }
+    );
+    return { success: true };
+  } catch (error) {
+    return { success: false };
+  }
+}
+
+// DELETE '/api/group/quit/:gSeq'
+// 모임 탈퇴
+exports.deleteQuitGroup = async (req, res) => {
+  try {
+    let token = req.headers.authorization.split(' ')[1];
+    const user = await jwt.verify(token);
+    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
+
+    const uSeq = user.uSeq;
+    console.log(uSeq);
+
+    if (!token) {
+      res.status(401).send({
+        success: false,
+        msg: '토큰 X',
+      });
+    }
+    if (!uSeq) {
+      res.status(402).send({
+        success: false,
+        msg: '로그인X or 비정상적인 접근',
+      });
+      return;
+    }
+
+    const gSeq = req.params.gSeq; // 어느 그룹을 탈퇴하려고 하는지 받아오기
+
+    // GroupUser 테이블에서 해당 uSeq와 gSeq 있는지 확인해서 모임에 참여하고 있는 유저인지 확인
+    const groupUser = await GroupUser.findOne({
+      where: { uSeq, gSeq },
+    });
+
+    if (!groupUser) {
+      res.status(404).send({
+        success: false,
+        msg: '모임 탈퇴 실패: 유저가 해당 모임에 속해있지 않습니다.',
+      });
+      return;
+    }
+
+    // Group 정보 있는지 한 번 더 확인
+    const group = await Group.findByPk(gSeq);
+
+    if (!group) {
+      res.status(404).send({
+        success: false,
+        msg: '모임 정보를 찾을 수 없습니다.',
+      });
+      return;
+    }
+    // 모임장인 경우
+    if (groupUser.guIsLeader === 'y') {
+      // 모임원 수 확인
+      const groupMembersCount = await GroupUser.count({
+        where: { gSeq },
+      });
+
+      if (groupMembersCount > 1) {
+        // 2명 이상 모임원이 있을 경우, 모임장 위임 / guIsLeader: 'n'로 권한 모임원으로 업데이트
+        // 모임장 위임 로직 호출
+        const newLeaderUSeq = req.body.newLeaderUSeq;
+
+        console.log('uSeq::::::::::::::::', uSeq);
+        if (newLeaderUSeq) {
+          const changeLeaderResult = await changeGroupLeader(
+            uSeq,
+            gSeq,
+            newLeaderUSeq
+          );
+
+          if (changeLeaderResult.success) {
+            await GroupUser.destroy({
+              where: { uSeq, gSeq },
+            });
+            res.status(200).send({
+              success: true,
+              msg: '모임 탈퇴 및 모임장 위임 성공',
+            });
+            return;
+          } else {
+            res.status(401).send({
+              success: false,
+              msg: '모임장 위임 실패',
+            });
+            return;
+          }
+        } else {
+          res.status(402).send({
+            success: false,
+            msg: 'newLeaderUSeq가 필요합니다.',
+          });
+          return;
+        }
+      }
+    }
+
+    // 모임장 아니면 바로 이쪽으로 와서 해당 행 삭제
+    await GroupUser.destroy({
+      where: { uSeq, gSeq },
+    });
+
+    res.status(200).send({
+      success: true,
+      msg: '모임 탈퇴 성공',
+    });
+    return;
+  } catch (error) {
+    // 기타 데이터베이스 오류
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      msg: '서버 에러',
+    });
+  }
+};
 
 // GET '/api/group/recommend'
 // 추천 모임
-exports.getRecommend = (req, res) => {};
+// exports.getRecommend = (req, res) => {};
 
 // POST '/api/group'
 // 모임 생성
