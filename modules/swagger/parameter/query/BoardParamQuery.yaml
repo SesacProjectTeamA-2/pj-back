@@ -13,9 +13,9 @@ components:
       schema:
         type: integer
         format: int64
-    categoryQuery:
+    gbCategoryQuery:
       in: query
-      name: category
+      name: gbCategory
       required: false
       description: 게시글의 카테고리 (notice, free, mission)
       example: notice
