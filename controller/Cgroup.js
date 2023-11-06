@@ -110,7 +110,7 @@ exports.postGroup = async (req, res) => {
     console.log(insertOneGroup);
 
     // db에 모임 정보 저장 후 gSeq로 링크 생성
-    const inviteLink = generateInviteLink(insertOneGroup.gSeq);
+    // const inviteLink = generateInviteLink(insertOneGroup.gSeq);
 
     // 2) 모임장을 모임 참여 유저에 추가
     if (insertOneGroup) {
@@ -140,6 +140,7 @@ exports.postGroup = async (req, res) => {
               ),
             },
             { where: { gSeq: insertOneGroup.gSeq } }
+
           );
 
           mCnt++;

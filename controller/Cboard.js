@@ -371,9 +371,9 @@ exports.createBoard = async (req, res) => {
     const uSeq = user.uSeq;
     console.log(uSeq);
 
-    // 클라이언트에서 요청 보낼때 query로 mSeq, gSeq, gbCategory 값 넣어서 보내주기
-    const gSeq = req.query.gSeq;
-    const gbCategory = req.query.gbCategory;
+    // 클라이언트에서 요청 보낼때 body로 mSeq, gSeq, gbCategory 값 넣어서 보내주기
+    const gSeq = req.body.gSeq;
+    const gbCategory = req.body.gbCategory;
     // console.log('377번째줄 :', gbCategory);
     // console.log('378번째줄 :', req.query.gbCategory);
 
@@ -419,9 +419,9 @@ exports.createBoard = async (req, res) => {
       const newBoard = await GroupBoard.create({
         gbTitle: req.body.gbTitle,
         gbContent: req.body.gbContent,
-        gbCategory: req.query.gbCategory,
-        mSeq: mSeq,
-        gSeq: gSeq,
+        gbCategory: req.body.gbCategory,
+        mSeq: req.body.mSeq,
+        gSeq: req.body.gSeq,
         uSeq: uSeq,
         guSeq: guSeq,
       });
@@ -438,14 +438,12 @@ exports.createBoard = async (req, res) => {
         },
       });
     } else if (gbCategory === 'notice' || gbCategory === 'free') {
-      // console.log('442번째줄 :', gbCategory);
-      // console.log('443번째줄 :', req.query.gbCategory);
       // DB작업
       const newBoard = await GroupBoard.create({
         gbTitle: req.body.gbTitle,
         gbContent: req.body.gbContent,
-        gbCategory: req.query.gbCategory,
-        gSeq: gSeq,
+        gbCategory: req.body.gbCategory,
+        gSeq: req.body.gSeq,
         uSeq: uSeq,
         guSeq: guSeq,
       });

@@ -12,6 +12,10 @@ components: # 컴포넌트 선언
       type: object
       description: 게시글 작성 요청시 필요한 정보
       properties: # req.body로 넘어온 값 정의
+        gSeq:
+          type: integer
+          description: gSeq
+          example: 1
         gbTitle:
           type: string
           description: 게시글 제목
@@ -20,6 +24,14 @@ components: # 컴포넌트 선언
           type: string
           description: 게시글 내용
           example: 내용입니다
+        gbCategory:
+          type: string
+          description: 게시글 카테고리
+          example: notice
+        mSeq:
+          type: integer
+          description: 카테고리가 미션일 경우 mSeq
+          example: 1
 
     # 게시글 수정시 필요한 req.body
     patchBoard: # PATCH '/api/board/edit'
