@@ -175,7 +175,7 @@ router.get('/create', authUtil, controller.getCreateBoard);
  *         - bearerAuth: []
  *       parameters:
  *        - $ref: '#/components/parameters/gSeqQuery'
- *        - $ref: '#/components/parameters/categoryQuery'
+ *        - $ref: '#/components/parameters/gbCategoryQuery'
  *        - $ref: '#/components/parameters/mSeqQuery'
  *       requestBody:
  *         description: 게시글 작성 위해 필요한 정보
