@@ -357,11 +357,12 @@ exports.postGroup = async (req, res) => {
     const user = await jwt.verify(token);
     console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
+    const gCoverImg = req.file.location; // 업로드된 이미지의 S3 URL
+
     const uSeq = user.uSeq;
     console.log(uSeq);
 
-    const { gName, gDesc, gDday, gMaxMem, gCategory, gCoverImg, missionArray } =
-      req.body;
+    const { gName, gDesc, gDday, gMaxMem, gCategory, missionArray } = req.body;
 
     // 1) 모임 생성 → gSeq
     const insertOneGroup = await Group.create({
@@ -440,8 +441,7 @@ exports.patchGroup = async (req, res) => {
     const uSeq = user.uSeq;
     console.log(uSeq);
 
-    const { gSeq, gName, gDesc, gDday, gMaxMem, gCategory, gCoverImg } =
-      req.body;
+    const { gSeq, gName, gDesc, gDday, gMaxMem, gCategory } = req.body;
 
     // 현재 모임을 수정하려는 사람이 모임장인지 확인
     const selectOneGroupUser = await GroupUser.findOne({
@@ -459,7 +459,6 @@ exports.patchGroup = async (req, res) => {
           gDday,
           gMaxMem,
           gCategory,
-          gCoverImg,
         },
         {
           where: {
@@ -473,6 +472,49 @@ exports.patchGroup = async (req, res) => {
       } else {
         res.json({ isSuccess: false, msg: '모임 수정에 실패했습니다' });
       }
+    } else {
+      res.json({ isSuccess: false, msg: '모임장이 아닙니다.' });
+    }
+  } catch (err) {
+    console.error(err);
+    res.json({ isSuccess: false, msg: 'error' });
+  }
+};
+
+// PATCH '/api/group/groupCoverImg'
+// 모임 커버 이미지 수정
+exports.groupCoverImg = async (req, res) => {
+  try {
+    let token = req.headers.authorization.split(' ')[1];
+    const user = await jwt.verify(token);
+    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
+    const uSeq = user.uSeq;
+    console.log(uSeq);
+
+    const gCoverImg = req.file.location; // 업로드된 이미지의 S3 URL
+
+    const { gSeq } = req.body;
+
+    // 현재 모임을 수정하려는 사람이 모임장인지 확인
+    const selectOneGroupUser = await GroupUser.findOne({
+      where: {
+        gSeq,
+        uSeq,
+      },
+    });
+
+    if (selectOneGroupUser) {
+      await Group.update(
+        {
+          gCoverImg,
+        },
+        {
+          where: {
+            gSeq,
+          },
+        }
+      );
+      res.json({ isSuccess: true, msg: '모임 이미지 수정 완료' });
     } else {
       res.json({ isSuccess: false, msg: '모임장이 아닙니다.' });
     }

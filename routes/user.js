@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const controller = require('../controller/Cuser');
 const authUtil = require('../middlewares/auth').checkToken;
+const upload = require('../middlewares/imgUpload').upload;
+console.log(upload.upload);
 
 router.get('/users', controller.getUsers); // 모든 유저 조회
 
@@ -131,5 +133,13 @@ router.get('/mypage', authUtil, controller.getProfile);
  *                 $ref: '#/components/schemas/editMypageAPIResult'
  */
 router.patch('/mypage', controller.editProfile);
+
+// 이미지 업로드 처리
+router.patch('/mypage/userImg', upload.single('image'), controller.userImg);
+router.patch(
+  '/mypage/userCoverImg',
+  upload.single('image'),
+  controller.userCoverImg
+);
 
 module.exports = router;

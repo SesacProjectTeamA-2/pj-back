@@ -510,6 +510,7 @@ exports.editProfile = async (req, res) => {
         uName,
         uDesc,
         uPhrase,
+        uCharImg,
         uCategory1,
         uCategory2,
         uCategory3,
@@ -531,6 +532,7 @@ exports.editProfile = async (req, res) => {
             uName,
             uDesc,
             uPhrase,
+            uCharImg,
             uCategory1,
             uCategory2,
             uCategory3,
@@ -556,8 +558,62 @@ exports.editProfile = async (req, res) => {
   }
 };
 
-exports.editProfileImg = (req, res) => {
+exports.userImg = async (req, res) => {
   // uImg,
-  // uCharImg,
-  // uCoverImg,
+  const imageUrl = req.file.location; // 업로드된 이미지의 S3 URL
+  try {
+    // 로그인된 상태
+    if (req.headers.authorization) {
+      let token = req.headers.authorization.split(' ')[1];
+      const user = await jwt.verify(token);
+      console.log('디코딩된 유저 토큰!!', user);
+      await User.update(
+        {
+          uImg: imageUrl,
+        },
+        {
+          where: { uSeq: user.uSeq },
+        }
+      );
+      res.json({ result: true, message: '이미지 업로드 성공' });
+    } else {
+      res.json({ result: false, message: '로그인 해주세요!' });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(err.statusCode || 500).send({
+      msg: err.message,
+      OK: false,
+    });
+  }
+};
+
+exports.userCoverImg = async (req, res) => {
+  // uImg,
+  const imageUrl = req.file.location; // 업로드된 이미지의 S3 URL
+  try {
+    // 로그인된 상태
+    if (req.headers.authorization) {
+      let token = req.headers.authorization.split(' ')[1];
+      const user = await jwt.verify(token);
+      console.log('디코딩된 유저 토큰!!', user);
+      await User.update(
+        {
+          uCoverImg: imageUrl,
+        },
+        {
+          where: { uSeq: user.uSeq },
+        }
+      );
+      res.json({ result: true, message: '이미지 업로드 성공' });
+    } else {
+      res.json({ result: false, message: '로그인 해주세요!' });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(err.statusCode || 500).send({
+      msg: err.message,
+      OK: false,
+    });
+  }
 };
