@@ -60,6 +60,25 @@ app.use(
   swaggerUi.setup(specs)
 );
 
+// 5) 모임 채팅(그룹 채팅)
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
+
+// Socket.io 설정
+io.on('connection', (socket) => {
+  console.log('User connected: ' + socket.id);
+
+  // 새로운 메시지 수신
+  socket.on('chat message', (msg) => {
+    io.emit('chat message', msg); // 모든 클라이언트에게 메시지 전송
+  });
+
+  // 사용자 연결 해제
+  socket.on('disconnect', () => {
+    console.log('User disconnected: ' + socket.id);
+  });
+});
+
 /**
  * @path {GET} ${URL}:${PORT}/api
  * @description 모든 api는 indexRouter를 거쳐가도록 설정
