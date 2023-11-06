@@ -120,7 +120,7 @@ router.get('/mypage', authUtil, controller.getProfile);
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/editMypageAPIResult'
+ *               $ref: '#/components/schemas/editMypageAPI'
  *       responses:
  *         "200":
  *           description: 마이페이지 수정
