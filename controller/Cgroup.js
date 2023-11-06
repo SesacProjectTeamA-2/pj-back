@@ -16,7 +16,6 @@ const jwt = require('../modules/jwt');
 const ranking = require('../modules/rankSystem');
 const { v4: uuidv4 } = require('uuid'); // 모임 링크 생성
 
-
 // GET '/api/group/:id'
 // 모임 정보 조회(상세 화면)
 exports.getGroup = (req, res) => {
@@ -134,12 +133,14 @@ exports.postGroup = async (req, res) => {
             mLevel: missionInfo.mLevel, // 난이도 (상: 5점, 중: 3점, 하: 1점)
           });
 
-          await Group.update({
-            gTotalScore: sequelize.literal(
-              `gTotalScore + ${missionInfo.mLevel}`
-            ),
-            where: { gSeq: insertOneGroup.gSeq },
-          });
+          await Group.update(
+            {
+              gTotalScore: sequelize.literal(
+                `gTotalScore + ${missionInfo.mLevel}`
+              ),
+            },
+            { where: { gSeq: insertOneGroup.gSeq } }
+          );
 
           mCnt++;
         }
