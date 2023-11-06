@@ -539,7 +539,7 @@ exports.editProfile = async (req, res) => {
             uMainGroup,
           },
           {
-            where: { uSeq: userSeq },
+            where: { uSeq: user.uSeq },
           }
         );
         res.json({ result: true, message: '회원정보 수정 완료!' });

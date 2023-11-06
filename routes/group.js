@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const controller = require('../controller/Cgroup');
 const authUtil = require('../middlewares/auth').checkToken;
+const socketUtil = require('../middlewares/socketIo');
 
 /**
  * @swagger
@@ -131,5 +132,7 @@ router.patch('/', authUtil, controller.patchGroup); // 모임 수정
  *                 $ref: '#/components/schemas/groupApiResult'
  */
 router.delete('/', authUtil, controller.deleteGroup); // 모임 삭제
+
+router.get('/chat/:gSeq', authUtil, controller.getGroupChat); // 모임(별) 채팅
 
 module.exports = router;

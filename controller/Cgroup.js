@@ -423,3 +423,97 @@ exports.joinGroup = async (req, res) => {
     res.json({ result: false, message: '먼저 로그인 해주세요.' });
   }
 };
+
+// GET '/api/group/chat/:gSeq'
+// 모임(별) 채팅
+exports.getGroupChat = async (req, res) => {
+  try {
+    const { gSeq } = req.params;
+    console.log('------------------------');
+    console.log(gSeq);
+    console.log('------------------------');
+    // let token = req.headers.authorization.split(' ')[1];
+    let token =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1TmFtZSI6ImV1bmcgZW8iLCJ1RW1haWwiOiJlb2V1bmcxMTNAZ21haWwuY29tIiwidVNlcSI6MSwiaWF0IjoxNjk5MjYxNTMxfQ.UkGZrK0HKrpbzecPL6AGmk_qLLSwG_gnLJ-1e4if0ag';
+    const user = await jwt.verify(token);
+    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
+
+    const uSeq = user.uSeq;
+    console.log(uSeq);
+
+    // 해당 모임의 모임원인지 확인
+    const groupInfo = await GroupUser.findOne({
+      attributes: [
+        'gSeq',
+        'guIsLeader',
+        'tb_group.gName',
+        'tb_user.uName',
+        'tb_user.uEmail',
+      ],
+      include: [
+        {
+          model: Group,
+          required: true,
+        },
+        {
+          model: User,
+          required: true,
+          where: {
+            uSeq,
+            isUse: {
+              // 현재 서비스 이용 가능한 유저
+              [Op.eq]: 'y',
+            },
+          },
+        },
+      ],
+      where: {
+        uSeq,
+        gSeq,
+        guIsBlackUser: {
+          [Op.is]: null, // 화이트유저만 가지고온다.
+        },
+      },
+    });
+
+    // 해당 모임에 모임원의 정보가 있는 경우, 채팅 가능
+    // 모임별 namespace는 chat{gSeq}로 지정
+    // Ex. gSeq가 100이면, namespace = chat100
+    if (groupInfo) {
+      // Socket.io를 사용하여 클라이언트와 통신할 수 있음
+      const io = req.io;
+
+      // namespace /chat{gSeq}에 접속
+      const chatNamespace = io.of(`/chat${gSeq}`).on('connection', (socket) => {
+        // 클라이언트가 접속한 경우
+        socket.on('login', (data) => {
+          console.log(data);
+          // room에 join되어 있는 클라이언트에게 메시지 전송
+          chatNamespace.emit('login', `${user.uName}님이 입장하셨습니다.`);
+        });
+
+        // 메시지 수신시
+        socket.on('chat message', (msg) => {
+          chatNamespace.emit('chat message', `${user.uName} : ${msg}`);
+        });
+
+        // 연결 종료 시
+        socket.on('disconnect', () => {
+          console.log(`${socket.name}님이 모임 채팅에서 퇴장하셨습니다.`);
+        });
+      });
+      // res.status(200).json({ isSuccess: true });
+      // 간단한 HTML 파일을 응답으로 전송
+      const fs = require('fs');
+      const html = fs.readFileSync('public/index.html', 'utf8');
+      res.send(html);
+    } else {
+      res
+        .status(401)
+        .json({ isSuccess: false, msg: '해당 모임의 인원이 아닙니다.' });
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ isSuccess: false, msg: 'error' });
+  }
+};
