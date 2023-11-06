@@ -139,9 +139,8 @@ exports.postGroup = async (req, res) => {
                 `gTotalScore + ${missionInfo.mLevel}`
               ),
             },
-            {
-              where: { gSeq: insertOneGroup.gSeq },
-            }
+            { where: { gSeq: insertOneGroup.gSeq } }
+
           );
 
           mCnt++;

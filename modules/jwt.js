@@ -9,7 +9,7 @@ module.exports = {
   sign: async (user) => {
     /* 현재는 idx와 email을 payload로 넣었지만 필요한 값을 넣기*/
     const payload = {
-      uNmae: user.userName,
+      uName: user.userName,
       uEmail: user.userEmail,
       uSeq: user.uSeq,
     };

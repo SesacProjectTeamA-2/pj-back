@@ -4,7 +4,7 @@
 components: # 컴포넌트 선언
   schemas: # 스키마 정의
     # 마이페이지 수정 위한 request body
-    editMypageAPIResult: # PATCH '/api/user/mypage'
+    editMypageAPI: # PATCH '/api/user/mypage'
       required:
         - uName
         - uDesc
