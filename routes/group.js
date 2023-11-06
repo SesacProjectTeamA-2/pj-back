@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const controller = require('../controller/Cgroup');
 const authUtil = require('../middlewares/auth').checkToken;
+const upload = require('../middlewares/imgUpload').upload;
 
 /**
  * @swagger
@@ -74,7 +75,7 @@ router.get('/', controller.getGroups); // 모임 조회 (검색어 검색 / 카�
  *               schema:
  *                 $ref: '#/components/schemas/groupApiResult'
  */
-router.post('/', authUtil, controller.postGroup); // 모임 생성
+router.post('/', authUtil, upload.single('image'), controller.postGroup); // 모임 생성
 
 /**
  * @swagger
@@ -103,6 +104,14 @@ router.post('/', authUtil, controller.postGroup); // 모임 생성
  *                 $ref: '#/components/schemas/groupApiResult'
  */
 router.patch('/', authUtil, controller.patchGroup); // 모임 수정
+
+// 모임 이미지 수정
+router.patch(
+  '/groupCoverImg',
+  authUtil,
+  upload.single('image'),
+  controller.groupCoverImg
+);
 
 /**
  * @swagger
