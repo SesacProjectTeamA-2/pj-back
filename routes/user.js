@@ -135,8 +135,8 @@ router.get('/mypage', authUtil, controller.getProfile);
 router.patch('/mypage', controller.editProfile);
 
 // 이미지 업로드 처리
-router.post('/mypage/userImg', upload.single('image'), controller.userImg);
-router.post(
+router.patch('/mypage/userImg', upload.single('image'), controller.userImg);
+router.patch(
   '/mypage/userCoverImg',
   upload.single('image'),
   controller.userCoverImg
