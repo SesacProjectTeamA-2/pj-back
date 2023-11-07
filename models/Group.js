@@ -49,6 +49,12 @@ const Group = (Sequelize, DataTypes) => {
         defaultValue: 0,
         comment: '모임 미션 현재 점수',
       },
+      // gLink: {
+      //   type: DataTypes.STRING,
+      //   allowNull: false,
+      //   defaultValue: null,
+      //   comment: '모임 초대 위한 링크',
+      // },
     },
     {
       tableName: 'tb_group',

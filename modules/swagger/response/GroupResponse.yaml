@@ -26,19 +26,15 @@ components:
           example: { 'mTitle': '코딩', 'mContent': '코딩하기' }
         groupMember:
           type: array
-          description: 모임 멤버 (모임유저시퀀스/유저시퀀스/모임장여부/닉네임/이미지/캐릭터이미지)
-          example: [
-        {
-            "guSeq": 1,
-            "uSeq": 1,
-            "guIsLeader": "y",
-            "tb_user": {
-                "uName": "chitty",
-                "uImg": "./1234/abcx",
-                "uCharImg": "./bdla/svhioa"
-            }
-        }
-    ]
+          description: 모임 멤버 (모임유저시퀀스/유저시퀀스/모임장여부/닉네임/이미지/캐릭터이미지)를 포함하는 객체의 배열입니다.
+          example:
+            - guSeq: 1
+              uSeq: 1
+              guIsLeader: 'y'
+              tb_user:
+                uName: 'chitty'
+                uImg: './1234/abcx'
+                uCharImg: './bdla/svhioa'
         groupName:
           type: string
           description: 모임 이름
@@ -62,30 +58,21 @@ components:
           example: ex = 운동 / re = 독서 / st = 스터디 / eco = 경제 / lan = 언어 / cert = 자격증 / it = IT / etc = 기타
         groupRanking:
           type: object
-          description: nowRanking(현재랭킹), totalRanking(누적랭킹), doneRates(달성률-내림차순)
-          example: {
-        "nowRanking": [
-            {
-                "uSeq": 1,
-                "guNowScore": 10,
-                "tb_user": {
-                    "uName": "chitty"
-                }
-            }
-        ],
-        "totalRanking": [
-            {
-                "uSeq": 1,
-                "guTotalScore": 30,
-                "tb_user": {
-                    "uName": "chitty"
-                }
-            }
-        ],
-        "doneRates": [
-            33.33333333333333
-        ]
-    }
+          description: |
+            객체로서 nowRanking(현재랭킹), totalRanking(누적랭킹), doneRates(달성률-내림차순)를 포함합니다.
+          example:
+            nowRanking:
+              - uSeq: 1
+                guNowScore: 10
+                tb_user:
+                  uName: 'chitty'
+            totalRanking:
+              - uSeq: 1
+                guTotalScore: 30
+                tb_user:
+                  uName: 'chitty'
+            doneRates:
+              - 33.33333333333333
 
     # 기본적인 응답 object (성공 여부, 응답 메시지)
     groupApiResult:

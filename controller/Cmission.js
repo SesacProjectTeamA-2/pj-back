@@ -10,8 +10,8 @@ const score = require('../modules/rankSystem');
 // 로그인 된 사용자인지 아닌지 판별하려면 불러와야함
 const jwt = require('../modules/jwt');
 
-// 하루가 지나는 날(00:01 분에 업데이트 되는 data)
-cron.schedule('1 0 * * *', async () => {
+// 점수 자동 업데이트 함수
+const updateScore = async () => {
   try {
     // 현재 날짜를 얻기
     const currentDate = new Date();
@@ -50,6 +50,7 @@ cron.schedule('1 0 * * *', async () => {
           { guNowScore: 0 },
           { where: { gSeq: group.gSeq } }
         );
+        // 그룹 미션 점수 초기화
         await Group.update({ gTotalScore: 0 }, { where: { gSeq: group.gSeq } });
         console.log(
           '1. 누적 점수 업데이트!!!! 2. 미션만료!!! 3. 모임 미션 점수 초기화!!!'
@@ -58,12 +59,14 @@ cron.schedule('1 0 * * *', async () => {
     }
   } catch (error) {
     // 기타 데이터베이스 오류
-    console.log(error);
-    res.status(500).send({
-      success: false,
-      msg: '서버에러 발생',
-    });
+    console.log('노드 크론 실행 중 서버 에러', error);
+    // 에러 핸들링 코드 추가
   }
+};
+
+// 하루가 지나는 날(00:01 분에 업데이트 되도록 실행)
+cron.schedule('1 0 * * *', () => {
+  updateScore();
 });
 
 // 유저 미션 리스트
@@ -161,7 +164,7 @@ exports.getGroupMission = async (req, res) => {
 exports.editMission = async (req, res) => {
   try {
     const gSeq = req.params.gSeq;
-    const { mSeq, gDday, mTitle, mContent, mLevel } = req.body;
+    const { missionArray } = req.body;
     // 로그인 여부 확인
     if (req.headers.authorization) {
       let token = req.headers.authorization.split(' ')[1];
@@ -175,18 +178,31 @@ exports.editMission = async (req, res) => {
         where: { gSeq, uSeq },
         attributes: ['guIsBlackUser'],
       });
-      if (isLeader) {
-        const task1 = Mission.update(
-          {
-            mTitle, // 미션 제목
-            mContent, // 미션 내용
-            mLevel, // 난이도 (상: 5점, 중: 3점, 하: 1점)
-          },
-          { where: { mSeq } }
-        );
-        const task2 = Group.update({ gDday }, { where: { gSeq } });
 
-        await Promise.all([task1, task2]);
+      if (isLeader) {
+        // 기존 미션 수정시
+        for (let missionInfo of missionArray) {
+          if (missionInfo.mSeq) {
+            await Mission.update(
+              {
+                mTitle: missionInfo.mTitle, // 미션 제목
+                mContent: missionInfo.mContent, // 미션 내용
+                mLevel: missionInfo.mLevel, // 난이도 (상: 5점, 중: 3점, 하: 1점)
+              },
+              { where: { mSeq: missionInfo.mSeq } }
+            );
+          } else {
+            // 새로운 미션 추가시
+            await Mission.create({
+              gSeq,
+              mTitle: missionInfo.mTitle, // 미션 제목
+              mContent: missionInfo.mContent, // 미션 내용
+              mLevel: missionInfo.mLevel, // 난이도 (상: 5점, 중: 3점, 하: 1점)
+            });
+          }
+        }
+        const gDday = missionArray[0].gDday;
+        await Group.update({ gDday }, { where: { gSeq } });
 
         res.json({ result: true, message: '수정완료' });
       } else {
