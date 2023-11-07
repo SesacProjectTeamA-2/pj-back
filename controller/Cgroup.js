@@ -357,8 +357,6 @@ exports.postGroup = async (req, res) => {
     const user = await jwt.verify(token);
     console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
-    const gCoverImg = req.file.location; // 업로드된 이미지의 S3 URL
-
     const uSeq = user.uSeq;
     console.log(uSeq);
 
@@ -377,7 +375,6 @@ exports.postGroup = async (req, res) => {
       gDday, // 디데이
       gMaxMem, // 최대인원
       gCategory, // 카테고리
-      gCoverImg, // 커버 이미지
       gLink: base64,
     });
 
@@ -497,32 +494,36 @@ exports.groupCoverImg = async (req, res) => {
     const uSeq = user.uSeq;
     console.log(uSeq);
 
-    const gCoverImg = req.file.location; // 업로드된 이미지의 S3 URL
+    if (req.file.location) {
+      const gCoverImg = req.file.location; // 업로드된 이미지의 S3 URL
 
-    const { gSeq } = req.body;
+      const { gSeq } = req.body;
 
-    // 현재 모임을 수정하려는 사람이 모임장인지 확인
-    const selectOneGroupUser = await GroupUser.findOne({
-      where: {
-        gSeq,
-        uSeq,
-      },
-    });
-
-    if (selectOneGroupUser) {
-      await Group.update(
-        {
-          gCoverImg,
+      // 현재 모임을 수정하려는 사람이 모임장인지 확인
+      const selectOneGroupUser = await GroupUser.findOne({
+        where: {
+          gSeq,
+          uSeq,
         },
-        {
-          where: {
-            gSeq,
+      });
+
+      if (selectOneGroupUser) {
+        await Group.update(
+          {
+            gCoverImg,
           },
-        }
-      );
-      res.json({ isSuccess: true, msg: '모임 이미지 수정 완료' });
+          {
+            where: {
+              gSeq,
+            },
+          }
+        );
+        res.json({ isSuccess: true, msg: '모임 이미지 수정 완료' });
+      } else {
+        res.json({ isSuccess: false, msg: '모임장이 아닙니다.' });
+      }
     } else {
-      res.json({ isSuccess: false, msg: '모임장이 아닙니다.' });
+      res.json({ isSuccess: false, msg: '이미지가 첨부되지 않았습니다' });
     }
   } catch (err) {
     console.error(err);
@@ -639,17 +640,29 @@ exports.getGroupDetail = async (req, res) => {
       where: { gSeq: groupSeq, isExpired: { [Op.is]: null } },
     });
 
-    const memberArray = await GroupUser.findAll({
-      attributes: ['guSeq', 'uSeq', 'guIsLeader'],
-      order: [['guSeq', 'ASC']],
-      where: { gSeq: groupSeq },
+    const memberArray = await User.findAll({
+      attributes: ['uSeq', 'uName', 'uImg', 'uCharImg'],
       include: [
         {
-          model: User,
-          attributes: ['uName', 'uImg', 'uCharImg'],
+          model: GroupUser,
+          where: { gSeq: groupSeq, guIsLeader: { [Op.is]: null } },
+          attributes: ['guSeq'],
         },
       ],
     });
+
+    const leaderInfo = await User.findOne({
+      attributes: ['uSeq', 'uName', 'uImg', 'uCharImg'],
+      include: [
+        {
+          model: GroupUser,
+          where: { gSeq: groupSeq, guIsLeader: 'y' },
+          attributes: ['guSeq'],
+        },
+      ],
+    });
+
+    console.log('멤버어레이>>>>>>>>>', memberArray);
 
     const groupRanking = await ranking.groupRanking(groupSeq);
 
@@ -720,6 +733,8 @@ exports.getGroupDetail = async (req, res) => {
         groupDday: groupDday,
         groupCategory: gCategory,
         groupCoverImg: gCoverImg,
+        memberArray,
+        leaderInfo,
       });
       // 비회원인경우
     } else {
@@ -736,6 +751,8 @@ exports.getGroupDetail = async (req, res) => {
         groupDday: groupDday,
         groupCategory: gCategory,
         groupCoverImg: gCoverImg,
+        memberArray,
+        leaderInfo,
       });
     }
   } catch (err) {
@@ -935,7 +952,6 @@ exports.postJoinByLink = async (req, res) => {
     res.json({ success: false, msg: 'error' });
   }
 };
-
 
 exports.postJoin = async (req, res) => {
   try {
