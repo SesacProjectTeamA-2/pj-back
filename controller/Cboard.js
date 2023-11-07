@@ -396,7 +396,7 @@ exports.createBoard = async (req, res) => {
 
     // 모임원인지 아닌지 guSeq 확인
     const groupUser = await GroupUser.findOne({
-      where: { uSeq: uSeq },
+      where: { uSeq: uSeq, gSeq: gSeq },
     });
 
     if (!groupUser) {
