@@ -652,14 +652,17 @@ exports.getGroupDetail = async (req, res) => {
       (user) => user.tb_user
     );
 
-    const nowRanking = groupRanking.nowRanking.filter((now) => now !== tb_user);
+    const nowRanking = groupRanking.nowRanking.filter(
+      (now) => now !== 'tb_user'
+    );
 
     const totalScoreUserInfo = groupRanking.totalRanking.map(
       (user) => user.tb_user
     );
 
+    console.log('토탈랭킹<<<<<<<', groupRanking.totalRanking);
     const totalRanking = groupRanking.nowRanking.filter(
-      (total) => total !== tb_user
+      (total) => total !== 'tb_user'
     );
 
     const doneRates = groupRanking.doneRates;
