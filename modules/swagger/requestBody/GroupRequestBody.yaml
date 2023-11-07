@@ -3,7 +3,6 @@
 ###################################################
 components: # 컴포넌트 선언
   schemas: # 스키마 정의
-  
     # 모임 생성시 필요한 req.body
     postGroup: # POST '/api/group'
       required:
@@ -129,4 +128,14 @@ components: # 컴포넌트 선언
           description: 새 모임장이 될 사람의 uSeq
           example: 1
 
-
+    # 링크로 모임 가입할 때 필요한 req.body
+    postJoinByLink: # POST '/api/group/joinByLink'
+      required:
+        - gLink
+      type: object
+      description: 모임 링크로 가입 시 필요한 정보
+      properties: # req.body로 넘어온 값 정의
+        gLink:
+          type: string
+          description: 모임의 링크 (코드)
+          example: ZjE0NjRlNWYtY2NkOC00YWU1LWEyN2UtMjVhMjQyM2FmMTBl
