@@ -652,20 +652,26 @@ exports.getGroupDetail = async (req, res) => {
       (user) => user.tb_user
     );
 
-    const nowRanking = groupRanking.nowRanking.filter(
-      (now) => now !== 'tb_user'
-    );
+    const nowRanking = groupRanking.nowRanking.map((item) => {
+      return {
+        uSeq: item.uSeq,
+        guNowScore: item.guNowScore,
+      };
+    });
 
     const totalScoreUserInfo = groupRanking.totalRanking.map(
       (user) => user.tb_user
     );
 
-    console.log('토탈랭킹<<<<<<<', groupRanking.totalRanking);
-    const totalRanking = groupRanking.nowRanking.filter(
-      (total) => total !== 'tb_user'
-    );
+    const totalRanking = groupRanking.nowRanking.map((item) => {
+      return {
+        uSeq: item.uSeq,
+        guNowScore: item.guNowScore,
+      };
+    });
 
     const doneRates = groupRanking.doneRates;
+    console.log('그룹랭킹>>>>>>>>>>>', groupRanking);
 
     // 회원인 경우
     if (req.headers.authorization) {
@@ -707,7 +713,6 @@ exports.getGroupDetail = async (req, res) => {
         groupDday: groupDday,
         groupCategory: gCategory,
         groupCoverImg: gCoverImg,
-        groupRanking,
       });
       // 비회원인경우
     } else {
@@ -724,7 +729,6 @@ exports.getGroupDetail = async (req, res) => {
         groupDday: groupDday,
         groupCategory: gCategory,
         groupCoverImg: gCoverImg,
-        groupRanking,
       });
     }
   } catch (err) {
