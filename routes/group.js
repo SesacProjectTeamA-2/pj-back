@@ -147,7 +147,7 @@ router.delete('/quit/:gSeq', authUtil, controller.deleteQuitGroup); // 모임 �
  *               schema:
  *                 $ref: '#/components/schemas/groupApiResult'
  */
-router.post('/', authUtil, upload.single('image'), controller.postGroup); // 모임 생성
+router.post('/', authUtil, controller.postGroup); // 모임 생성
 
 /**
  * @swagger
