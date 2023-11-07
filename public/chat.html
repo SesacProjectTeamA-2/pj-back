@@ -8,6 +8,7 @@
     <ul id="messages"></ul>
     <input id="message" autocomplete="off" /><button>보내기</button>
     <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
       // 1부터 5까지의 난수 생성
       function getRandomNumber(min, max) {
@@ -23,8 +24,14 @@
       const messageInput = document.getElementById('message');
       const messageButton = document.querySelector('button');
 
+      // const cookie = new Cookies();
+      // const uToken = cookie.get('isUser'); // 토큰 값
+      // console.log(uToken);
+      const uSeq = 1;
+      socket.emit('login', uSeq);
+
       messageButton.addEventListener('click', () => {
-        socket.emit('groupChat', randomNum);
+        socket.emit('groupChat', 1);
         socket.emit('chatMessage', messageInput.value);
         messageInput.value = '';
       });

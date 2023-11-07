@@ -473,70 +473,62 @@ exports.getGroupChat = async (req, res) => {
       },
     });
 
-    // 해당 모임에 모임원의 정보가 있는 경우, 채팅 가능
-    // 모임별 방번호는 gSeq로 설정
-    // Socket.io를 사용하여 클라이언트와 통신할 수 있음
-    const io = req.io;
-    io.on('connection', (socket) => {
-      console.log('소켓 연결이 이루어졌습니다.');
+    if (groupInfo) {
+      const { guIsLeader } = groupInfo.dataValues;
+      const { gName } = groupInfo.dataValues.tb_group;
+      const { uName, uEmail } = groupInfo.dataValues.tb_user;
 
-      socket.on('groupChat', (gSeq) => {
-        socket.join(gSeq);
-        socket.name = uSeq;
-        socket.roomNumber = gSeq;
-        console.log(socket.roomNumber);
+      // 해당 모임에 모임원의 정보가 있는 경우, 채팅 가능
+      // 모임별 방번호는 gSeq로 설정
+      // Socket.io를 사용하여 클라이언트와 통신할 수 있음
+      const io = req.io;
+      const connectedClients = {}; // 연결된 클라이언트를 저장할 객체
+
+      io.on('connection', (socket) => {
+        socket.on('login', (uSeq) => {
+          // 클라이언트에서 로그인 이벤트를 보내면, 연결을 저장하고 해당 연결을 사용
+          if (!connectedClients[uSeq]) {
+            connectedClients[uSeq] = socket;
+            socket.name = uName;
+            socket.roomName = gName;
+            socket.roomNumber = gSeq;
+            console.log('소켓 연결이 이루어졌습니다.');
+            // console.log(connectedClients);
+          } else {
+            // 이미 연결이 있는 경우, 기존 연결을 사용하고 새 연결을 닫음
+            socket.disconnect();
+          }
+        });
+
+        socket.on('groupChat', (gSeq) => {
+          socket.name = uName;
+          socket.roomName = gName;
+          socket.roomNumber = gSeq;
+          socket.join(socket.roomNumber);
+          console.log(socket.roomName, ' -- ', socket.roomNumber);
+        });
+
+        socket.on('chatMessage', (message) => {
+          console.log(message);
+          io.to(socket.roomNumber).emit(
+            'message',
+            `${socket.name} : ` + message
+          ); // 모든 클라이언트에 메시지를 전송
+        });
+
+        socket.on('disconnect', () => {
+          console.log('소켓 연결이 끊어졌습니다.');
+        });
       });
 
-      socket.on('chatMessage', (message) => {
-        console.log(message);
-        io.to(socket.roomNumber).emit('message', `${socket.name} : ` + message); // 모든 클라이언트에 메시지를 전송
-      });
-
-      socket.on('disconnect', () => {
-        console.log('소켓 연결이 끊어졌습니다.');
-      });
-    });
-    // namespace /chat{gSeq}에 접속
-    const chat = io.of('/chat');
-
-    // res.status(200).json({ isSuccess: true });
-    const { join } = require('node:path');
-    res.sendFile(join(__dirname, '/../public/chat.html'));
-    // if (groupInfo) {
-    //   // Socket.io를 사용하여 클라이언트와 통신할 수 있음
-    //   const io = req.io;
-    //   io.on('connection', (socket) => {
-    //     console.log('소켓 연결이 이루어졌습니다.');
-
-    //     socket.on('groupChat', (gSeq) => {
-    //       socket.join(gSeq);
-    //       socket.name = uSeq;
-    //       socket.roomNumber = gSeq;
-    //     });
-
-    //     socket.on('chatMessage', (message) => {
-    //       console.log(message);
-    //       io.to(socket.roomNumber).emit(
-    //         'message',
-    //         `${socket.name} : ` + message
-    //       ); // 모든 클라이언트에 메시지를 전송
-    //     });
-
-    //     socket.on('disconnect', () => {
-    //       console.log('소켓 연결이 끊어졌습니다.');
-    //     });
-    //   });
-    //   // namespace /chat{gSeq}에 접속
-    //   const chat = io.of('/chat');
-
-    //   // res.status(200).json({ isSuccess: true });
-    //   const { join } = require('node:path');
-    //   res.sendFile(join(__dirname, '/../public/chat.html'));
-    // } else {
-    //   res
-    //     .status(401)
-    //     .json({ isSuccess: false, msg: '해당 모임의 인원이 아닙니다.' });
-    // }
+      // res.status(200).json({ isSuccess: true });
+      const { join } = require('node:path');
+      res.sendFile(join(__dirname, '/../public/chat.html'));
+    } else {
+      res
+        .status(401)
+        .json({ isSuccess: false, msg: '해당 모임의 인원이 아닙니다.' });
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({ isSuccess: false, msg: 'error' });
