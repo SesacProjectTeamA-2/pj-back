@@ -91,7 +91,7 @@ module.exports = {
         where: { gSeq },
         attributes: ['uSeq', 'guNowScore'],
         order: [['guNowScore', 'DESC']],
-        include: [{ model: User, attributes: ['uName'] }],
+        include: [{ model: User, attributes: ['uName', 'uSeq', 'uImg'] }],
       });
 
       console.log('모임 랭킹>>>>>>>>>>>>>', nowRanking);
@@ -100,7 +100,7 @@ module.exports = {
         where: { gSeq },
         attributes: ['uSeq', 'guTotalScore'],
         order: [['guTotalScore', 'DESC']],
-        include: [{ model: User, attributes: ['uName'] }],
+        include: [{ model: User, attributes: ['uName', 'uSeq', 'uImg'] }],
       });
 
       console.log('토탈 랭킹>>>>>>>>>>>>>', totalRanking);

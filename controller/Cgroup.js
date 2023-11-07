@@ -407,7 +407,6 @@ exports.postGroup = async (req, res) => {
               ),
             },
             { where: { gSeq: insertOneGroup.gSeq } }
-
           );
 
           mCnt++;
@@ -649,6 +648,22 @@ exports.getGroupDetail = async (req, res) => {
 
     console.log('그룹 랭킹>>>>>>>>>>', groupRanking);
 
+    const nowScoreUserInfo = groupRanking.nowRanking.map(
+      (user) => user.tb_user
+    );
+
+    const nowRanking = groupRanking.nowRanking.filter((now) => now !== tb_user);
+
+    const totalScoreUserInfo = groupRanking.totalRanking.map(
+      (user) => user.tb_user
+    );
+
+    const totalRanking = groupRanking.nowRanking.filter(
+      (total) => total !== tb_user
+    );
+
+    const doneRates = groupRanking.doneRates;
+
     // 회원인 경우
     if (req.headers.authorization) {
       let token = req.headers.authorization.split(' ')[1];
@@ -678,7 +693,11 @@ exports.getGroupDetail = async (req, res) => {
         isJoin,
         isLeader,
         groupMission,
-        groupMember: memberArray,
+        nowRanking,
+        totalRanking,
+        nowScoreUserInfo,
+        totalScoreUserInfo,
+        doneRates,
         groupName: gName,
         groupMaxMember: gMaxMem,
         grInformation: gDesc,
@@ -692,7 +711,11 @@ exports.getGroupDetail = async (req, res) => {
       res.json({
         result: false,
         groupMission,
-        groupMember: memberArray,
+        nowRanking,
+        totalRanking,
+        nowScoreUserInfo,
+        totalScoreUserInfo,
+        doneRates,
         groupName: gName,
         grInformation: gDesc,
         groupDday: groupDday,
