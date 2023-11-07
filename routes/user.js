@@ -134,6 +134,27 @@ router.get('/mypage', authUtil, controller.getProfile);
  */
 router.patch('/mypage', controller.editProfile);
 
+/**
+ * @swagger
+ * paths:
+ *   /api/user/mypage:
+ *     delete:
+ *       summary: 회원 탈퇴
+ *       description: 회원 탈퇴
+ *       tags: [User]
+ *       security:
+ *         - bearerAuth: []
+ *       responses:
+ *         "200":
+ *           description: 회원 탈퇴 요청 성공
+ *           required: true
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/userQuitResult'
+ */
+router.delete('/mypage', controller.delUser);
+
 // 이미지 업로드 처리
 router.patch('/mypage/userImg', upload.single('image'), controller.userImg);
 router.patch(

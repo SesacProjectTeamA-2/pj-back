@@ -617,3 +617,37 @@ exports.userCoverImg = async (req, res) => {
     });
   }
 };
+
+// 회원탈퇴
+exports.delUser = async (req, res) => {
+  try {
+    // 로그인된 상태
+    if (req.headers.authorization) {
+      let token = req.headers.authorization.split(' ')[1];
+      const user = await jwt.verify(token);
+      console.log('디코딩된 유저 토큰!!', user);
+
+      await User.destroy({
+        where: { uSeq: user.uSeq },
+      });
+
+      res.json({
+        result: true,
+        message: '회원탈퇴 완료',
+      });
+
+      // 비로그인 상태
+    } else {
+      res.json({
+        result: false,
+        message: '로그인 해주세요!',
+      });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(err.statusCode || 500).send({
+      msg: err.message,
+      OK: false,
+    });
+  }
+};
