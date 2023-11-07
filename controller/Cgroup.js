@@ -364,6 +364,12 @@ exports.postGroup = async (req, res) => {
 
     const { gName, gDesc, gDday, gMaxMem, gCategory, missionArray } = req.body;
 
+    // UUID 생성
+    const uuid = uuidv4();
+
+    // UUID를 Base64로 인코딩
+    const base64 = Buffer.from(uuid, 'utf8').toString('base64');
+
     // 1) 모임 생성 → gSeq
     const insertOneGroup = await Group.create({
       gName, // 모임명
@@ -372,6 +378,7 @@ exports.postGroup = async (req, res) => {
       gMaxMem, // 최대인원
       gCategory, // 카테고리
       gCoverImg, // 커버 이미지
+      gLink: base64,
     });
 
     console.log(insertOneGroup);
@@ -865,5 +872,62 @@ exports.getGroupChat = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ isSuccess: false, msg: 'error' });
+  }
+};
+
+exports.postJoinByLink = async (req, res) => {
+  try {
+    let token = req.headers.authorization.split(' ')[1];
+    const user = await jwt.verify(token);
+    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
+
+    const uSeq = user.uSeq;
+    console.log(uSeq);
+
+    if (!token || !uSeq) {
+      res.status(401).send({
+        success: false,
+        msg: '로그인X or 비정상적인 접근',
+      });
+      return;
+    }
+    console.log('dddddddddddddddd', req.body);
+    const gLink = req.body.gLink;
+
+    const group = await Group.findOne({ where: { gLink: gLink } });
+
+    if (!group) {
+      res.status(404).json({ success: false, msg: '모임을 찾을 수 없습니다.' });
+      return;
+    }
+
+    // 사용자가 이미 해당 그룹에 속해 있는지 확인
+    const alreadyJoined = await GroupUser.findOne({
+      where: { gSeq: group.gSeq, uSeq: uSeq },
+    });
+
+    if (alreadyJoined) {
+      res.status(400).json({
+        success: false,
+        msg: '사용자는 이미 그룹에 속해 있습니다.',
+      });
+      return;
+    }
+
+    // 사용자를 그룹에 추가
+    const result = await GroupUser.create({
+      gSeq: group.gSeq,
+      uSeq: uSeq,
+      guIsLeader: 'n', // 사용자가 모임장이 아님
+    });
+
+    if (result) {
+      res.json({ success: true, msg: '모임 참여에 성공했습니다.' });
+    } else {
+      res.json({ success: false, msg: '모임 참여에 실패했습니다.' });
+    }
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, msg: 'error' });
   }
 };

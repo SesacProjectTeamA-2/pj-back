@@ -215,4 +215,33 @@ router.delete('/', authUtil, controller.deleteGroup); // 모임 삭제
 
 router.get('/chat/:gSeq', authUtil, controller.getGroupChat); // 모임(별) 채팅
 
+/**
+ * @swagger
+ * paths:
+ *   /api/group/joinByLink:
+ *     post:
+ *       summary: 링크로 모임 가입
+ *       description: 링크로 모임 가입
+ *       security:
+ *         - bearerAuth: []
+ *       tags: [Group]
+ *       requestBody:
+ *         description: 링크로 모임 가입하기 위해 필요한 정보 (모임링크)
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/postJoinByLink'
+ *       responses:
+ *         "200":
+ *           description: 모임 가입에 대한 성공 여부/메시지
+ *           required: true
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/groupApiResult'
+ */
+router.post('/joinByLink', authUtil, controller.postJoinByLink); // 링크로 모임 가입
+
+
 module.exports = router;
