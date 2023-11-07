@@ -139,3 +139,15 @@ components: # 컴포넌트 선언
           type: string
           description: 모임의 링크 (코드)
           example: ZjE0NjRlNWYtY2NkOC00YWU1LWEyN2UtMjVhMjQyM2FmMTBl
+
+        # 그냥 모임 가입할 때 필요한 req.body
+    postJoin: # POST '/api/group/join'
+      required:
+        - gSeq
+      type: object
+      description: 모임 가입 시 필요한 정보
+      properties: # req.body로 넘어온 값 정의
+        gSeq:
+          type: integer
+          description: 모임의 gSeq
+          example: 1

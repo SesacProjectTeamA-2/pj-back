@@ -243,5 +243,32 @@ router.get('/chat/:gSeq', authUtil, controller.getGroupChat); // 모임(별) 채
  */
 router.post('/joinByLink', authUtil, controller.postJoinByLink); // 링크로 모임 가입
 
+/**
+ * @swagger
+ * paths:
+ *   /api/group/join:
+ *     post:
+ *       summary: 모임 가입
+ *       description: 모임 가입
+ *       security:
+ *         - bearerAuth: []
+ *       tags: [Group]
+ *       requestBody:
+ *         description: 모임 가입하기 위해 필요한 정보
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/postJoin'
+ *       responses:
+ *         "200":
+ *           description: 모임 가입에 대한 성공 여부/메시지
+ *           required: true
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/groupApiResult'
+ */
+router.post('/join', authUtil, controller.postJoin); // 모임 가입
 
 module.exports = router;
