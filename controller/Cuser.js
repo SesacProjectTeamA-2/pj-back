@@ -589,7 +589,6 @@ exports.userImg = async (req, res) => {
 };
 
 exports.userCoverImg = async (req, res) => {
-  // uImg,
   const imageUrl = req.file.location; // 업로드된 이미지의 S3 URL
   try {
     // 로그인된 상태

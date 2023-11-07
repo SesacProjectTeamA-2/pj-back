@@ -213,4 +213,6 @@ router.patch(
  */
 router.delete('/', authUtil, controller.deleteGroup); // 모임 삭제
 
+router.get('/chat/:gSeq', authUtil, controller.getGroupChat); // 모임(별) 채팅
+
 module.exports = router;
