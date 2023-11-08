@@ -335,14 +335,14 @@ exports.getLoginGoogleRedirect = async (req, res) => {
           let redirectUrl = `${serverUrl}:${frontPort}/main`;
           redirectUrl += `?isSuccess=${false}`;
           redirectUrl += `&msg=검증되지 않은 Gmail입니다.`;
-          res.status(401).redirect(redirectUrl); // 검증(확인)된 메일 X
+          res.redirect(redirectUrl); // 검증(확인)된 메일 X
         }
       }
     } else {
       let redirectUrl = `${serverUrl}:${frontPort}/main`;
       redirectUrl += `?isSuccess=${false}`;
       redirectUrl += `&msg=해당 Gmail은 존재하지 않습니다.`;
-      res.status(401).redirect(redirectUrl); // 구글 계정 정보 존재 X
+      res.redirect(redirectUrl); // 구글 계정 정보 존재 X
     }
   } catch (err) {
     console.error(err);
