@@ -844,9 +844,7 @@ exports.joinGroup = async (req, res) => {
 exports.getGroupChat = async (req, res) => {
   try {
     const { gSeq } = req.params;
-    // let token = req.headers.authorization.split(' ')[1];
-    let token =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1TmFtZSI6ImV1bmcgZW8iLCJ1RW1haWwiOiJlb2V1bmcxMTNAZ21haWwuY29tIiwidVNlcSI6MSwiaWF0IjoxNjk5MjYxNTMxfQ.UkGZrK0HKrpbzecPL6AGmk_qLLSwG_gnLJ-1e4if0ag';
+    let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
     console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
