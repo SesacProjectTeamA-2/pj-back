@@ -107,7 +107,7 @@ exports.getGroupNotiDetail = async (req, res) => {
         },
         {
           model: GroupBoardComment,
-          attributes: ['gbcSeq'],
+          attributes: ['gbcSeq', 'gbcContent'],
           include: [
             {
               model: GroupBoard, // 댓글 작성자 정보 가져오기
@@ -244,7 +244,7 @@ exports.getGroupFreeDetail = async (req, res) => {
         },
         {
           model: GroupBoardComment,
-          attributes: ['gbcSeq'],
+          attributes: ['gbcSeq', 'gbcContent'],
           include: [
             {
               model: GroupBoard, // 댓글 작성자 정보 가져오기
@@ -385,7 +385,7 @@ exports.getGroupMissionDetail = async (req, res) => {
         },
         {
           model: GroupBoardComment,
-          attributes: ['gbcSeq'],
+          attributes: ['gbcSeq', 'gbcContent'],
           include: [
             {
               model: GroupBoard, // 댓글 작성자 정보 가져오기
