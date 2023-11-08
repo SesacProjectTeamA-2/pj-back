@@ -152,7 +152,7 @@ router.post('/', authUtil, controller.postGroup); // 모임 생성
 /**
  * @swagger
  * paths:
- *   /api/group/:
+ *   /api/group:
  *     patch:
  *       summary: 모임 수정
  *       description: 모임 수정
@@ -188,7 +188,7 @@ router.patch(
 /**
  * @swagger
  * paths:
- *   /api/group/:
+ *   /api/group:
  *     delete:
  *       summary: 모임 삭제
  *       description: 모임 삭제
@@ -290,5 +290,35 @@ router.post('/joinByLink', authUtil, controller.postJoinByLink); // 링크로 �
  *                 $ref: '#/components/schemas/groupApiResult'
  */
 router.post('/join', authUtil, controller.postJoin); // 모임 가입
+
+/**
+ * @swagger
+ * paths:
+ *   /api/group/leader/{gSeq}:
+ *     patch:
+ *       summary: 모임장 위임
+ *       description: 모임장 위임
+ *       security:
+ *         - bearerAuth: []
+ *       tags: [Group]
+ *       parameters:
+ *        - $ref: '#/components/parameters/gSeqPath'
+ *       requestBody:
+ *         description: 새로운 모임장 uSeq
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/changeGroupLeader'
+ *       responses:
+ *         "200":
+ *           description: 모임장 위임 성공 여부
+ *           required: true
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/groupApiResult'
+ */
+router.patch('/leader/:gSeq', authUtil, controller.patchLeader); // 모임장 위임
 
 module.exports = router;

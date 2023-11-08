@@ -212,7 +212,7 @@ async function changeGroupLeader(currentLeaderUSeq, gSeq, newLeaderUSeq) {
     }
     // 현재 모임의 모임장을 모임원으로 변경
     await GroupUser.update(
-      { guIsLeader: 'n' },
+      { guIsLeader: null },
       {
         where: { gSeq, uSeq: currentLeaderUSeq },
       }
@@ -292,7 +292,7 @@ exports.deleteQuitGroup = async (req, res) => {
       });
 
       if (groupMembersCount > 1) {
-        // 2명 이상 모임원이 있을 경우, 모임장 위임 / guIsLeader: 'n'로 권한 모임원으로 업데이트
+        // 2명 이상 모임원이 있을 경우, 모임장 위임 / guIsLeader: null로 권한 모임원으로 업데이트
         // 모임장 위임 로직 호출
         const newLeaderUSeq = req.body.newLeaderUSeq;
 
@@ -682,6 +682,7 @@ exports.getGroupDetail = async (req, res) => {
   try {
     const groupSeq = req.params.gSeq;
     // 모임 정보
+    console.log(groupSeq);
     const groupInfo = await Group.findOne({ where: { gSeq: groupSeq } });
 
     const { gName, gDesc, gDday, gMaxMem, gCategory, gCoverImg } = groupInfo;
@@ -1104,7 +1105,6 @@ exports.postJoin = async (req, res) => {
     const result = await GroupUser.create({
       gSeq: gSeq,
       uSeq: uSeq,
-      guIsLeader: 'n', // 사용자가 모임장이 아님
     });
 
     if (result) {
@@ -1121,5 +1121,98 @@ exports.postJoin = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.json({ success: false, msg: 'error' });
+  }
+};
+
+// PATCH '/api/group/leader/:gSeq'
+// 모임장 위임
+exports.patchLeader = async (req, res) => {
+  try {
+    let token = req.headers.authorization.split(' ')[1];
+    const user = await jwt.verify(token);
+    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
+
+    const uSeq = user.uSeq;
+    console.log(uSeq);
+
+    if (!token) {
+      res.send({
+        success: false,
+        msg: '토큰 X',
+      });
+    }
+    if (!uSeq) {
+      res.send({
+        success: false,
+        msg: '로그인X or 비정상적인 접근',
+      });
+      return;
+    }
+
+    const { gSeq } = req.params;
+
+    // 1) Group 정보 있는지 확인
+    const group = await Group.findByPk(gSeq);
+
+    if (!group) {
+      res.send({
+        success: false,
+        msg: '모임 정보를 찾을 수 없습니다.',
+      });
+      return;
+    }
+
+    // 2) 실제 모임장인지 확인
+    const isLeader = await GroupUser.findOne({
+      where: { uSeq, gSeq, guIsLeader: { [Op.eq]: 'y' } },
+    });
+
+    if (!isLeader) {
+      res.send({
+        success: false,
+        msg: '모임장 위임 실패: 유저가 해당 모임의 모임장이 아닙니다.',
+      });
+      return;
+    }
+
+    // 모임장 본인의 guIsLeader 값을 null로 수정하고
+    // 모임장으로 위임할 유저의 guIsLeader 값을 y로 수정
+    const newLeaderUSeq = req.body.newLeaderUSeq;
+
+    console.log('uSeq::::::::::::::::', uSeq);
+    if (newLeaderUSeq) {
+      const changeLeaderResult = await changeGroupLeader(
+        uSeq,
+        gSeq,
+        newLeaderUSeq
+      );
+
+      if (changeLeaderResult.success) {
+        res.status(200).send({
+          success: true,
+          msg: '모임장 위임 성공',
+        });
+        return;
+      } else {
+        res.send({
+          success: false,
+          msg: '모임장 위임 실패',
+        });
+        return;
+      }
+    } else {
+      res.send({
+        success: false,
+        msg: '모임장 위임을 할 유저의 시퀀스가 필요합니다.',
+      });
+      return;
+    }
+  } catch (error) {
+    // 기타 데이터베이스 오류
+    console.log(error);
+    res.send({
+      success: false,
+      msg: '서버 에러',
+    });
   }
 };
