@@ -680,7 +680,8 @@ function calculateDDay(targetDate) {
 // 모임 페이지 load
 exports.getGroupDetail = async (req, res) => {
   try {
-    const groupSeq = req.params.gSeq;
+    let groupSeq = req.params.gSeq;
+
     // 모임 정보
     console.log(groupSeq);
     const groupInfo = await Group.findOne({ where: { gSeq: groupSeq } });
@@ -744,7 +745,6 @@ exports.getGroupDetail = async (req, res) => {
     });
 
     const doneRates = groupRanking.doneRates;
-    console.log('그룹랭킹>>>>>>>>>>>', groupRanking);
 
     // 회원인 경우
     if (req.headers.authorization) {
@@ -752,14 +752,15 @@ exports.getGroupDetail = async (req, res) => {
       const user = await jwt.verify(token);
       console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
+      // 모임에 가입한 경우
+      let isLeader;
+      let isJoin;
+
       const groupUser = await GroupUser.findOne({
         attributes: ['guSeq', 'guIsLeader'],
         where: { gSeq: groupSeq, uSeq: user.uSeq },
       });
 
-      // 모임에 가입한 경우
-      let isLeader;
-      let isJoin;
       if (groupUser) {
         isJoin = true;
         // 모임장여부 : true/false
