@@ -1,0 +1,153 @@
+###################################################
+################## [RequestBody] ##################
+###################################################
+components: # 컴포넌트 선언
+  schemas: # 스키마 정의
+    # 모임 생성시 필요한 req.body
+    postGroup: # POST '/api/group'
+      required:
+        - gName
+        - gDesc
+        - gDday
+        - gMaxMem
+        - gCategory
+        - missionArray
+      type: object
+      description: 모임 생성 시 필요한 정보
+      properties: # req.body로 넘어온 값 정의
+        gName:
+          type: string
+          description: 모임명 (Unique)
+          example: Node 스터디 (중복 안됩니다!)
+        gDesc:
+          type: string
+          description: 모임에 대한 설명
+          example: Node.js 스터디 모임입니다!
+        gDday:
+          type: string
+          format: date-time
+          description: 모임 자체의 디데이
+          example: 2023-10-28
+        gMaxMem:
+          type: integer
+          format: int64
+          description: 모임 최대 인원
+          example: 10
+        gCategory:
+          type: string
+          description: ex = 운동 / re = 독서 / st = 스터디 / eco = 경제 / lan = 언어 / cert = 자격증 / it = IT / etc = 기타
+          example: st
+        gCoverImg:
+          type: string
+          description: 모임 커버 이미지
+          example: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSr1_J07ruu0QuBhaD6HSDkvbQdW_OOENXmiA&usqp=CAU
+        missionArray:
+          type: array
+          items:
+            type: object
+            properties:
+              mTitle:
+                type: string
+                description: 미션 제목
+                example: Node.js 강의 듣기
+              mContent:
+                type: string
+                description: 미션 내용
+                example: Node.js 강의 쳅터 1 듣고 오기
+              mLevel:
+                type: integer
+                description: 난이도에 따른 점수 부여 (상 = 5점, 중 = 3점, 하 = 1점)
+                example: 5
+
+    # 모임 수정시 필요한 req.body
+    patchGroup: # PATCH '/api/group'
+      required:
+        - gName
+        - gDesc
+        - gDday
+        - gMaxMem
+        - gCategory
+      type: object
+      description: 모임 수정 시 필요한 정보
+      properties: # req.body로 넘어온 값 정의
+        gSeq:
+          type: integer
+          format: int64
+          description: 모임 시퀀스
+          example: 1
+        gName:
+          type: string
+          description: 모임명 (Unique)
+          example: 정보처리기사 실기 대비반 (중복 안됩니다!)
+        gDesc:
+          type: string
+          description: 모임에 대한 설명
+          example: 정보처리기사 실기 대비 오프라인 모임입니다!
+        gDday:
+          type: string
+          format: date-time
+          description: 모임 자체의 디데이
+          example: 2023-10-31
+        gMaxMem:
+          type: integer
+          format: int64
+          description: 모임 최대 인원
+          example: 20
+        gCategory:
+          type: string
+          description: ex = 운동 / re = 독서 / st = 스터디 / eco = 경제 / lan = 언어 / cert = 자격증 / it = IT / etc = 기타
+          example: cert
+        gCoverImg:
+          type: string
+          description: 모임 커버 이미지
+          example: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVnwfCZtvVrf0NdXWT4YQp_aVEFlZ5-kuUfw&usqp=CAU
+
+    # 모임 삭제시 필요한 req.body
+    deleteGroup: # DELETE '/api/group'
+      required:
+        - gSeq
+      type: object
+      description: 모임 삭제 시 필요한 정보
+      properties: # req.body로 넘어온 값 정의
+        gSeq:
+          type: integer
+          format: int64
+          description: 모임 시퀀스
+          example: 1
+
+    # 모임 탈퇴 시, 모임장 위임이 필요한 경우 req.body
+    changeGroupLeader: # DELETE '/api/group/quit/:gSeq'
+      required:
+        - newLeaderUSeq
+      type: object
+      description: 모임장 위임이 필요한 경우 changeGroupLeader함수 실행을 위해 newLeaderUSeq
+      properties: # req.body로 넘어온 값 정의
+        newLeaderUSeq:
+          type: integer
+          format: int64
+          description: 새 모임장이 될 사람의 uSeq
+          example: 1
+
+    # 링크로 모임 가입할 때 필요한 req.body
+    postJoinByLink: # POST '/api/group/joinByLink'
+      required:
+        - gLink
+      type: object
+      description: 모임 링크로 가입 시 필요한 정보
+      properties: # req.body로 넘어온 값 정의
+        gLink:
+          type: string
+          description: 모임의 링크 (코드)
+          example: ZjE0NjRlNWYtY2NkOC00YWU1LWEyN2UtMjVhMjQyM2FmMTBl
+
+        # 그냥 모임 가입할 때 필요한 req.body
+    postJoin: # POST '/api/group/join'
+      required:
+        - gSeq
+      type: object
+      description: 모임 가입 시 필요한 정보
+      properties: # req.body로 넘어온 값 정의
+        gSeq:
+          type: integer
+          description: 모임의 gSeq
+          example: 1

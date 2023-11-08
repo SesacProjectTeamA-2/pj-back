@@ -1,0 +1,21 @@
+###################################################
+################## [RequestBody] ##################
+###################################################
+components: # 컴포넌트 선언
+  schemas: # 스키마 정의
+    # 미션 수정시 필요한 req.body
+    editMission: # PATCH '/api/mission/{gSeq}'
+      required:
+        - missionArray
+      type: object
+      description: 미션 수정시 필요한 정보
+      properties: # req.body로 넘어온 값 정의
+        missionArray:
+          type: array
+          description: |
+            미션 시퀀스(mSeq), 미션 제목(mTitle), 미션 내용(mContent), 난이도(mLevel)를 포함하는 객체의 배열입니다.
+          example:
+            - mSeq: 1
+              mTitle: '운동하기'
+              mContent: '일주일에 한 번 헬스장'
+              mLevel: 5

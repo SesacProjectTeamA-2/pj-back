@@ -1,0 +1,55 @@
+###################################################
+################## [Responses] ####################
+###################################################
+components:
+  schemas:
+    # 기본적인 응답 object (성공 여부, 응답 메시지)
+    commentApiResult:
+      required:
+        - status
+        - success
+        - msg
+      type: object
+      description: 기본적인 응답 object (성공 여부, 응답 메시지, 상태 코드)
+      properties:
+        status:
+          type: integer
+          description: 상태코드
+          example: 200
+        success:
+          type: boolean
+          description: 성공여부
+          example: true
+        msg:
+          type: string
+          description: 메세지
+          example: Success
+
+    # 작성한 댓글 정보
+    postCommentResult: # POST '/api/comment/create'
+      type: object
+      description: 작성한 댓글 정보
+      properties: # res.json으로 정의한 값 정의
+        gbcSeq:
+          type: integer
+          format: int64
+          description: 댓글 시퀀스
+          example: 1
+        gbcContent:
+          type: text
+          description: 댓글 내용
+          example: 댓글 내용입니다
+        gbcDepth1:
+          type: integer
+          description: 일단 기본 NULL
+          example: null
+        createdAt:
+          type: string
+          format: date-time
+          description: 댓글 작성 시간
+          example: 2023-10-28
+        updatedAt:
+          type: string
+          format: date-time
+          description: 댓글 수정 시간
+          example: 2023-10-28

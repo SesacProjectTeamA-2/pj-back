@@ -1,0 +1,150 @@
+###################################################
+################## [Responses] ####################
+###################################################
+components:
+  schemas:
+    # 모임 상세화면 정보
+    groupDetail:
+      type: object
+      description: 모임 정보
+      properties: # res.json으로 정의한 값 정의
+        result:
+          type: boolean
+          description: 회원/비회원 여부
+          example: true
+        isJoin:
+          type: boolean
+          description: 모임가입/ 비가입 여부
+          example: true
+        isLeader:
+          type: boolean
+          description: 모임장인지 여부
+          example: true
+        groupMission:
+          type: object
+          description: 모임 미션(mTitle:미션 제목, mContent:미션 내용)
+          example: { 'mTitle': '코딩', 'mContent': '코딩하기' }
+        groupMember:
+          type: array
+          description: 모임 멤버 (모임유저시퀀스/유저시퀀스/모임장여부/닉네임/이미지/캐릭터이미지)를 포함하는 객체의 배열입니다.
+          example:
+            - guSeq: 1
+              uSeq: 1
+              guIsLeader: 'y'
+              tb_user:
+                uName: 'chitty'
+                uImg: './1234/abcx'
+                uCharImg: './bdla/svhioa'
+        groupName:
+          type: string
+          description: 모임 이름
+          example: sesac
+        groupMaxMember:
+          type: integer
+          description: 모임 최대인원
+          example: 20
+        grInformation:
+          type: string
+          description: 모임 설명
+          example: 코딩모임이에요
+        groupDday:
+          type: number
+          format: date
+          description: 모임 디데이
+          example: 8
+        groupCategory:
+          type: string
+          description: ex = 운동 / re = 독서 / st = 스터디 / eco = 경제 / lan = 언어 / cert = 자격증 / it = IT / etc = 기타
+          example: ex = 운동 / re = 독서 / st = 스터디 / eco = 경제 / lan = 언어 / cert = 자격증 / it = IT / etc = 기타
+        groupRanking:
+          type: object
+          description: |
+            객체로서 nowRanking(현재랭킹), totalRanking(누적랭킹), doneRates(달성률-내림차순)를 포함합니다.
+          example:
+            nowRanking:
+              - uSeq: 1
+                guNowScore: 10
+                tb_user:
+                  uName: 'chitty'
+            totalRanking:
+              - uSeq: 1
+                guTotalScore: 30
+                tb_user:
+                  uName: 'chitty'
+            doneRates:
+              - 33.33333333333333
+
+    # 기본적인 응답 object (성공 여부, 응답 메시지)
+    groupApiResult:
+      required:
+        - isSuccess
+        - msg
+      type: object
+      description: 기본적인 응답 object (성공 여부, 응답 메시지)
+      properties: # res.json으로 정의한 값 정의
+        isSuccess:
+          type: boolean
+          description: 성공 여부
+          example: true
+        msg:
+          type: string
+          description: 응답 메시지
+          example: 성공
+
+    # 모임 array
+    groupArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/groupInfo'
+
+    # 모임 정보 object
+    groupInfo:
+      type: object
+      description: 모임 정보
+      properties: # res.json으로 정의한 값 정의
+        gSeq:
+          type: integer
+          format: int64
+          description: 모임 시퀀스
+          example: 1
+        gName:
+          type: string
+          description: 모임명 (Unique)
+          example: 정보처리기사 실기 대비반 (중복 안됩니다!)
+        gDesc:
+          type: string
+          description: 모임에 대한 설명
+          example: 정보처리기사 실기 대비 오프라인 모임입니다!
+        gDday:
+          type: string
+          format: date-time
+          description: 모임 자체의 디데이
+          example: 2023-10-31
+        gMaxMem:
+          type: integer
+          format: int64
+          description: 모임 최대 인원
+          example: 20
+        gCategory:
+          type: string
+          description: ex = 운동 / re = 독서 / st = 스터디 / eco = 경제 / lan = 언어 / cert = 자격증 / it = IT / etc = 기타
+          example: cert
+        gCoverImg:
+          type: string
+          description: 모임 커버 이미지
+          example: https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVnwfCZtvVrf0NdXWT4YQp_aVEFlZ5-kuUfw&usqp=CAU
+        gTotalScore:
+          type: integer
+          format: int64
+          description: 현재 미션 총 점수(현재 진행되는 미션에 대한 총 점수)
+          example: 15
+        createdAt:
+          type: string
+          format: date-time
+          description: 모임 생성 시간
+          example: 2023-10-28
+        updatedAt:
+          type: string
+          format: date-time
+          description: 모임 수정 시간
+          example: 2023-10-31

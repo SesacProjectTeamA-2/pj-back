@@ -1,0 +1,92 @@
+###################################################
+################## [Responses] ####################
+###################################################
+components:
+  schemas:
+    # 유저 미션 리스트
+    missionResult:
+      type: object
+      description: 유저 미션 리스트 조회
+      properties: # res.json으로 정의한 값 정의
+        result:
+          type: boolean
+          description: 로그인 여부
+          example: true
+        uName:
+          type: string
+          description: 유저 닉네임
+          example: sean
+        uCharImg:
+          type: string
+          description: 캐릭터이미지
+          example: ./1234/abcd/
+        groupInfo:
+          type: array
+          description: gSeq(그룹시퀀스), gName(그룹명), gDday(그룹 디데이 날짜)
+          example:
+            - gSeq: 1
+              gName: '새싹'
+              gDday: '2023-11-15'
+        isDone:
+          type: array
+          description: mSeq(미션시퀀스)에 대하여는 완료한 미션에 해당함.
+          example:
+            - 1
+            - 2
+            - 3
+        missionArray:
+          type: array
+          description: gSeq(그룹시퀀스), mSeq(미션시퀀스), mTitle(미션제목)
+          example:
+            - gSeq: 1
+              mSeq: 1
+              mTitle: '운동하기'
+
+    # 미션 수정에 대한 응답
+    editMissionResult:
+      type: object
+      required:
+        - result
+        - message
+      description: 미션 수정 응답
+      properties: # res.json으로 정의한 값 정의
+        result:
+          type: boolean
+          description: 수정 성공 여부
+          example: true
+        message:
+          type: string
+          description: 응답메세지('수정완료', '권한이 없어요', '로그인 해주세요!')
+          example: 수정완료
+
+    # 그룹 미션 리스트
+    groupMissionResult:
+      type: object
+      required:
+        - missionList
+        - Dday
+      description: 그룹 미션 조회(진행중인)
+      properties: # res.json으로 정의한 값 정의
+        missionList:
+          type: object
+          description:
+            [
+              mSeq: 미션시퀀스,
+              gSeq: 그룹 시퀀스,
+              mTitle: 미션 제목,
+              mContent: 미션 내용,
+              mLevel: 미션 점수,
+            ]
+          example:
+            {
+              'mSeq': 1,
+              'gSeq': 1,
+              'mTitle': '코딩',
+              'mContent': '코딩하기',
+              'mLevel': 5,
+            }
+        Dday:
+          type: number
+          format: date
+          description: 디데이 날짜
+          example: 2023-11-20

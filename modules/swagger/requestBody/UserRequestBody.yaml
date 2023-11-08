@@ -1,0 +1,56 @@
+###################################################
+################## [RequestBody] ##################
+###################################################
+components: # 컴포넌트 선언
+  schemas: # 스키마 정의
+    # 마이페이지 수정 위한 request body
+    editMypageAPI: # PATCH '/api/user/mypage'
+      required:
+        - uName
+        - uDesc
+        - uPhrase
+        - uCategory1
+        - uCategory2
+        - uCategory3
+        - uSetDday
+        - uMainDday
+        - uMainGroup
+      type: object
+      description: 모임 생성 시 필요한 정보
+      properties: # req.body로 넘어온 값 정의
+        uName:
+          type: string
+          description: 유저 닉네임 (Unique)
+          example: chungzo
+        uDesc:
+          type: string
+          description: 자기소개
+          example: 안녕하세요.
+        uPhrase:
+          type: string
+          description: 작성하지 않을 시(null), 랜덤 명언/ 작성할 경우 해당 문구 출력
+          example: I am 신뢰에요
+        uCategory1:
+          type: string
+          description: 관심분야1
+          example: ex = 운동 / re = 독서 / st = 스터디 / eco = 경제 / lan = 언어 / cert = 자격증 / it = IT / etc = 기타
+        uCategory2:
+          type: string
+          description: 관심분야2
+          example: ex = 운동 / re = 독서 / st = 스터디 / eco = 경제 / lan = 언어 / cert = 자격증 / it = IT / etc = 기타
+        uCategory3:
+          type: string
+          description: 관심분야3
+          example: ex = 운동 / re = 독서 / st = 스터디 / eco = 경제 / lan = 언어 / cert = 자격증 / it = IT / etc = 기타
+        uSetDday:
+          type: string
+          description: 대표 디데이 설정 여부/ 설정하지 않았을 경우, 빈값(null)
+          example: null
+        uMainDday:
+          type: integer
+          description: 대표모임디데이<해당 모임의 seq(gSeq)>
+          example: 2
+        uMainGroup:
+          type: integer
+          description: 대표모임 달성률<해당 모임의 seq(gSeq)>
+          example: 3

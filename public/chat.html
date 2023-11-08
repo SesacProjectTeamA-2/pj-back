@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>그룹 채팅</title>
+  </head>
+  <body>
+    <h1>채팅</h1>
+    <ul id="messages"></ul>
+    <input id="message" autocomplete="off" /><button>보내기</button>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+      // 1부터 5까지의 난수 생성
+      function getRandomNumber(min, max) {
+        // Math.random()은 0 이상 1 미만의 난수를 반환하므로
+        // 원하는 범위에 맞게 변환합니다.
+        const range = max - min + 1;
+        return Math.floor(Math.random() * range) + min;
+      }
+      const randomNum = getRandomNumber(1, 2);
+
+      const socket = io(`http://localhost:8888/`);
+      const messages = document.getElementById('messages');
+      const messageInput = document.getElementById('message');
+      const messageButton = document.querySelector('button');
+
+      // const cookie = new Cookies();
+      // const uToken = cookie.get('isUser'); // 토큰 값
+      // console.log(uToken);
+      const uSeq = 1;
+      socket.emit('login', uSeq);
+
+      messageButton.addEventListener('click', () => {
+        socket.emit('groupChat', 1);
+        socket.emit('chatMessage', messageInput.value);
+        messageInput.value = '';
+      });
+
+      socket.on('message', (msg) => {
+        console.log(msg);
+        const li = document.createElement('li');
+        li.textContent = msg;
+        messages.appendChild(li);
+      });
+    </script>
+  </body>
+</html>
