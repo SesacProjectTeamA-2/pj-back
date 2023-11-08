@@ -81,7 +81,7 @@ exports.getMission = async (req, res) => {
       const userInfo = await User.findOne({
         where: { uSeq },
       });
-      const { uName, uCharImg } = userInfo;
+      const { uName, uCharImg, uMainGroup } = userInfo;
 
       // 3. 그룹별 미션 load(), group [디데이, 모임명 - join], mission [미션 제목, 미션만료x(null)], group board[미션완료여부(y) mission join]
       const groupInfo = await GroupUser.findAll({
@@ -91,6 +91,7 @@ exports.getMission = async (req, res) => {
       });
 
       const gSeqArray = groupInfo.map((group) => group.gSeq);
+      const groupArray = groupInfo.map((user) => user.tb_group);
 
       // 그룹별 달성률
       const groupDoneRates = [];
@@ -103,28 +104,80 @@ exports.getMission = async (req, res) => {
         }
       }
 
-      const missionArray = await Mission.findAll({
-        attributes: ['mSeq', 'gSeq', 'mTitle'],
-        where: { gSeq: { [Op.in]: gSeqArray }, isExpired: { [Op.is]: null } },
-      });
-
-      const doneArray = await GroupBoard.findAll({
-        where: { gbIsDone: 'y' },
+      const doneArrays = await GroupBoard.findAll({
+        where: { uSeq, gSeq: { [Op.in]: gSeqArray } },
         attributes: ['mSeq'],
-        include: [{ model: Mission }],
       });
 
-      const isDoneArray = doneArray.map((done) => done.mSeq);
+      let missionArray;
 
-      res.json({
-        result: true,
-        uName,
-        uCharImg,
-        groupInfo,
-        isDone: isDoneArray,
-        missionArray,
-        doneRates: groupDoneRates,
-      });
+      if (doneArrays.length > 0) {
+        missionArray = await Mission.findAll({
+          attributes: ['mTitle', 'mSeq', 'gSeq'],
+          where: {
+            mSeq: { [Op.in]: doneArrays },
+            isExpired: { [Op.is]: null },
+          },
+        });
+      } else {
+        missionArray = await Mission.findAll({
+          attributes: ['mTitle', 'mSeq', 'gSeq'],
+          where: {
+            gSeq: { [Op.in]: gSeqArray },
+            isExpired: { [Op.is]: null },
+          },
+          order: [['gSeq', 'ASC']],
+        });
+      }
+
+      // const doneArray = await Mission.findAll({
+      //   attributes: ['mTitle'],
+      //   where: { isExpired: { [Op.is]: null } },
+      //   include: [{ model: GroupBoard, where: { gbIsDone: { [Op.ne]: 'y' } } }],
+      // });
+
+      // 대표그룹 달성률
+      if (uMainGroup) {
+        const groupRanking = await score.groupRanking(uMainGroup);
+
+        const nowScoreUserInfo = groupRanking.nowRanking.map(
+          (user) => user.tb_user
+        );
+
+        const nowRanking = groupRanking.nowRanking.map((item) => {
+          return {
+            uSeq: item.uSeq,
+            guNowScore: item.guNowScore,
+          };
+        });
+
+        const groupUserRates = groupRanking.doneRates;
+        console.log(groupRanking);
+        res.json({
+          result: true,
+          mainGroup: true,
+          uName,
+          uCharImg,
+          groupInfo,
+          groupArray,
+          missionArray,
+          nowScoreUserInfo,
+          nowRanking,
+          GroupRates: groupUserRates,
+          doneRates: groupDoneRates,
+        });
+      } else {
+        res.json({
+          result: true,
+          mainGroup: false,
+          uName,
+          uCharImg,
+          groupInfo,
+          groupArray,
+          missionArray,
+          doneRates: groupDoneRates,
+        });
+      }
     } else {
       res.json({ result: false, message: '로그인 해주세요!' });
     }
@@ -180,8 +233,10 @@ exports.editMission = async (req, res) => {
       });
 
       if (isLeader) {
+        console.log('미션어레이>>>>>>>>', missionArray);
         // 기존 미션 수정시
         for (let missionInfo of missionArray) {
+          console.log(missionInfo);
           if (missionInfo.mSeq) {
             await Mission.update(
               {
