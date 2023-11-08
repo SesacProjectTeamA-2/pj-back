@@ -22,17 +22,20 @@ exports.createComment = async (req, res) => {
     console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
-    console.log(uSeq);
+    const uEmail = user.uEmail;
+    const uName = user.uName;
+
+    console.log(uSeq, uEmail, uName);
 
     if (!token) {
-      res.status(401).send({
+      res.send({
         success: false,
         msg: '토큰 X',
       });
     }
 
     if (!uSeq) {
-      res.status(402).send({
+      res.send({
         success: false,
         msg: '로그인X or 비정상적인 접근',
       });
@@ -41,7 +44,7 @@ exports.createComment = async (req, res) => {
 
     // Req 데이터 Null 검사
     if (!req.body.gbcContent || !req.params.gbSeq) {
-      res.status(400).send({
+      res.send({
         success: false,
         msg: 'gbcContent가 빈 값이거나 gbSeq를 찾을 수 없음',
       });
@@ -51,7 +54,7 @@ exports.createComment = async (req, res) => {
     // 댓글이 달릴 게시글 = gbSeq
     const gbSeq = req.params.gbSeq;
     if (!gbSeq) {
-      res.status(400).send({
+      res.send({
         success: false,
         msg: 'gbSeq 값을 찾을 수 없음',
       });
@@ -61,7 +64,7 @@ exports.createComment = async (req, res) => {
     // gbSeq가 DB에 있는지 확인
     const groupBoard = await GroupBoard.findByPk(gbSeq);
     if (!groupBoard) {
-      res.status(404).send({
+      res.send({
         success: false,
         msg: '존재하지 않는 gbSeq',
       });
@@ -79,10 +82,10 @@ exports.createComment = async (req, res) => {
     res.status(200).send({
       success: true,
       msg: '게시글 댓글 생성 처리 성공',
-      data: {
-        user: uSeq,
-        gbcContent: gbcContent,
-      },
+      uSeq: uSeq,
+      uEmail: uEmail,
+      uName: uName,
+      gbcContent: gbcContent,
     });
     return;
   } catch (error) {
@@ -109,17 +112,20 @@ exports.editComment = async (req, res) => {
     console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
-    console.log(uSeq);
+    const uEmail = user.uEmail;
+    const uName = user.uName;
+
+    console.log(uSeq, uEmail, uName);
 
     if (!token) {
-      res.status(401).send({
+      res.send({
         success: false,
         msg: '토큰 X',
       });
     }
 
     if (!uSeq) {
-      res.status(402).send({
+      res.send({
         success: false,
         msg: '로그인X or 비정상적인 접근',
       });
@@ -132,7 +138,7 @@ exports.editComment = async (req, res) => {
 
     // uSeq로 게시글 소유자 여부 확인(권한 확인)
     if (beforeEdit.dataValues.uSeq !== uSeq) {
-      res.status(403).send({
+      res.send({
         success: false,
         msg: '게시글의 소유자가 아님',
       });
@@ -165,6 +171,9 @@ exports.editComment = async (req, res) => {
       isUpdated,
       result,
       msg: 'comment 업데이트 처리 성공',
+      uSeq: uSeq,
+      uEmail: uEmail,
+      uName: uName,
     });
   } catch (error) {
     // 에러 처리
@@ -185,17 +194,20 @@ exports.deleteComment = async (req, res) => {
     console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
-    console.log(uSeq);
+    const uEmail = user.uEmail;
+    const uName = user.uName;
+
+    console.log(uSeq, uEmail, uName);
 
     if (!token) {
-      res.status(401).send({
+      res.send({
         success: false,
         msg: '토큰 X',
       });
     }
 
     if (!uSeq) {
-      res.status(402).send({
+      res.send({
         success: false,
         msg: '로그인X or 비정상적인 접근',
       });
@@ -213,7 +225,7 @@ exports.deleteComment = async (req, res) => {
 
     if (!isDeleted) {
       // 삭제 실패 처리
-      res.status(404).send({
+      res.send({
         success: false,
         msg: '댓글이 삭제되지 않았습니다.',
       });
@@ -223,6 +235,9 @@ exports.deleteComment = async (req, res) => {
       res.status(200).send({
         success: true,
         msg: '댓글이 정상적으로 삭제되었습니다.',
+        uSeq: uSeq,
+        uEmail: uEmail,
+        uName: uName,
       });
     }
   } catch (error) {

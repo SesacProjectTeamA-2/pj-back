@@ -335,14 +335,14 @@ exports.getLoginGoogleRedirect = async (req, res) => {
           let redirectUrl = `${serverUrl}:${frontPort}/main`;
           redirectUrl += `?isSuccess=${false}`;
           redirectUrl += `&msg=검증되지 않은 Gmail입니다.`;
-          res.status(401).redirect(redirectUrl); // 검증(확인)된 메일 X
+          res.redirect(redirectUrl); // 검증(확인)된 메일 X
         }
       }
     } else {
       let redirectUrl = `${serverUrl}:${frontPort}/main`;
       redirectUrl += `?isSuccess=${false}`;
       redirectUrl += `&msg=해당 Gmail은 존재하지 않습니다.`;
-      res.status(401).redirect(redirectUrl); // 구글 계정 정보 존재 X
+      res.redirect(redirectUrl); // 구글 계정 정보 존재 X
     }
   } catch (err) {
     console.error(err);
@@ -367,7 +367,7 @@ exports.postRegister = async (req, res) => {
 
     // null 값 있는지 검사 : 필수값은 3개
     if (!uEmail || !uName || !uCharImg) {
-      return res.status(400).json({
+      return res.json({
         OK: false,
         msg: '입력 필드 중 하나 이상이 누락되었습니다.',
       });
@@ -378,7 +378,7 @@ exports.postRegister = async (req, res) => {
     const uNameIsDuplicate = await User.count({ where: { uName } });
 
     if (uEmailIsDuplicate || uNameIsDuplicate) {
-      return res.status(409).json({
+      return res.json({
         OK: false,
         uEmailIsDuplicate,
         uNameIsDuplicate,
@@ -417,7 +417,18 @@ exports.postRegister = async (req, res) => {
     });
     console.log(jwtToken.token);
 
-    res.status(200).send({ user: newUser, token: jwtToken.token });
+    res
+      .status(200)
+      .send({
+        uEmail: newUser.uEmail,
+        uName: newUser.uName,
+        uImg: newUser.uImg,
+        uCharImg: newUser.uCharImg,
+        uCategory1: newUser.uCategory1,
+        uCategory2: newUser.uCategory2,
+        uCategory3: newUser.uCategory3,
+        token: jwtToken.token,
+      });
   } catch (err) {
     console.log(err);
     res.status(err.statusCode || 500).send({

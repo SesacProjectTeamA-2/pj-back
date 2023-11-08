@@ -76,16 +76,19 @@ exports.getJoined = async (req, res) => {
     console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
-    console.log(uSeq);
+    const uEmail = user.uEmail;
+    const uName = user.uName;
+
+    console.log(uSeq, uEmail, uName);
 
     if (!token) {
-      res.status(401).send({
+      res.send({
         success: false,
         msg: '토큰 X',
       });
     }
     if (!uSeq) {
-      res.status(402).send({
+      res.send({
         success: false,
         msg: '로그인X or 비정상적인 접근',
       });
@@ -102,9 +105,9 @@ exports.getJoined = async (req, res) => {
       res.status(200).send({
         success: true,
         msg: '현재 참여 중인 모임이 없습니다.',
-        data: {
-          user: uSeq,
-        },
+        uSeq: uSeq,
+        uEmail: uEmail,
+        uName: uName,
       });
       return;
     }
@@ -118,9 +121,9 @@ exports.getJoined = async (req, res) => {
       success: true,
       msg: '현재 참여 중인 모임 정보 조회 성공',
       groupInfo,
-      data: {
-        user: uSeq,
-      },
+      uSeq: uSeq,
+      uEmail: uEmail,
+      uName: uName,
     });
   } catch (error) {
     // 기타 데이터베이스 오류
@@ -141,16 +144,19 @@ exports.getMade = async (req, res) => {
     console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
-    console.log(uSeq);
+    const uEmail = user.uEmail;
+    const uName = user.uName;
+
+    console.log(uSeq, uEmail, uName);
 
     if (!token) {
-      res.status(401).send({
+      res.send({
         success: false,
         msg: '토큰 X',
       });
     }
     if (!uSeq) {
-      res.status(402).send({
+      res.send({
         success: false,
         msg: '로그인X or 비정상적인 접근',
       });
@@ -167,9 +173,9 @@ exports.getMade = async (req, res) => {
       res.status(200).send({
         success: true,
         msg: '생성한 그룹이 없습니다.',
-        data: {
-          user: uSeq,
-        },
+        uSeq: uSeq,
+        uEmail: uEmail,
+        uName: uName,
       });
       return;
     }
@@ -183,9 +189,9 @@ exports.getMade = async (req, res) => {
       success: true,
       msg: '내가 생성한 그룹 정보 조회 성공',
       groupInfo,
-      data: {
-        user: uSeq,
-      },
+      uSeq: uSeq,
+      uEmail: uEmail,
+      uName: uName,
     });
   } catch (error) {
     // 기타 데이터베이스 오류
@@ -234,16 +240,19 @@ exports.deleteQuitGroup = async (req, res) => {
     console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
-    console.log(uSeq);
+    const uEmail = user.uEmail;
+    const uName = user.uName;
+
+    console.log(uSeq, uEmail, uName);
 
     if (!token) {
-      res.status(401).send({
+      res.send({
         success: false,
         msg: '토큰 X',
       });
     }
     if (!uSeq) {
-      res.status(402).send({
+      res.send({
         success: false,
         msg: '로그인X or 비정상적인 접근',
       });
@@ -258,7 +267,7 @@ exports.deleteQuitGroup = async (req, res) => {
     });
 
     if (!groupUser) {
-      res.status(404).send({
+      res.send({
         success: false,
         msg: '모임 탈퇴 실패: 유저가 해당 모임에 속해있지 않습니다.',
       });
@@ -269,7 +278,7 @@ exports.deleteQuitGroup = async (req, res) => {
     const group = await Group.findByPk(gSeq);
 
     if (!group) {
-      res.status(404).send({
+      res.send({
         success: false,
         msg: '모임 정보를 찾을 수 없습니다.',
       });
@@ -302,17 +311,20 @@ exports.deleteQuitGroup = async (req, res) => {
             res.status(200).send({
               success: true,
               msg: '모임 탈퇴 및 모임장 위임 성공',
+              uSeq: uSeq,
+              uEmail: uEmail,
+              uName: uName,
             });
             return;
           } else {
-            res.status(401).send({
+            res.send({
               success: false,
               msg: '모임장 위임 실패',
             });
             return;
           }
         } else {
-          res.status(402).send({
+          res.send({
             success: false,
             msg: 'newLeaderUSeq가 필요합니다.',
           });
@@ -329,6 +341,9 @@ exports.deleteQuitGroup = async (req, res) => {
     res.status(200).send({
       success: true,
       msg: '모임 탈퇴 성공',
+      uSeq: uSeq,
+      uEmail: uEmail,
+      uName: uName,
     });
     return;
   } catch (error) {
@@ -358,7 +373,10 @@ exports.postGroup = async (req, res) => {
     console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
-    console.log(uSeq);
+    const uEmail = user.uEmail;
+    const uName = user.uName;
+
+    console.log(uSeq, uEmail, uName);
 
     const { gName, gDesc, gDday, gMaxMem, gCategory, missionArray } = req.body;
 
@@ -417,7 +435,13 @@ exports.postGroup = async (req, res) => {
         }
 
         if (missionArray.length === mCnt) {
-          res.json({ isSuccess: true, msg: '모임 생성에 성공했습니다.' });
+          res.status(200).send({
+            isSuccess: true,
+            msg: '모임 생성에 성공했습니다.',
+            uSeq: uSeq,
+            uEmail: uEmail,
+            uName: uName,
+          });
         } else {
           res.json({ isSuccess: false, msg: '모임 생성에 실패했습니다.' });
         }
@@ -442,7 +466,10 @@ exports.patchGroup = async (req, res) => {
     console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
-    console.log(uSeq);
+    const uEmail = user.uEmail;
+    const uName = user.uName;
+
+    console.log(uSeq, uEmail, uName);
 
     const { gSeq, gName, gDesc, gDday, gMaxMem, gCategory } = req.body;
 
@@ -471,7 +498,13 @@ exports.patchGroup = async (req, res) => {
       );
 
       if (updateOneGroup) {
-        res.json({ isSuccess: true, msg: '모임 수정에 성공했습니다' });
+        res.status(200).send({
+          isSuccess: true,
+          msg: '모임 수정에 성공했습니다',
+          uSeq: uSeq,
+          uEmail: uEmail,
+          uName: uName,
+        });
       } else {
         res.json({ isSuccess: false, msg: '모임 수정에 실패했습니다' });
       }
@@ -491,8 +524,12 @@ exports.groupCoverImg = async (req, res) => {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
     console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
+
     const uSeq = user.uSeq;
-    console.log(uSeq);
+    const uEmail = user.uEmail;
+    const uName = user.uName;
+
+    console.log(uSeq, uEmail, uName);
 
     if (req.file.location) {
       const gCoverImg = req.file.location; // 업로드된 이미지의 S3 URL
@@ -518,7 +555,13 @@ exports.groupCoverImg = async (req, res) => {
             },
           }
         );
-        res.json({ isSuccess: true, msg: '모임 이미지 수정 완료' });
+        res.status(200).send({
+          isSuccess: true,
+          msg: '모임 이미지 수정 완료',
+          uSeq: uSeq,
+          uEmail: uEmail,
+          uName: uName,
+        });
       } else {
         res.json({ isSuccess: false, msg: '모임장이 아닙니다.' });
       }
@@ -553,7 +596,10 @@ exports.deleteGroup = async (req, res) => {
     console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
-    console.log(uSeq);
+    const uEmail = user.uEmail;
+    const uName = user.uName;
+
+    console.log(uSeq, uEmail, uName);
 
     const { gSeq } = req.body;
 
@@ -597,7 +643,13 @@ exports.deleteGroup = async (req, res) => {
         });
 
         if (deleteOneGroup) {
-          res.json({ isSuccess: true, msg: '모임 삭제에 성공했습니다' });
+          res.status(200).send({
+            isSuccess: true,
+            msg: '모임 삭제에 성공했습니다',
+            uSeq: uSeq,
+            uEmail: uEmail,
+            uName: uName,
+          });
         } else {
           res.json({ isSuccess: false, msg: '모임 삭제에 실패했습니다' });
         }
@@ -887,7 +939,7 @@ exports.getGroupChat = async (req, res) => {
       res.sendFile(join(__dirname, '/../public/chat.html'));
     } else {
       res
-        .status(401)
+        
         .json({ isSuccess: false, msg: '해당 모임의 인원이 아닙니다.' });
     }
   } catch (err) {
@@ -903,10 +955,13 @@ exports.postJoinByLink = async (req, res) => {
     console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
-    console.log(uSeq);
+    const uEmail = user.uEmail;
+    const uName = user.uName;
+
+    console.log(uSeq, uEmail, uName);
 
     if (!token || !uSeq) {
-      res.status(401).send({
+      res.send({
         success: false,
         msg: '로그인X or 비정상적인 접근',
       });
@@ -918,7 +973,7 @@ exports.postJoinByLink = async (req, res) => {
     const group = await Group.findOne({ where: { gLink: gLink } });
 
     if (!group) {
-      res.status(404).json({ success: false, msg: '모임을 찾을 수 없습니다.' });
+      res.json({ success: false, msg: '모임을 찾을 수 없습니다.' });
       return;
     }
 
@@ -928,7 +983,7 @@ exports.postJoinByLink = async (req, res) => {
     });
 
     if (alreadyJoined) {
-      res.status(400).json({
+      res.json({
         success: false,
         msg: '사용자는 이미 그룹에 속해 있습니다.',
       });
@@ -943,7 +998,13 @@ exports.postJoinByLink = async (req, res) => {
     });
 
     if (result) {
-      res.json({ success: true, msg: '모임 참여에 성공했습니다.' });
+      res.status(200).send({
+        success: true,
+        msg: '모임 참여에 성공했습니다.',
+        uSeq: uSeq,
+        uEmail: uEmail,
+        uName: uName,
+      });
     } else {
       res.json({ success: false, msg: '모임 참여에 실패했습니다.' });
     }
@@ -960,10 +1021,13 @@ exports.postJoin = async (req, res) => {
     console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
-    console.log(uSeq);
+    const uEmail = user.uEmail;
+    const uName = user.uName;
+
+    console.log(uSeq, uEmail, uName);
 
     if (!token || !uSeq) {
-      res.status(401).send({
+      res.send({
         success: false,
         msg: '로그인X or 비정상적인 접근',
       });
@@ -976,7 +1040,7 @@ exports.postJoin = async (req, res) => {
     const group = await Group.findOne({ where: { gSeq: gSeq } });
 
     if (!group) {
-      res.status(404).json({ success: false, msg: '모임을 찾을 수 없습니다.' });
+      res.json({ success: false, msg: '모임을 찾을 수 없습니다.' });
       return;
     }
 
@@ -986,7 +1050,7 @@ exports.postJoin = async (req, res) => {
     });
 
     if (alreadyJoined) {
-      res.status(400).json({
+      res.json({
         success: false,
         msg: '사용자는 이미 그룹에 속해 있습니다.',
       });
@@ -1001,7 +1065,13 @@ exports.postJoin = async (req, res) => {
     });
 
     if (result) {
-      res.json({ success: true, msg: '모임 참여에 성공했습니다.' });
+      res.status(200).send({
+        success: true,
+        msg: '모임 참여에 성공했습니다.',
+        uSeq: uSeq,
+        uEmail: uEmail,
+        uName: uName,
+      });
     } else {
       res.json({ success: false, msg: '모임 참여에 실패했습니다.' });
     }
