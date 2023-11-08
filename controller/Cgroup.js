@@ -938,13 +938,56 @@ exports.getGroupChat = async (req, res) => {
       const { join } = require('node:path');
       res.sendFile(join(__dirname, '/../public/chat.html'));
     } else {
-      res
-        
-        .json({ isSuccess: false, msg: '해당 모임의 인원이 아닙니다.' });
+      res.json({ isSuccess: false, msg: '해당 모임의 인원이 아닙니다.' });
     }
   } catch (err) {
     console.error(err);
     res.status(500).json({ isSuccess: false, msg: 'error' });
+  }
+};
+
+// getJoinLink
+exports.getJoinLink = async (req, res) => {
+  try {
+    const gSeq = req.params.gSeq; // 어느 그룹을 탈퇴하려고 하는지 받아오기
+
+    const groupLink = await Group.findOne({
+      where: { gSeq },
+      attributes: ['gLink'],
+    });
+
+    if (!groupLink) {
+      res.send({
+        success: false,
+        msg: '링크가 존재하지 않습니다',
+      });
+      return;
+    }
+
+    // Group 정보 있는지 한 번 더 확인
+    const group = await Group.findByPk(gSeq);
+
+    if (!group) {
+      res.send({
+        success: false,
+        msg: '모임 정보를 찾을 수 없습니다.',
+      });
+      return;
+    }
+
+    res.status(200).send({
+      success: true,
+      msg: '모임 링크 가져오기 성공',
+      gLink: groupLink.gLink, // gLink을 응답에 포함
+    });
+    return;
+  } catch (error) {
+    // 기타 데이터베이스 오류
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      msg: '서버 에러',
+    });
   }
 };
 

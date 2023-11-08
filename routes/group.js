@@ -214,6 +214,26 @@ router.patch(
 router.delete('/', authUtil, controller.deleteGroup); // 모임 삭제
 
 // router.get('/chat/:gSeq', authUtil, controller.getGroupChat); // 모임(별) 채팅
+/**
+ * @swagger
+ * paths:
+ *   /api/group/getJoinLink/{gSeq}:
+ *     get:
+ *       summary: 모임 초대 링크 가져오기
+ *       description: 모임 초대 링크 가져오기
+ *       tags: [Group]
+ *       parameters:
+ *        - $ref: '#/components/parameters/gSeqPath'
+ *       responses:
+ *         "200":
+ *           description: 모임 초대 링크 가져오기
+ *           required: true
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/groupArray'
+ */
+router.get('/getJoinLink/:gSeq', controller.getJoinLink); // 모임 초대 링크 가져오기
 
 /**
  * @swagger
