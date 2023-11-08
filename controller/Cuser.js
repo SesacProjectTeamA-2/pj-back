@@ -367,7 +367,7 @@ exports.postRegister = async (req, res) => {
 
     // null 값 있는지 검사 : 필수값은 3개
     if (!uEmail || !uName || !uCharImg) {
-      return res.status(400).json({
+      return res.json({
         OK: false,
         msg: '입력 필드 중 하나 이상이 누락되었습니다.',
       });
@@ -378,7 +378,7 @@ exports.postRegister = async (req, res) => {
     const uNameIsDuplicate = await User.count({ where: { uName } });
 
     if (uEmailIsDuplicate || uNameIsDuplicate) {
-      return res.status(409).json({
+      return res.json({
         OK: false,
         uEmailIsDuplicate,
         uNameIsDuplicate,
@@ -417,7 +417,18 @@ exports.postRegister = async (req, res) => {
     });
     console.log(jwtToken.token);
 
-    res.status(200).send({ user: newUser, token: jwtToken.token });
+    res
+      .status(200)
+      .send({
+        uEmail: newUser.uEmail,
+        uName: newUser.uName,
+        uImg: newUser.uImg,
+        uCharImg: newUser.uCharImg,
+        uCategory1: newUser.uCategory1,
+        uCategory2: newUser.uCategory2,
+        uCategory3: newUser.uCategory3,
+        token: jwtToken.token,
+      });
   } catch (err) {
     console.log(err);
     res.status(err.statusCode || 500).send({

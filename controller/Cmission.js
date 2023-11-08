@@ -139,6 +139,30 @@ exports.getGroupMission = async (req, res) => {
   const gSeq = req.params.gSeq;
 
   try {
+    let token = req.headers.authorization.split(' ')[1];
+    const user = await jwt.verify(token);
+    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
+
+    const uSeq = user.uSeq;
+    const uEmail = user.uEmail;
+    const uName = user.uName;
+
+    console.log(uSeq, uEmail, uName);
+
+    if (!token) {
+      res.send({
+        success: false,
+        msg: '토큰 X',
+      });
+    }
+    if (!uSeq) {
+      res.send({
+        success: false,
+        msg: '로그인X or 비정상적인 접근',
+      });
+      return;
+    }
+
     const missionList = await Mission.findAll({
       where: { gSeq: gSeq, isExpired: { [Op.is]: null } },
       attributes: ['mSeq', 'gSeq', 'mTitle', 'mContent', 'mLevel'],
@@ -150,9 +174,13 @@ exports.getGroupMission = async (req, res) => {
       attributes: ['gDday'],
     });
     console.log(missionList);
-    res.json({
+
+    res.status(200).send({
       missionList,
       Dday: Dday.gDday,
+      uSeq: uSeq,
+      uEmail: uEmail,
+      uName: uName,
     });
   } catch (err) {
     console.error(err);
@@ -172,6 +200,10 @@ exports.editMission = async (req, res) => {
       console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
       const uSeq = user.uSeq;
+      const uEmail = user.uEmail;
+      const uName = user.uName;
+
+      console.log(uSeq, uEmail, uName);
 
       // 모임장 여부 확인
       const isLeader = await GroupUser.findOne({
@@ -204,7 +236,15 @@ exports.editMission = async (req, res) => {
         const gDday = missionArray[0].gDday;
         await Group.update({ gDday }, { where: { gSeq } });
 
-        res.json({ result: true, message: '수정완료' });
+        res
+          .status(200)
+          .send({
+            result: true,
+            message: '수정완료',
+            uSeq: uSeq,
+            uEmail: uEmail,
+            uName: uName,
+          });
       } else {
         res.json({ result: false, message: '권한이 없어요' });
       }

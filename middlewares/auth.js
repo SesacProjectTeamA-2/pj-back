@@ -13,19 +13,19 @@ const authUtil = {
       console.log(token);
 
       // 토큰 없음
-      if (!token) return res.status(400).json({ error: '토큰 없음' });
+      if (!token) return res.json({ error: '토큰 없음' });
       // decode
       const user = await jwt.verify(token);
       console.log('디코딩 된 토큰 :', user);
       console.log(' 토큰 :', token);
       // 유효기간 만료
       if (user === TOKEN_EXPIRED)
-        return res.status(401).json({ error: '유효기간 만료된 토큰' });
+        return res.json({ error: '유효기간 만료된 토큰' });
       // 유효하지 않는 토큰
       if (user === TOKEN_INVALID)
-        return res.status(402).json({ error: '유효하지 않는 토큰' });
+        return res.json({ error: '유효하지 않는 토큰' });
       if (user.uSeq === undefined)
-        return res.status(403).json({ error: '토근 : undefined' });
+        return res.json({ error: '토근 : undefined' });
       req.uSeq = user.uSeq;
       next();
     } catch {

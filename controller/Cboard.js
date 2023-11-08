@@ -31,6 +31,16 @@ exports.getGroupNotiBoard = async (req, res) => {
           model: GroupBoardComment,
           attributes: ['gbSeq'],
         },
+        {
+          model: GroupUser,
+          attributes: ['guSeq'],
+          include: [
+            {
+              model: User,
+              attributes: ['uName', 'uImg'],
+            },
+          ],
+        },
       ],
       attributes: {
         exclude: ['tb_groupBoardComments'], // 'tb_groupBoardComments' 필드 제외->반복제거
@@ -58,13 +68,13 @@ exports.getGroupNotiBoard = async (req, res) => {
       });
     } else {
       // 게시글을 찾지 못했을 경우
-      res.status(404).send({
+      res.send({
         success: false,
         msg: '게시글을 찾을 수 없습니다.',
       });
     }
   } catch {
-    res.status(405).send({
+    res.send({
       success: false,
       msg: 'db 에러',
     });
@@ -84,7 +94,40 @@ exports.getGroupNotiDetail = async (req, res) => {
     // gSeq 및 category로 공지사항 게시글 필터링
     const groupInfo = await GroupBoard.findOne({
       where: { gSeq: gSeq, gbCategory: category, gbSeq: gbSeq },
-      include: [GroupBoardComment], // 댓글 배열형태로 가져오기
+      include: [
+        {
+          model: GroupUser,
+          attributes: ['guSeq'],
+          include: [
+            {
+              model: User,
+              attributes: ['uName', 'uImg'],
+            },
+          ],
+        },
+        {
+          model: GroupBoardComment,
+          attributes: ['gbcSeq'],
+          include: [
+            {
+              model: GroupBoard, // 댓글 작성자 정보 가져오기
+              attributes: ['gbSeq'],
+              include: [
+                {
+                  model: GroupUser,
+                  attributes: ['guSeq'],
+                  include: [
+                    {
+                      model: User,
+                      attributes: ['uName', 'uImg'],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
     });
 
     if (groupInfo) {
@@ -96,13 +139,13 @@ exports.getGroupNotiDetail = async (req, res) => {
       });
     } else {
       // 게시글을 찾지 못했을 경우
-      res.status(404).send({
+      res.send({
         success: false,
         msg: '게시글을 찾을 수 없습니다.',
       });
     }
   } catch {
-    res.status(405).send({
+    res.send({
       success: false,
       msg: 'gSeq 혹은 gbSeq를 찾을 수 없습니다.',
     });
@@ -125,99 +168,15 @@ exports.getGroupFreeBoard = async (req, res) => {
           model: GroupBoardComment,
           attributes: ['gbSeq'],
         },
-      ],
-      attributes: {
-        exclude: ['tb_groupBoardComments'], // 'tb_groupBoardComments' 필드 제외->반복제거
-      },
-    });
-
-    // groupInfo에 대한 댓글 수 가져오기
-    for (const group of groupInfo) {
-      const gbSeq = group.gbSeq;
-      const commentVal = await GroupBoardComment.findAndCountAll({
-        where: { gbSeq },
-      });
-      group.dataValues.commentCount = commentVal.count;
-      delete group.dataValues.tb_groupBoardComments;
-    }
-
-    console.log(groupInfo);
-
-    if (groupInfo) {
-      // 게시글을 찾았을 경우
-      res.status(200).send({
-        success: true,
-        msg: '게시글 조회 성공',
-        groupInfo,
-      });
-    } else {
-      // 게시글을 찾지 못했을 경우
-      res.status(404).send({
-        success: false,
-        msg: '게시글을 찾을 수 없습니다.',
-      });
-    }
-  } catch {
-    res.status(405).send({
-      success: false,
-      msg: 'gSeq를 찾을 수 없습니다.',
-    });
-  }
-};
-
-// 그룹의 자유 게시글 디테알
-exports.getGroupFreeDetail = async (req, res) => {
-  try {
-    const gSeq = req.params.gSeq;
-    const category = 'free'; // 'free' 카테고리
-    const gbSeq = req.params.gbSeq; // 게시글 고유 식별자
-
-    console.log(gSeq, '그룹의', gbSeq, '번째 글, 카테고리는', category);
-    console.log(req.params); // gSeq값
-
-    // gSeq 및 category로 공지사항 게시글 필터링
-    const groupInfo = await GroupBoard.findOne({
-      where: { gSeq: gSeq, gbCategory: category, gbSeq: gbSeq },
-      include: [GroupBoardComment], // 댓글 배열형태로 가져오기
-    });
-
-    if (groupInfo) {
-      // 게시글을 찾았을 경우
-      res.status(200).send({
-        success: true,
-        msg: '게시글 조회 성공',
-        groupInfo,
-      });
-    } else {
-      // 게시글을 찾지 못했을 경우
-      res.status(404).send({
-        success: false,
-        msg: '게시글을 찾을 수 없습니다.',
-      });
-    }
-  } catch {
-    res.status(405).send({
-      success: false,
-      msg: 'gSeq 혹은 gbSeq 를 찾을 수 없습니다.',
-    });
-  }
-};
-
-// 그룹의 미션 게시판
-exports.getGroupMissionBoard = async (req, res) => {
-  try {
-    const gSeq = req.params.gSeq;
-    const category = 'mission';
-    const mSeq = req.params.mSeq; // 클라이언트에서 요청 보낼때 query로 mSeq 값 넣어서 보내주기
-
-    console.log(gSeq, category, mSeq);
-
-    const groupInfo = await GroupBoard.findAll({
-      where: { gSeq: gSeq, gbCategory: category, mSeq: mSeq },
-      include: [
         {
-          model: GroupBoardComment,
-          attributes: ['gbSeq'],
+          model: GroupUser,
+          attributes: ['guSeq'],
+          include: [
+            {
+              model: User,
+              attributes: ['uName', 'uImg'],
+            },
+          ],
         },
       ],
       attributes: {
@@ -246,13 +205,150 @@ exports.getGroupMissionBoard = async (req, res) => {
       });
     } else {
       // 게시글을 찾지 못했을 경우
-      res.status(404).send({
+      res.send({
         success: false,
         msg: '게시글을 찾을 수 없습니다.',
       });
     }
   } catch {
-    res.status(405).send({
+    res.send({
+      success: false,
+      msg: 'gSeq를 찾을 수 없습니다.',
+    });
+  }
+};
+
+// 그룹의 자유 게시글 디테알
+exports.getGroupFreeDetail = async (req, res) => {
+  try {
+    const gSeq = req.params.gSeq;
+    const category = 'free'; // 'free' 카테고리
+    const gbSeq = req.params.gbSeq; // 게시글 고유 식별자
+
+    console.log(gSeq, '그룹의', gbSeq, '번째 글, 카테고리는', category);
+    console.log(req.params); // gSeq값
+
+    // gSeq 및 category로 공지사항 게시글 필터링
+    const groupInfo = await GroupBoard.findOne({
+      where: { gSeq: gSeq, gbCategory: category, gbSeq: gbSeq },
+      include: [
+        {
+          model: GroupUser,
+          attributes: ['guSeq'],
+          include: [
+            {
+              model: User,
+              attributes: ['uName', 'uImg'],
+            },
+          ],
+        },
+        {
+          model: GroupBoardComment,
+          attributes: ['gbcSeq'],
+          include: [
+            {
+              model: GroupBoard, // 댓글 작성자 정보 가져오기
+              attributes: ['gbSeq'],
+              include: [
+                {
+                  model: GroupUser,
+                  attributes: ['guSeq'],
+                  include: [
+                    {
+                      model: User,
+                      attributes: ['uName', 'uImg'],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    if (groupInfo) {
+      // 게시글을 찾았을 경우
+      res.status(200).send({
+        success: true,
+        msg: '게시글 조회 성공',
+        groupInfo,
+      });
+    } else {
+      // 게시글을 찾지 못했을 경우
+      res.send({
+        success: false,
+        msg: '게시글을 찾을 수 없습니다.',
+      });
+    }
+  } catch {
+    res.send({
+      success: false,
+      msg: 'gSeq 혹은 gbSeq 를 찾을 수 없습니다.',
+    });
+  }
+};
+
+// 그룹의 미션 게시판
+exports.getGroupMissionBoard = async (req, res) => {
+  try {
+    const gSeq = req.params.gSeq;
+    const category = 'mission';
+    const mSeq = req.params.mSeq; // 클라이언트에서 요청 보낼때 query로 mSeq 값 넣어서 보내주기
+
+    console.log(gSeq, category, mSeq);
+
+    const groupInfo = await GroupBoard.findAll({
+      where: { gSeq: gSeq, gbCategory: category, mSeq: mSeq },
+      include: [
+        {
+          model: GroupBoardComment,
+          attributes: ['gbSeq'],
+        },
+        {
+          model: GroupUser,
+          attributes: ['guSeq'],
+          include: [
+            {
+              model: User,
+              attributes: ['uName', 'uImg'],
+            },
+          ],
+        },
+      ],
+      attributes: {
+        exclude: ['tb_groupBoardComments'], // 'tb_groupBoardComments' 필드 제외->반복제거
+      },
+    });
+
+    // groupInfo에 대한 댓글 수 가져오기
+    for (const group of groupInfo) {
+      const gbSeq = group.gbSeq;
+      const commentVal = await GroupBoardComment.findAndCountAll({
+        where: { gbSeq },
+      });
+      group.dataValues.commentCount = commentVal.count;
+      delete group.dataValues.tb_groupBoardComments;
+    }
+
+    console.log(groupInfo);
+
+    if (groupInfo) {
+      // 게시글을 찾았을 경우
+      res.status(200).send({
+        success: true,
+        msg: '게시글 조회 성공',
+        groupInfo,
+      });
+    } else {
+      // 게시글을 찾지 못했을 경우
+      res.send({
+        success: false,
+        msg: '게시글을 찾을 수 없습니다.',
+      });
+    }
+  } catch {
+    res.send({
       success: false,
       msg: 'gSeq 혹은 mSeq를 찾을 수 없습니다.',
     });
@@ -269,9 +365,47 @@ exports.getGroupMissionDetail = async (req, res) => {
 
     console.log('getGroupMissionDetail : ', gSeq, category, mSeq, gbSeq);
 
+    // const groupInfo = await GroupBoard.findOne({
+    //   where: { gSeq: gSeq, gbCategory: category, mSeq: mSeq, gbSeq: gbSeq },
+    //   include: [GroupBoardComment], // 댓글 배열형태로 가져오기
+    // });
+    // gSeq 및 category로 공지사항 게시글 필터링
     const groupInfo = await GroupBoard.findOne({
       where: { gSeq: gSeq, gbCategory: category, mSeq: mSeq, gbSeq: gbSeq },
-      include: [GroupBoardComment], // 댓글 배열형태로 가져오기
+      include: [
+        {
+          model: GroupUser,
+          attributes: ['guSeq'],
+          include: [
+            {
+              model: User,
+              attributes: ['uName', 'uImg'],
+            },
+          ],
+        },
+        {
+          model: GroupBoardComment,
+          attributes: ['gbcSeq'],
+          include: [
+            {
+              model: GroupBoard, // 댓글 작성자 정보 가져오기
+              attributes: ['gbSeq'],
+              include: [
+                {
+                  model: GroupUser,
+                  attributes: ['guSeq'],
+                  include: [
+                    {
+                      model: User,
+                      attributes: ['uName', 'uImg'],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
     });
 
     if (groupInfo) {
@@ -283,13 +417,13 @@ exports.getGroupMissionDetail = async (req, res) => {
       });
     } else {
       // 게시글을 찾지 못했을 경우
-      res.status(404).send({
+      res.send({
         success: false,
         msg: '게시글을 찾을 수 없습니다.',
       });
     }
   } catch {
-    res.status(405).send({
+    res.send({
       success: false,
       msg: 'gSeq 혹은 mSeq를 찾을 수 없습니다.',
     });
@@ -317,16 +451,19 @@ exports.getCreateBoard = async (req, res) => {
     console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
-    console.log(uSeq);
+    const uEmail = user.uEmail;
+    const uName = user.uName;
+
+    console.log(uSeq, uEmail, uName);
 
     if (!token) {
-      res.status(401).send({
+      res.send({
         success: false,
         msg: '토큰 X',
       });
     }
     if (!uSeq) {
-      res.status(402).send({
+      res.send({
         success: false,
         msg: '로그인X or 비정상적인 접근',
       });
@@ -337,9 +474,9 @@ exports.getCreateBoard = async (req, res) => {
       success: true,
       msg: '게시글 조회 성공',
       groupInfo,
-      data: {
-        user: uSeq,
-      },
+      uSeq: uSeq,
+      uEmail: uEmail,
+      uName: uName,
     });
   } catch (error) {
     // 기타 데이터베이스 오류
@@ -369,7 +506,10 @@ exports.createBoard = async (req, res) => {
     console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
-    console.log(uSeq);
+    const uEmail = user.uEmail;
+    const uName = user.uName;
+
+    console.log(uSeq, uEmail, uName);
 
     // 클라이언트에서 요청 보낼때 body로 mSeq, gSeq, gbCategory 값 넣어서 보내주기
     const gSeq = req.body.gSeq;
@@ -378,14 +518,14 @@ exports.createBoard = async (req, res) => {
     // console.log('378번째줄 :', req.query.gbCategory);
 
     if (!token) {
-      res.status(401).send({
+      res.send({
         success: false,
         msg: '토큰 X',
       });
     }
 
     if (!uSeq) {
-      res.status(402).send({
+      res.send({
         success: false,
         msg: '로그인X or 비정상적인 접근',
       });
@@ -400,7 +540,7 @@ exports.createBoard = async (req, res) => {
     });
 
     if (!groupUser) {
-      res.status(402).send({
+      res.send({
         success: false,
         msg: '그룹에 참여한 유저 X or 비정상적인 접근',
       });
@@ -432,10 +572,10 @@ exports.createBoard = async (req, res) => {
         success: true,
         msg: '게시글 (미션) 생성 처리 성공',
         gbSeq: newBoard.dataValues.gbSeq,
-        data: {
-          user: uSeq,
-          gbSeq: newBoard.dataValues.gbSeq,
-        },
+
+        uSeq: uSeq,
+        uEmail: uEmail,
+        uName: uName,
       });
     } else if (gbCategory === 'notice' || gbCategory === 'free') {
       // DB작업
@@ -451,13 +591,12 @@ exports.createBoard = async (req, res) => {
         success: true,
         msg: '게시글 (공지, 자유) 생성 처리 성공',
         gbSeq: newBoard.dataValues.gbSeq,
-        data: {
-          user: uSeq,
-          gbSeq: newBoard.dataValues.gbSeq,
-        },
+        uSeq: uSeq,
+        uEmail: uEmail,
+        uName: uName,
       });
     } else {
-      res.status(400).send({
+      res.send({
         success: false,
         msg: '올바르지 않은 카테고리 값입니다.',
       });
@@ -486,17 +625,20 @@ exports.getEditBoard = async (req, res) => {
     console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
-    console.log(uSeq);
+    const uEmail = user.uEmail;
+    const uName = user.uName;
+
+    console.log(uSeq, uEmail, uName);
 
     if (!token) {
-      res.status(401).send({
+      res.send({
         success: false,
         msg: '토큰 X',
       });
     }
 
     if (!uSeq) {
-      res.status(402).send({
+      res.send({
         success: false,
         msg: '로그인X or 비정상적인 접근',
       });
@@ -510,7 +652,7 @@ exports.getEditBoard = async (req, res) => {
     console.log(beforeEdit.dataValues);
     // uSeq로 게시글 소유자 여부 확인(권한 확인)
     if (beforeEdit.dataValues.uSeq !== uSeq) {
-      res.status(401).send({
+      res.send({
         success: false,
         msg: '게시글의 소유자가 아님',
       });
@@ -525,6 +667,9 @@ exports.getEditBoard = async (req, res) => {
         success: true,
         userData: writerUser,
         msg: '페이지 렌더링 정상 처리',
+        uSeq: uSeq,
+        uEmail: uEmail,
+        uName: uName,
       });
     }
   } catch (error) {
@@ -553,17 +698,20 @@ exports.editBoard = async (req, res) => {
     console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
-    console.log(uSeq);
+    const uEmail = user.uEmail;
+    const uName = user.uName;
+
+    console.log(uSeq, uEmail, uName);
 
     if (!token) {
-      res.status(401).send({
+      res.send({
         success: false,
         msg: '토큰 X',
       });
     }
 
     if (!uSeq) {
-      res.status(402).send({
+      res.send({
         success: false,
         msg: '로그인X or 비정상적인 접근',
       });
@@ -576,7 +724,7 @@ exports.editBoard = async (req, res) => {
 
     // uSeq로 게시글 소유자 여부 확인(권한 확인)
     if (beforeEdit.dataValues.uSeq !== uSeq) {
-      res.status(403).send({
+      res.send({
         success: false,
         msg: '게시글의 소유자가 아님',
       });
@@ -610,6 +758,9 @@ exports.editBoard = async (req, res) => {
       isUpdated,
       result,
       msg: '게시글 업데이트 처리 성공',
+      uSeq: uSeq,
+      uEmail: uEmail,
+      uName: uName,
     });
   } catch (error) {
     // 에러 처리
@@ -639,17 +790,20 @@ exports.deleteBoard = async (req, res) => {
     console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
-    console.log(uSeq);
+    const uEmail = user.uEmail;
+    const uName = user.uName;
+
+    console.log(uSeq, uEmail, uName);
 
     if (!token) {
-      res.status(401).send({
+      res.send({
         success: false,
         msg: '토큰 X',
       });
     }
 
     if (!uSeq) {
-      res.status(402).send({
+      res.send({
         success: false,
         msg: '로그인X or 비정상적인 접근',
       });
@@ -667,7 +821,7 @@ exports.deleteBoard = async (req, res) => {
 
     if (!isDeleted) {
       // 삭제 실패 처리
-      res.status(404).send({
+      res.send({
         success: false,
         msg: '게시글이 삭제되지 않았습니다.',
       });
@@ -677,6 +831,9 @@ exports.deleteBoard = async (req, res) => {
       res.status(200).send({
         success: true,
         msg: '게시글이 정상적으로 삭제되었습니다.',
+        uSeq: uSeq,
+        uEmail: uEmail,
+        uName: uName,
       });
     }
   } catch (error) {
