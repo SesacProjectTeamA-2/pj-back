@@ -42,6 +42,20 @@ exports.createComment = async (req, res) => {
       return;
     }
 
+    const groupUser = await GroupUser.findOne({
+      where: { uSeq: uSeq },
+    });
+
+    if (!groupUser) {
+      res.send({
+        success: false,
+        msg: 'groupuser에서 해당 uSeq의 guSeq를 찾을 수 없음',
+      });
+      return;
+    }
+
+    const guSeq = groupUser.guSeq;
+
     // Req 데이터 Null 검사
     if (!req.body.gbcContent || !req.params.gbSeq) {
       res.send({
@@ -75,7 +89,7 @@ exports.createComment = async (req, res) => {
     const newComment = await GroupBoardComment.create({
       gbSeq: gbSeq,
       gbcContent: gbcContent,
-      uSeq: uSeq,
+      guSeq: guSeq,
     });
 
     // 정상 처리
@@ -136,8 +150,29 @@ exports.editComment = async (req, res) => {
     // 업데이트 전 게시글 데이터 조회
     const beforeEdit = await GroupBoardComment.findByPk(gbcSeq);
 
+    // Check if the comment to be edited exists
+    if (!beforeEdit) {
+      res.send({
+        success: false,
+        msg: '수정할 댓글을 찾을 수 없음',
+      });
+      return;
+    }
+
+    const groupUser = await GroupUser.findOne({
+      where: { uSeq: uSeq },
+    });
+
+    if (!groupUser) {
+      res.send({
+        success: false,
+        msg: 'groupuser에서 해당 uSeq의 guSeq를 찾을 수 없음',
+      });
+      return;
+    }
+
     // uSeq로 게시글 소유자 여부 확인(권한 확인)
-    if (beforeEdit.dataValues.uSeq !== uSeq) {
+    if (beforeEdit.dataValues.guSeq !== uSeq) {
       res.send({
         success: false,
         msg: '게시글의 소유자가 아님',
@@ -216,10 +251,24 @@ exports.deleteComment = async (req, res) => {
     const gbcSeq = req.params.gbcSeq;
     console.log('삭제하려는 gbcSeq : ', gbcSeq);
 
+    const groupUser = await GroupUser.findOne({
+      where: { uSeq: uSeq },
+    });
+
+    if (!groupUser) {
+      res.send({
+        success: false,
+        msg: 'groupuser에서 해당 uSeq의 guSeq를 찾을 수 없음',
+      });
+      return;
+    }
+
+    const guSeq = groupUser.guSeq;
+
     const isDeleted = await GroupBoardComment.destroy({
       where: {
         gbcSeq: gbcSeq,
-        uSeq: uSeq,
+        guSeq: guSeq,
       },
     });
 
