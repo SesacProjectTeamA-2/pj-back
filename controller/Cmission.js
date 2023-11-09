@@ -231,6 +231,19 @@ exports.getGroupMission = async (req, res) => {
       attributes: ['mSeq', 'gSeq', 'mTitle', 'createdAt', 'updatedAt'],
       group: ['mSeq', 'gSeq'],
     });
+
+    const updatedAtArray = expiredMissionList.map((dates) => {
+      const previousDate = new Date(dates.updatedAt);
+      previousDate.setDate(previousDate.getDate() - 1);
+      return previousDate.getTime(); // getTime()으로 timestamp 반환
+    });
+
+    // 현재 날짜에서 하루를 빼서 이전 날짜를 계산
+    const previousDateArray = updatedAtArray.map((updatedAt) => {
+      const updatedAtDate = new Date(updatedAt);
+      return updatedAtDate.toISOString().slice(0, 10);
+    });
+
     console.log('미션리스트>>>>', missionList);
     console.log('만료미션리스트>>>>', expiredMissionList);
 
@@ -243,6 +256,7 @@ exports.getGroupMission = async (req, res) => {
       missionList,
       gName: gName.gName,
       expiredMissionList,
+      previousDateArray,
       Dday: Dday.gDday,
       uSeq: uSeq,
       uEmail: uEmail,
