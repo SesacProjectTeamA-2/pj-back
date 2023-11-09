@@ -8,6 +8,7 @@ const TOKEN_INVALID = -2;
 const authUtil = {
   checkToken: async (req, res, next) => {
     console.log('====================================');
+    console.log(req.headers);
     try {
       var token = req.headers.authorization.split(' ')[1];
       console.log(token);

@@ -32,6 +32,8 @@ router.get('/user', authUtil, controller.getMission);
  *     get:
  *       summary: 그룹 미션 조회
  *       description: 그룹 미션 조회
+ *       security:
+ *         - bearerAuth: []
  *       tags: [Mission]
  *       parameters:
  *         - $ref: '#/components/parameters/groupSeqParamPath'
