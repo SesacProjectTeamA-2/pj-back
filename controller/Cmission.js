@@ -86,6 +86,7 @@ exports.getMission = async (req, res) => {
       const groupInfo = await GroupUser.findAll({
         where: { uSeq },
         attributes: ['gSeq'],
+        group: ['gSeq', 'guSeq'],
         include: [{ model: Group, attributes: ['gName', 'gDday'] }],
       });
 
@@ -112,15 +113,18 @@ exports.getMission = async (req, res) => {
 
       if (doneArrays.length > 0) {
         missionArray = await Mission.findAll({
-          attributes: ['mTitle', 'mSeq', 'gSeq'],
+          group: ['gSeq', 'mSeq'],
+          attributes: ['mTitle', 'gSeq', 'mSeq'],
           where: {
             mSeq: { [Op.in]: doneArrays },
             isExpired: { [Op.is]: null },
           },
+          order: [['gSeq', 'ASC']],
         });
       } else {
         missionArray = await Mission.findAll({
-          attributes: ['mTitle', 'mSeq', 'gSeq'],
+          group: ['gSeq', 'mSeq'],
+          attributes: ['mTitle', 'gSeq', 'mSeq'],
           where: {
             gSeq: { [Op.in]: gSeqArray },
             isExpired: { [Op.is]: null },
@@ -129,6 +133,17 @@ exports.getMission = async (req, res) => {
         });
       }
 
+      // 객체를 묶은 Map을 생성
+      const titleMap = missionArray.reduce((result, { mTitle, gSeq, mSeq }) => {
+        result[gSeq] = result[gSeq] || {};
+        result[gSeq][mTitle] = mSeq;
+        return result;
+      }, {});
+
+      // Map을 배열로 변환
+      const rearrangedArray = Object.values(titleMap);
+
+      console.log('미션어레이>>>>>>>>>>>>>', rearrangedArray);
       // const doneArray = await Mission.findAll({
       //   attributes: ['mTitle'],
       //   where: { isExpired: { [Op.is]: null } },
@@ -159,7 +174,7 @@ exports.getMission = async (req, res) => {
           uCharImg,
           groupInfo,
           groupArray,
-          missionArray,
+          missionArray: rearrangedArray,
           nowScoreUserInfo,
           nowRanking,
           GroupRates: groupUserRates,
@@ -241,7 +256,6 @@ exports.getGroupMission = async (req, res) => {
       ],
       group: ['mSeq', 'gSeq'],
     });
-
 
     console.log('미션리스트>>>>', missionList);
     console.log('만료미션리스트>>>>', expiredMissionList);
