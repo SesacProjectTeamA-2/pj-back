@@ -242,7 +242,6 @@ exports.getGroupMission = async (req, res) => {
       group: ['mSeq', 'gSeq'],
     });
 
-    console.log('>>>>>>>>>>>>>>>>>>>', expiredMissionList);
 
     console.log('미션리스트>>>>', missionList);
     console.log('만료미션리스트>>>>', expiredMissionList);
@@ -256,7 +255,6 @@ exports.getGroupMission = async (req, res) => {
       missionList,
       gName: gName.gName,
       expiredMissionList,
-
       Dday: Dday.gDday,
       uSeq: uSeq,
       uEmail: uEmail,
