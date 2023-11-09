@@ -24,12 +24,11 @@ const updateScore = async () => {
     const Groups = await Group.findAll({
       where: {
         gDday: {
-          [Op.gte]: previousDate.toISOString().slice(0, 10), // 이전 날짜 이후인 경우
-          [Op.lte]: currentDate.toISOString().slice(0, 10), // 현재 날짜 이전인 경우
+          [Op.eq]: sequelize.literal('DATE_SUB(CURDATE(), INTERVAL 1 DAY)'), // 현재 날짜에서 1일 추가한 날짜와 같은 경우
         },
       },
+      attributes: ['gSeq'], // '*' 대신 원하는 속성을 지정하거나 제외할 수 있음
       include: [{ model: Mission, where: { isExpired: { [Op.is]: null } } }],
-      attributes: ['gSeq'],
     });
 
     if (Groups.length > 0) {
@@ -65,7 +64,7 @@ const updateScore = async () => {
 };
 
 // 하루가 지나는 날(00:01 분에 업데이트 되도록 실행)
-cron.schedule('1 0 * * *', () => {
+cron.schedule('* * * * *', () => {
   updateScore();
 });
 
