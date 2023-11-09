@@ -64,7 +64,7 @@ const updateScore = async () => {
 };
 
 // 하루가 지나는 날(00:01 분에 업데이트 되도록 실행)
-cron.schedule('* * * * *', () => {
+cron.schedule('0 1 * * *', () => {
   updateScore();
 });
 
