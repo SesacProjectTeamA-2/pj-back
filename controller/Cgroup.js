@@ -100,6 +100,15 @@ exports.getJoined = async (req, res) => {
       where: { uSeq, guIsLeader: { [Op.ne]: 'y' } }, // 모임장은 제외 -> 생성한 모임에서 보여주도록
       attributes: ['gSeq'],
     });
+
+    const guNumber = await GroupUser.findAll({
+      where: { gSeq: { [Op.in]: groupUserList } },
+      attributes: ['guSeq'],
+      include: [{ model: Group }],
+    });
+
+    console.log(guNumber);
+
     // 참여중인 모임이 없으면
     if (!groupUserList || groupUserList.length === 0) {
       res.status(200).send({
@@ -121,6 +130,7 @@ exports.getJoined = async (req, res) => {
       success: true,
       msg: '현재 참여 중인 모임 정보 조회 성공',
       groupInfo,
+      groupUserCount: guNumber.length,
       uSeq: uSeq,
       uEmail: uEmail,
       uName: uName,
@@ -169,6 +179,12 @@ exports.getMade = async (req, res) => {
       attributes: ['gSeq'],
     });
 
+    const guNumber = await GroupUser.findAll({
+      where: { gSeq: { [Op.in]: groupList } },
+      attributes: ['guSeq'],
+      include: [{ model: Group }],
+    });
+
     if (!groupList || groupList.length === 0) {
       res.status(200).send({
         success: true,
@@ -189,6 +205,7 @@ exports.getMade = async (req, res) => {
       success: true,
       msg: '내가 생성한 그룹 정보 조회 성공',
       groupInfo,
+      groupUserCount: guNumber.length,
       uSeq: uSeq,
       uEmail: uEmail,
       uName: uName,

@@ -216,6 +216,11 @@ exports.getGroupMission = async (req, res) => {
       return;
     }
 
+    const gName = await Group.findOne({
+      where: { gSeq },
+      attributes: ['gName'],
+    });
+
     const missionList = await Mission.findAll({
       where: { gSeq: gSeq, isExpired: { [Op.is]: null } },
       attributes: ['mSeq', 'gSeq', 'mTitle', 'mContent', 'mLevel'],
@@ -237,6 +242,7 @@ exports.getGroupMission = async (req, res) => {
 
     res.status(200).send({
       missionList,
+      gName: gName.gName,
       expiredMissionList,
       Dday: Dday.gDday,
       uSeq: uSeq,
