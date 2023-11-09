@@ -119,6 +119,18 @@ GroupBoardComment.belongsTo(GroupBoard, {
   onUpdate: 'CASCADE',
 });
 
+// 6. GroupUser 1 - GroupBoardComment 다
+GroupUser.hasMany(GroupBoardComment, {
+  foreignKey: 'guSeq',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
+GroupBoardComment.belongsTo(GroupUser, {
+  foreignKey: 'guSeq',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
+
 // 9. GroupBoard 1 - GroupBoardIcon 다
 GroupBoard.hasMany(GroupBoardIcon, {
   foreignKey: 'gbSeq',
