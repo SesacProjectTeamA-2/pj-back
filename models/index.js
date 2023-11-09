@@ -117,12 +117,12 @@ GroupBoardComment.belongsTo(GroupBoard, {
 
 // 6. GroupUser 1 - GroupBoardComment 다
 GroupUser.hasMany(GroupBoardComment, {
-  foreignKey: 'uSeq',
+  foreignKey: 'guSeq',
   onDelete: 'CASCADE',
   onUpdate: 'CASCADE',
 });
 GroupBoardComment.belongsTo(GroupUser, {
-  foreignKey: 'uSeq',
+  foreignKey: 'guSeq',
   onDelete: 'CASCADE',
   onUpdate: 'CASCADE',
 });
