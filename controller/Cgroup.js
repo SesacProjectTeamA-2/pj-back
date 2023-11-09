@@ -36,7 +36,6 @@ exports.getGroups = async (req, res) => {
 
     console.log(search);
     console.log(category);
-
     const selectGroups = await Group.findAndCountAll({
       where: {
         [Op.or]: [
@@ -46,6 +45,8 @@ exports.getGroups = async (req, res) => {
           {
             gDesc: { [Op.like]: `%${search}%` },
           },
+        ],
+        [Op.and]: [
           {
             gCategory: { [Op.in]: category },
           },
@@ -100,6 +101,16 @@ exports.getJoined = async (req, res) => {
       where: { uSeq, guIsLeader: { [Op.ne]: 'y' } }, // 모임장은 제외 -> 생성한 모임에서 보여주도록
       attributes: ['gSeq'],
     });
+
+    const groups = groupUserList.map((list) => list.gSeq);
+
+    const guNumber = await GroupUser.count({
+      where: { gSeq: { [Op.in]: groups } },
+      group: ['gSeq'],
+      attributes: ['gSeq'],
+      include: [{ model: Group }],
+    });
+
     // 참여중인 모임이 없으면
     if (!groupUserList || groupUserList.length === 0) {
       res.status(200).send({
@@ -121,6 +132,7 @@ exports.getJoined = async (req, res) => {
       success: true,
       msg: '현재 참여 중인 모임 정보 조회 성공',
       groupInfo,
+      groupUserCount: guNumber,
       uSeq: uSeq,
       uEmail: uEmail,
       uName: uName,
@@ -168,6 +180,16 @@ exports.getMade = async (req, res) => {
       where: { uSeq, guIsLeader: 'y' }, // 모임장인 그룹만
       attributes: ['gSeq'],
     });
+    console.log('>///////////////////', groupList);
+
+    const groups = groupList.map((list) => list.gSeq);
+
+    const guNumber = await GroupUser.count({
+      where: { gSeq: { [Op.in]: groups } },
+      group: ['gSeq'],
+      attributes: ['gSeq'],
+      include: [{ model: Group }],
+    });
 
     if (!groupList || groupList.length === 0) {
       res.status(200).send({
@@ -189,6 +211,7 @@ exports.getMade = async (req, res) => {
       success: true,
       msg: '내가 생성한 그룹 정보 조회 성공',
       groupInfo,
+      groupUserCount: guNumber,
       uSeq: uSeq,
       uEmail: uEmail,
       uName: uName,
@@ -844,9 +867,7 @@ exports.joinGroup = async (req, res) => {
 exports.getGroupChat = async (req, res) => {
   try {
     const { gSeq } = req.params;
-    // let token = req.headers.authorization.split(' ')[1];
-    let token =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1TmFtZSI6ImV1bmcgZW8iLCJ1RW1haWwiOiJlb2V1bmcxMTNAZ21haWwuY29tIiwidVNlcSI6MSwiaWF0IjoxNjk5MjYxNTMxfQ.UkGZrK0HKrpbzecPL6AGmk_qLLSwG_gnLJ-1e4if0ag';
+    let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
     console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
