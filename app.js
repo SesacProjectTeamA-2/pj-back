@@ -87,26 +87,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// 그룹 채팅 라우트
-// app.get('/api/group/chat/:chatRoomNumber', (req, res) => {
-//   // 채팅방 번호를 가져오는 부분
-//   const chatRoomNumber = req.params.chatRoomNumber;
-//   res.sendFile(__dirname + '/index.html'); // 렌더링할 HTML 파일을 보내줄 수 있음
-// });
-
-// // Socket.IO 연결
-// io.on('connection', (socket) => {
-//   console.log('소켓 연결이 이루어졌습니다.');
-
-//   socket.on('chat message', (msg) => {
-//     io.emit('chat message', msg); // 모든 클라이언트에 메시지를 전송
-//   });
-
-//   socket.on('disconnect', () => {
-//     console.log('소켓 연결이 끊어졌습니다.');
-//   });
-// });
-
 /**
  * @path {GET} ${URL}:${PORT}/api
  * @description 모든 api는 indexRouter를 거쳐가도록 설정

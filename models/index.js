@@ -70,11 +70,13 @@ GroupBoard.belongsTo(Mission, {
 // 5. GroupUser 1 - GroupBoard 다
 GroupUser.hasMany(GroupBoard, {
   foreignKey: 'gSeq',
+  sourceKey: 'gSeq',
   onDelete: 'CASCADE',
   onUpdate: 'CASCADE',
 });
 GroupBoard.belongsTo(GroupUser, {
   foreignKey: 'gSeq',
+  targetKey: 'gSeq',
   onDelete: 'CASCADE',
   onUpdate: 'CASCADE',
 });
@@ -82,11 +84,13 @@ GroupBoard.belongsTo(GroupUser, {
 // 6. GroupUser 1 - GroupBoard 다
 GroupUser.hasMany(GroupBoard, {
   foreignKey: 'uSeq',
+  sourceKey: 'uSeq',
   onDelete: 'CASCADE',
   onUpdate: 'CASCADE',
 });
 GroupBoard.belongsTo(GroupUser, {
   foreignKey: 'uSeq',
+  targetKey: 'uSeq',
   onDelete: 'CASCADE',
   onUpdate: 'CASCADE',
 });
@@ -111,18 +115,6 @@ GroupBoard.hasMany(GroupBoardComment, {
 });
 GroupBoardComment.belongsTo(GroupBoard, {
   foreignKey: 'gbSeq',
-  onDelete: 'CASCADE',
-  onUpdate: 'CASCADE',
-});
-
-// 6. GroupUser 1 - GroupBoardComment 다
-GroupUser.hasMany(GroupBoardComment, {
-  foreignKey: 'uSeq',
-  onDelete: 'CASCADE',
-  onUpdate: 'CASCADE',
-});
-GroupBoardComment.belongsTo(GroupUser, {
-  foreignKey: 'uSeq',
   onDelete: 'CASCADE',
   onUpdate: 'CASCADE',
 });

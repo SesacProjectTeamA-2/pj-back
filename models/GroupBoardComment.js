@@ -9,6 +9,11 @@ const GroupBoardComment = (Sequelize, DataTypes) => {
         autoIncrement: true,
         comment: '댓글 시퀀스',
       },
+      uSeq: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        comment: '유저 시퀀스',
+      },
       gbcContent: {
         type: DataTypes.STRING,
         allowNull: false,
