@@ -36,7 +36,6 @@ exports.getGroups = async (req, res) => {
 
     console.log(search);
     console.log(category);
-
     const selectGroups = await Group.findAndCountAll({
       where: {
         [Op.or]: [
@@ -46,6 +45,8 @@ exports.getGroups = async (req, res) => {
           {
             gDesc: { [Op.like]: `%${search}%` },
           },
+        ],
+        [Op.and]: [
           {
             gCategory: { [Op.in]: category },
           },
