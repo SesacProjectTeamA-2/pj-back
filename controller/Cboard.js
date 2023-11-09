@@ -262,25 +262,38 @@ exports.getGroupFreeDetail = async (req, res) => {
           attributes: ['gbcSeq', 'gbcContent'],
           include: [
             {
-              model: GroupBoard, // 댓글 작성자 정보 가져오기
-              attributes: ['gbSeq'],
+              model: GroupUser,
+              attributes: ['guSeq'],
               include: [
                 {
-                  model: GroupUser,
-                  attributes: ['guSeq'],
-                  include: [
-                    {
-                      model: User,
-                      attributes: ['uName', 'uImg'],
-                    },
-                  ],
+                  model: User,
+                  attributes: ['uName', 'uImg'],
                 },
               ],
             },
           ],
+          // include: [
+          //   {
+          //     model: GroupBoard, // 댓글 작성자 정보 가져오기
+          //     attributes: ['gbSeq'],
+          //     include: [
+          //       {
+          //         model: GroupUser,
+          //         attributes: ['guSeq'],
+          //         include: [
+          //           {
+          //             model: User,
+          //             attributes: ['uName', 'uImg'],
+          //           },
+          //         ],
+          //       },
+          //     ],
+          //   },
+          // ],
         },
       ],
     });
+    console.log('groupInfo:', groupInfo);
 
     if (groupInfo) {
       // 게시글을 찾았을 경우
@@ -403,25 +416,38 @@ exports.getGroupMissionDetail = async (req, res) => {
           attributes: ['gbcSeq', 'gbcContent'],
           include: [
             {
-              model: GroupBoard, // 댓글 작성자 정보 가져오기
-              attributes: ['gbSeq'],
+              model: GroupUser,
+              attributes: ['guSeq'],
               include: [
                 {
-                  model: GroupUser,
-                  attributes: ['guSeq'],
-                  include: [
-                    {
-                      model: User,
-                      attributes: ['uName', 'uImg'],
-                    },
-                  ],
+                  model: User,
+                  attributes: ['uName', 'uImg'],
                 },
               ],
             },
           ],
+          // include: [
+          //   {
+          //     model: GroupBoard, // 댓글 작성자 정보 가져오기
+          //     attributes: ['gbSeq'],
+          //     include: [
+          //       {
+          //         model: GroupUser,
+          //         attributes: ['guSeq'],
+          //         include: [
+          //           {
+          //             model: User,
+          //             attributes: ['uName', 'uImg'],
+          //           },
+          //         ],
+          //       },
+          //     ],
+          //   },
+          // ],
         },
       ],
     });
+    console.log('groupInfo:', groupInfo);
 
     if (groupInfo) {
       // 게시글을 찾았을 경우
