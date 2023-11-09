@@ -156,7 +156,7 @@ exports.editComment = async (req, res) => {
     );
 
     // 업데이트 후 데이터 조회
-    const afterEdit = await GroupBoard.findByPk(gbcSeq);
+    const afterEdit = await GroupBoardComment.findByPk(gbcSeq);
 
     // 업데이트 전과 후의 실제 데이터 변경 여부 확인
     const hasChangedResult = hasChanged(
