@@ -228,9 +228,22 @@ exports.getGroupMission = async (req, res) => {
 
     const expiredMissionList = await Mission.findAll({
       where: { gSeq: gSeq, isExpired: 'y' },
-      attributes: ['mSeq', 'gSeq', 'mTitle', 'createdAt', 'updatedAt'],
+      attributes: [
+        'mSeq',
+        'gSeq',
+        'mTitle',
+        [sequelize.fn('YEAR', sequelize.col('createdAt')), 'createdYear'],
+        [sequelize.fn('MONTH', sequelize.col('createdAt')), 'createdMonth'],
+        [sequelize.fn('DAY', sequelize.col('createdAt')), 'createdDay'],
+        [sequelize.fn('YEAR', sequelize.col('updatedAt')), 'updatedYear'],
+        [sequelize.fn('MONTH', sequelize.col('updatedAt')), 'updatedMonth'],
+        [sequelize.fn('DAY', sequelize.col('updatedAt')), 'updatedDay'],
+      ],
       group: ['mSeq', 'gSeq'],
     });
+
+    console.log('>>>>>>>>>>>>>>>>>>>', expiredMissionList);
+
     console.log('미션리스트>>>>', missionList);
     console.log('만료미션리스트>>>>', expiredMissionList);
 
@@ -243,6 +256,7 @@ exports.getGroupMission = async (req, res) => {
       missionList,
       gName: gName.gName,
       expiredMissionList,
+
       Dday: Dday.gDday,
       uSeq: uSeq,
       uEmail: uEmail,
