@@ -216,20 +216,34 @@ exports.getGroupMission = async (req, res) => {
       return;
     }
 
+    const gName = await Group.findOne({
+      where: { gSeq },
+      attributes: ['gName'],
+    });
+
     const missionList = await Mission.findAll({
       where: { gSeq: gSeq, isExpired: { [Op.is]: null } },
       attributes: ['mSeq', 'gSeq', 'mTitle', 'mContent', 'mLevel'],
       group: ['mSeq', 'gSeq'],
     });
 
+    const expiredMissionList = await Mission.findAll({
+      where: { gSeq: gSeq, isExpired: 'y' },
+      attributes: ['mSeq', 'gSeq', 'mTitle', 'createdAt', 'updatedAt'],
+      group: ['mSeq', 'gSeq'],
+    });
+    console.log('미션리스트>>>>', missionList);
+    console.log('만료미션리스트>>>>', expiredMissionList);
+
     const Dday = await Group.findOne({
       where: { gSeq: gSeq },
       attributes: ['gDday'],
     });
-    console.log(missionList);
 
     res.status(200).send({
       missionList,
+      gName: gName.gName,
+      expiredMissionList,
       Dday: Dday.gDday,
       uSeq: uSeq,
       uEmail: uEmail,
@@ -291,15 +305,13 @@ exports.editMission = async (req, res) => {
         const gDday = missionArray[0].gDday;
         await Group.update({ gDday }, { where: { gSeq } });
 
-        res
-          .status(200)
-          .send({
-            result: true,
-            message: '수정완료',
-            uSeq: uSeq,
-            uEmail: uEmail,
-            uName: uName,
-          });
+        res.status(200).send({
+          result: true,
+          message: '수정완료',
+          uSeq: uSeq,
+          uEmail: uEmail,
+          uName: uName,
+        });
       } else {
         res.json({ result: false, message: '권한이 없어요' });
       }
