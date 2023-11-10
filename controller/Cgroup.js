@@ -1060,7 +1060,7 @@ exports.postJoinByLink = async (req, res) => {
     const result = await GroupUser.create({
       gSeq: group.gSeq,
       uSeq: uSeq,
-      guIsLeader: 'n', // 사용자가 모임장이 아님
+      guIsLeader: null, // 사용자가 모임장이 아님
     });
 
     if (result) {
