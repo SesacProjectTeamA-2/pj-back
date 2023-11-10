@@ -86,6 +86,7 @@ exports.getMission = async (req, res) => {
       const groupInfo = await GroupUser.findAll({
         where: { uSeq },
         attributes: ['gSeq'],
+        group: ['gSeq', 'guSeq'],
         include: [{ model: Group, attributes: ['gName', 'gDday'] }],
       });
 
@@ -111,24 +112,43 @@ exports.getMission = async (req, res) => {
       let missionArray;
 
       if (doneArrays.length > 0) {
-        missionArray = await Mission.findAll({
-          attributes: ['mTitle', 'mSeq', 'gSeq'],
-          where: {
-            mSeq: { [Op.in]: doneArrays },
-            isExpired: { [Op.is]: null },
-          },
-        });
-      } else {
-        missionArray = await Mission.findAll({
-          attributes: ['mTitle', 'mSeq', 'gSeq'],
+        missionArray = await Group.findAll({
+          attributes: ['gSeq', 'gName'],
           where: {
             gSeq: { [Op.in]: gSeqArray },
-            isExpired: { [Op.is]: null },
           },
+          include: [
+            {
+              model: Mission,
+              where: {
+                mSeq: { [Op.notIn]: doneArrays },
+                isExpired: { [Op.is]: null },
+              },
+              attributes: ['mTitle', , 'mSeq'],
+            },
+          ],
+          order: [['gSeq', 'ASC']],
+        });
+      } else {
+        missionArray = await Group.findAll({
+          where: {
+            gSeq: { [Op.in]: gSeqArray },
+          },
+          attributes: ['gSeq', 'gName'],
+          include: [
+            {
+              model: Mission,
+              where: {
+                isExpired: { [Op.is]: null },
+              },
+              attributes: ['mTitle', 'mSeq'],
+            },
+          ],
           order: [['gSeq', 'ASC']],
         });
       }
 
+      console.log('미션어레이>>>>>>>>>>>>>', missionArray);
       // const doneArray = await Mission.findAll({
       //   attributes: ['mTitle'],
       //   where: { isExpired: { [Op.is]: null } },
@@ -228,20 +248,18 @@ exports.getGroupMission = async (req, res) => {
 
     const expiredMissionList = await Mission.findAll({
       where: { gSeq: gSeq, isExpired: 'y' },
-      attributes: ['mSeq', 'gSeq', 'mTitle', 'createdAt', 'updatedAt'],
+      attributes: [
+        'mSeq',
+        'gSeq',
+        'mTitle',
+        [sequelize.fn('YEAR', sequelize.col('createdAt')), 'createdYear'],
+        [sequelize.fn('MONTH', sequelize.col('createdAt')), 'createdMonth'],
+        [sequelize.fn('DAY', sequelize.col('createdAt')), 'createdDay'],
+        [sequelize.fn('YEAR', sequelize.col('updatedAt')), 'updatedYear'],
+        [sequelize.fn('MONTH', sequelize.col('updatedAt')), 'updatedMonth'],
+        [sequelize.fn('DAY', sequelize.col('updatedAt')), 'updatedDay'],
+      ],
       group: ['mSeq', 'gSeq'],
-    });
-
-    const updatedAtArray = expiredMissionList.map((dates) => {
-      const previousDate = new Date(dates.updatedAt);
-      previousDate.setDate(previousDate.getDate() - 1);
-      return previousDate.getTime(); // getTime()으로 timestamp 반환
-    });
-
-    // 현재 날짜에서 하루를 빼서 이전 날짜를 계산
-    const previousDateArray = updatedAtArray.map((updatedAt) => {
-      const updatedAtDate = new Date(updatedAt);
-      return updatedAtDate.toISOString().slice(0, 10);
     });
 
     console.log('미션리스트>>>>', missionList);
@@ -256,7 +274,6 @@ exports.getGroupMission = async (req, res) => {
       missionList,
       gName: gName.gName,
       expiredMissionList,
-      previousDateArray,
       Dday: Dday.gDday,
       uSeq: uSeq,
       uEmail: uEmail,

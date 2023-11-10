@@ -110,25 +110,38 @@ exports.getGroupNotiDetail = async (req, res) => {
           attributes: ['gbcSeq', 'gbcContent'],
           include: [
             {
-              model: GroupBoard, // 댓글 작성자 정보 가져오기
-              attributes: ['gbSeq'],
+              model: GroupUser,
+              attributes: ['guSeq'],
               include: [
                 {
-                  model: GroupUser,
-                  attributes: ['guSeq'],
-                  include: [
-                    {
-                      model: User,
-                      attributes: ['uName', 'uImg'],
-                    },
-                  ],
+                  model: User,
+                  attributes: ['uName', 'uImg'],
                 },
               ],
             },
           ],
+          // include: [
+          //   {
+          //     model: GroupBoard, // 댓글 작성자 정보 가져오기
+          //     attributes: ['gbSeq'],
+          //     include: [
+          //       {
+          //         model: GroupUser,
+          //         attributes: ['guSeq'],
+          //         include: [
+          //           {
+          //             model: User,
+          //             attributes: ['uName', 'uImg'],
+          //           },
+          //         ],
+          //       },
+          //     ],
+          //   },
+          // ],
         },
       ],
     });
+    console.log('groupInfo:', groupInfo);
 
     if (groupInfo) {
       // 게시글을 찾았을 경우
@@ -144,7 +157,9 @@ exports.getGroupNotiDetail = async (req, res) => {
         msg: '게시글을 찾을 수 없습니다.',
       });
     }
-  } catch {
+  } catch (error) {
+    console.error('에러 발생:', error);
+
     res.send({
       success: false,
       msg: 'gSeq 혹은 gbSeq를 찾을 수 없습니다.',
@@ -247,25 +262,38 @@ exports.getGroupFreeDetail = async (req, res) => {
           attributes: ['gbcSeq', 'gbcContent'],
           include: [
             {
-              model: GroupBoard, // 댓글 작성자 정보 가져오기
-              attributes: ['gbSeq'],
+              model: GroupUser,
+              attributes: ['guSeq'],
               include: [
                 {
-                  model: GroupUser,
-                  attributes: ['guSeq'],
-                  include: [
-                    {
-                      model: User,
-                      attributes: ['uName', 'uImg'],
-                    },
-                  ],
+                  model: User,
+                  attributes: ['uName', 'uImg'],
                 },
               ],
             },
           ],
+          // include: [
+          //   {
+          //     model: GroupBoard, // 댓글 작성자 정보 가져오기
+          //     attributes: ['gbSeq'],
+          //     include: [
+          //       {
+          //         model: GroupUser,
+          //         attributes: ['guSeq'],
+          //         include: [
+          //           {
+          //             model: User,
+          //             attributes: ['uName', 'uImg'],
+          //           },
+          //         ],
+          //       },
+          //     ],
+          //   },
+          // ],
         },
       ],
     });
+    console.log('groupInfo:', groupInfo);
 
     if (groupInfo) {
       // 게시글을 찾았을 경우
@@ -388,25 +416,38 @@ exports.getGroupMissionDetail = async (req, res) => {
           attributes: ['gbcSeq', 'gbcContent'],
           include: [
             {
-              model: GroupBoard, // 댓글 작성자 정보 가져오기
-              attributes: ['gbSeq'],
+              model: GroupUser,
+              attributes: ['guSeq'],
               include: [
                 {
-                  model: GroupUser,
-                  attributes: ['guSeq'],
-                  include: [
-                    {
-                      model: User,
-                      attributes: ['uName', 'uImg'],
-                    },
-                  ],
+                  model: User,
+                  attributes: ['uName', 'uImg'],
                 },
               ],
             },
           ],
+          // include: [
+          //   {
+          //     model: GroupBoard, // 댓글 작성자 정보 가져오기
+          //     attributes: ['gbSeq'],
+          //     include: [
+          //       {
+          //         model: GroupUser,
+          //         attributes: ['guSeq'],
+          //         include: [
+          //           {
+          //             model: User,
+          //             attributes: ['uName', 'uImg'],
+          //           },
+          //         ],
+          //       },
+          //     ],
+          //   },
+          // ],
         },
       ],
     });
+    console.log('groupInfo:', groupInfo);
 
     if (groupInfo) {
       // 게시글을 찾았을 경우
@@ -550,7 +591,7 @@ exports.createBoard = async (req, res) => {
     console.log('uSeq의 guSeq : ', guSeq);
 
     if (gbCategory == 'mission') {
-      const mSeq = req.query.mSeq;
+      const mSeq = req.body.mSeq;
 
       // console.log('416번째줄 :', gbCategory);
       // console.log('417번째줄 :', req.query.gbCategory);

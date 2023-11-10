@@ -98,7 +98,7 @@ exports.getJoined = async (req, res) => {
 
     // uSeq로 GroupUser 테이블에서 모임에 참여 중인 gSeq 찾기
     const groupUserList = await GroupUser.findAll({
-      where: { uSeq, guIsLeader: { [Op.ne]: 'y' } }, // 모임장은 제외 -> 생성한 모임에서 보여주도록
+      where: { uSeq, guIsLeader: { [Op.is]: null } }, // 모임장은 제외 -> 생성한 모임에서 보여주도록
       attributes: ['gSeq'],
     });
 
@@ -1060,7 +1060,7 @@ exports.postJoinByLink = async (req, res) => {
     const result = await GroupUser.create({
       gSeq: group.gSeq,
       uSeq: uSeq,
-      guIsLeader: 'n', // 사용자가 모임장이 아님
+      guIsLeader: null, // 사용자가 모임장이 아님
     });
 
     if (result) {
