@@ -112,38 +112,43 @@ exports.getMission = async (req, res) => {
       let missionArray;
 
       if (doneArrays.length > 0) {
-        missionArray = await Mission.findAll({
-          group: ['gSeq', 'mSeq'],
-          attributes: ['mTitle', 'gSeq', 'mSeq'],
+        missionArray = await Group.findAll({
+          attributes: ['gSeq', 'gName'],
           where: {
-            mSeq: { [Op.in]: doneArrays },
-            isExpired: { [Op.is]: null },
+            gSeq: { [Op.in]: gSeqArray },
           },
+          include: [
+            {
+              model: Mission,
+              where: {
+                mSeq: { [Op.notIn]: doneArrays },
+                isExpired: { [Op.is]: null },
+              },
+              attributes: ['mTitle', , 'mSeq'],
+            },
+          ],
           order: [['gSeq', 'ASC']],
         });
       } else {
-        missionArray = await Mission.findAll({
-          group: ['gSeq', 'mSeq'],
-          attributes: ['mTitle', 'gSeq', 'mSeq'],
+        missionArray = await Group.findAll({
           where: {
             gSeq: { [Op.in]: gSeqArray },
-            isExpired: { [Op.is]: null },
           },
+          attributes: ['gSeq', 'gName'],
+          include: [
+            {
+              model: Mission,
+              where: {
+                isExpired: { [Op.is]: null },
+              },
+              attributes: ['mTitle', 'mSeq'],
+            },
+          ],
           order: [['gSeq', 'ASC']],
         });
       }
 
-      // 객체를 묶은 Map을 생성
-      const titleMap = missionArray.reduce((result, { mTitle, gSeq, mSeq }) => {
-        result[gSeq] = result[gSeq] || {};
-        result[gSeq][mTitle] = mSeq;
-        return result;
-      }, {});
-
-      // Map을 배열로 변환
-      const rearrangedArray = Object.values(titleMap);
-
-      console.log('미션어레이>>>>>>>>>>>>>', rearrangedArray);
+      console.log('미션어레이>>>>>>>>>>>>>', missionArray);
       // const doneArray = await Mission.findAll({
       //   attributes: ['mTitle'],
       //   where: { isExpired: { [Op.is]: null } },
@@ -174,7 +179,7 @@ exports.getMission = async (req, res) => {
           uCharImg,
           groupInfo,
           groupArray,
-          missionArray: rearrangedArray,
+          missionArray,
           nowScoreUserInfo,
           nowRanking,
           GroupRates: groupUserRates,
