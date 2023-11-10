@@ -86,6 +86,7 @@ exports.getMission = async (req, res) => {
       const groupInfo = await GroupUser.findAll({
         where: { uSeq },
         attributes: ['gSeq'],
+        group: ['gSeq', 'guSeq'],
         include: [{ model: Group, attributes: ['gName', 'gDday'] }],
       });
 
@@ -111,24 +112,43 @@ exports.getMission = async (req, res) => {
       let missionArray;
 
       if (doneArrays.length > 0) {
-        missionArray = await Mission.findAll({
-          attributes: ['mTitle', 'mSeq', 'gSeq'],
-          where: {
-            mSeq: { [Op.in]: doneArrays },
-            isExpired: { [Op.is]: null },
-          },
-        });
-      } else {
-        missionArray = await Mission.findAll({
-          attributes: ['mTitle', 'mSeq', 'gSeq'],
+        missionArray = await Group.findAll({
+          attributes: ['gSeq', 'gName'],
           where: {
             gSeq: { [Op.in]: gSeqArray },
-            isExpired: { [Op.is]: null },
           },
+          include: [
+            {
+              model: Mission,
+              where: {
+                mSeq: { [Op.notIn]: doneArrays },
+                isExpired: { [Op.is]: null },
+              },
+              attributes: ['mTitle', , 'mSeq'],
+            },
+          ],
+          order: [['gSeq', 'ASC']],
+        });
+      } else {
+        missionArray = await Group.findAll({
+          where: {
+            gSeq: { [Op.in]: gSeqArray },
+          },
+          attributes: ['gSeq', 'gName'],
+          include: [
+            {
+              model: Mission,
+              where: {
+                isExpired: { [Op.is]: null },
+              },
+              attributes: ['mTitle', 'mSeq'],
+            },
+          ],
           order: [['gSeq', 'ASC']],
         });
       }
 
+      console.log('미션어레이>>>>>>>>>>>>>', missionArray);
       // const doneArray = await Mission.findAll({
       //   attributes: ['mTitle'],
       //   where: { isExpired: { [Op.is]: null } },
@@ -241,7 +261,6 @@ exports.getGroupMission = async (req, res) => {
       ],
       group: ['mSeq', 'gSeq'],
     });
-
 
     console.log('미션리스트>>>>', missionList);
     console.log('만료미션리스트>>>>', expiredMissionList);
