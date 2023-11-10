@@ -59,7 +59,7 @@ app.use(
   //   challenge: true,
   //   users: { admin: process.env.SWAGGER_PW },
   // }),
-  // swaggerUi.serve,
+  swaggerUi.serve,
   swaggerUi.setup(specs)
 );
 
