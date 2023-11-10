@@ -54,11 +54,11 @@ app.use(cors());
 // 첫 인자로 받은 경로로 접속하면 swagger UI가 보임
 app.use(
   '/api-docs',
-  eba({
-    // swagger 로그인 설정
-    challenge: true,
-    users: { admin: process.env.SWAGGER_PW },
-  }),
+  // eba({
+  //   // swagger 로그인 설정
+  //   challenge: true,
+  //   users: { admin: process.env.SWAGGER_PW },
+  // }),
   swaggerUi.serve,
   swaggerUi.setup(specs)
 );
