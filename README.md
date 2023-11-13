@@ -5,11 +5,10 @@
 # 🧑‍🤝‍🧑 **Team Crew** - BE
 
 
-|이름|역할|
-|---|---|
-| [문영민](https://github.com/eoeung) | 개발 환경 설정, Swagger 적용 및 파일 분리 |
-| [문효진](https://github.com/jinnymoon1124) | JWT 미들웨어, 게시글 API 개발 |
-| [최태영](https://github.com/chitty12) | 유저, 미션, 모임 API 개발 |
+| [문영민](https://github.com/eoeung) | [문효진](https://github.com/jinnymoon1124) | [최태영](https://github.com/chitty12) |
+|---|---|---|
+| <img src="https://avatars.githubusercontent.com/u/134040422?v=4" width="100px" height="100px" alt="이미지 설명"> | <img src="https://avatars.githubusercontent.com/u/100422752?v=4" width="100px" height="100px" alt="이미지 설명"> | <img src="https://avatars.githubusercontent.com/u/107044870?v=4" width="100px" height="100px" alt="이미지 설명">| 
+| ㆍ개발/배포 환경 분리 설정 <br> ㆍSwagger 파일 분리 적용 <br> ㆍ구글 로그인 | ㆍJWT 미들웨어 <br> ㆍ게시글 API <br> ㆍ카카오 로그인| ㆍ유저, 미션, 모임 API <br> ㆍ네이버 로그인 |
 
 <br>
 
@@ -106,7 +105,6 @@ app.use(
 | ![image](https://github.com/SesacProjectTeamA-2/pj-back/assets/107044870/694a6129-39a3-4ed0-a3b7-54aea5938aa9) | ![image](https://github.com/SesacProjectTeamA-2/pj-back/assets/107044870/84cf5350-4b94-4717-9ed0-4b53177ec208) |
 
 
-### [!!! .env 파일 샘플 코드 바로가기 !!!](./config/sample.env)
 ## 3. 기타 API Key 값 설정
 ### 1) 소셜 로그인
 - 구글 로그인
