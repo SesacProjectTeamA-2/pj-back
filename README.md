@@ -3,12 +3,14 @@
 <br/>
 
 # 📂 **다운로드**
+
 ```bash
 # 백엔드 소스 다운로드
 $ git clone https://github.com/SesacProjectTeamA-2/pj-back.git
 ```
 
 \+ 화면에서 실행하고 싶은 경우, 진행
+
 ```bash
 # 프론트엔드 소스 다운로드
 $ git clone https://github.com/SesacProjectTeamA-2/pj-front.git
@@ -17,6 +19,7 @@ $ git clone https://github.com/SesacProjectTeamA-2/pj-front.git
 <br/>
 
 # 🛠️ **사용한 기술**
+
 [![Node][Node.js]][Node-url] <br>
 [![Express][Express]][Express-url] <br>
 [![Sequelize][Sequelize]][Sequelize-url] <br>
@@ -26,6 +29,7 @@ $ git clone https://github.com/SesacProjectTeamA-2/pj-front.git
 <br>
 
 # 📚 **주요 라이브러리**
+
 - cors
 - cross-env
 - express-basic-auth
@@ -35,21 +39,27 @@ $ git clone https://github.com/SesacProjectTeamA-2/pj-front.git
 <br>
 
 # 🚀 **ERD**
+
 - ERD 이미지 / 설명
 
 <br>
 
 # ⚙️ **개발 환경 설정**
+
 ## 1. .env 파일 설정
+
 - config 폴더 밑에 **.env**파일을 생성
+
 ```bash
 # .env 파일 생성
 $ cd pj-back
-$ touch .env 
+$ touch .env
 ```
 
 ## 2. Swagger 설정
+
 JWT를 사용해서 Bearer 토큰값이 필요한 경우, 설정해주는 부분
+
 ```javascript
 // config/swagger.js
 components: {
@@ -66,13 +76,14 @@ components: {
 <br>
 
 Swagger 로그인 설정(아이디, 비밀번호 입력)
+
 ```javascript
 app.use(
   '/api-docs', // YOUR_URL/api-docs : Swagger 호출
   eba({
     // swagger 로그인 설정
     challenge: true,
-    users: { 'YOUR_SWAGGER_ID': 'YOUR_SWAGGER_PW' }, // ID: PW
+    users: { YOUR_SWAGGER_ID: 'YOUR_SWAGGER_PW' }, // ID: PW
   }),
   swaggerUi.serve,
   swaggerUi.setup(specs)
@@ -84,6 +95,7 @@ app.use(
 <br>
 
 # 🏃‍♂️ **서버 구동**
+
 ```bash
 # git clone 이후에 실행
 $ cd pj-back
@@ -212,17 +224,77 @@ yarn install
 
 After installing all the packages we are ready to visit our other folders to work with.
 
-### 📂 **Folders in our project:**
+### 📂 **프로젝트 폴더 구조:**
 
 ```JS
----|---> configs
-   |---> controllers
-   |---> database
-   |---> middlewares
-   |---> models
-   |---> routes
-   |---> schemas
-   |---- server.js
+
+├── app.js
+├── config
+│   ├── .env
+│   ├── config.js
+│   ├── sample.env
+│   └── secretkey.js
+│
+├── controller
+│   ├── Cboard.js
+│   ├── Ccomment.js
+│   ├── Cgroup.js
+│   ├── Cmission.js
+│   └── Cuser.js
+│
+├── middlewares
+│   ├── auth.js
+│   └── imgUpload.js
+│
+├── models
+│   ├── Group.js
+│   ├── GroupBoard.js
+│   ├── GroupBoardComment.js
+│   ├── GroupBoardIcon.js
+│   ├── GroupUser.js
+│   ├── index.js
+│   ├── User.js
+│   └── Mission.js
+│
+├── modules
+│   ├── swagger
+│   │    ├── parameter
+│   │    │    ├─ path
+│   │    │    │  ├─ BoardParamPath.yaml
+│   │    │    │  └─ GroupParamPath.yaml
+│   │    │    │
+│   │    │    ├─ query
+│   │    │    │  ├─ BoardParamQuery.yaml
+│   │    │    │  ├─ GroupParamQuery.yaml
+│   │    │    │  └─ userParameter.yaml
+│   │    │    └─ GroupParameter.yaml
+│   │    │
+│   │    ├── requestBody
+│   │    │    ├─ BoardRequestBody.yaml
+│   │    │    ├─ CommentRequestBody.yaml
+│   │    │    ├─ GroupRequestBody.yaml
+│   │    │    ├─ MissionRequestBody.yaml
+│   │    │    └─ UserRequestBody.yaml
+│   │    │
+│   │    ├── response
+│   │    │    ├─ BoardRequest.yaml
+│   │    │    ├─ CommentResponse.yaml
+│   │    │    ├─ GroupResponse.yaml
+│   │    │    ├─ missionResponse.yaml
+│   │    │    └─ UseResponse.yaml
+│   │    │
+│   │    └── swagger.js
+│   │
+│   ├── jwt.js
+│   └── rankSystem.js
+│
+└── routes
+    ├── board.js
+    ├── comment.js
+    ├── group.js
+    ├── index.js
+    ├── mission.js
+    └── user.js
    // node-modules
 
 ```
@@ -257,7 +329,6 @@ After verifing account in database the user account will be verified for rest of
 ### 💁 **Forget password:**
 
 ### 💬 **Other routes, controllers, schemas, models, middlewares explore:**
-
 
 <!-- 이모지 검색 사이트 -->
 <!-- https://tools.picsart.com/text/emojis/ -->
