@@ -19,6 +19,27 @@ router.get('/login/google/redirect', controller.getLoginGoogleRedirect); // 구�
 /**
  * @swagger
  * paths:
+ *   /api/user/login/test/?testNum=testNum:
+ *     get:
+ *       summary: 테스트 계정 로그인
+ *       description: 테스트 계정 로그인
+ *       tags: [User]
+ *       parameters:
+ *         - $ref: '#/components/parameters/userLoginTest'
+ *       responses:
+ *         "200":
+ *           description: 테스트 계정 로그인
+ *           required: true
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 $ref: '#/components/schemas/userApiResult'
+ */
+router.get('/login/test', controller.getLoginTest); // 테스트 계정 로그인
+
+/**
+ * @swagger
+ * paths:
  *  /api/user/register:
  *    post:
  *      summary: "사용자 회원가입 요청"
