@@ -10,7 +10,7 @@ const { serverUrl, serverPort, frontPort, naverClientId, naverClientSecret } =
   config; // 서버 설정
 
 const { User } = require('../models');
-const { Op } = require('sequelize');
+const { Op, where } = require('sequelize');
 
 // 로그인 된 사용자인지 아닌지 판별하려면 불러와야함
 const jwt = require('../modules/jwt');
@@ -352,6 +352,61 @@ exports.getLoginGoogleRedirect = async (req, res) => {
     res.status(500).redirect(redirectUrl); // 에러
   }
 };
+
+// GET '/api/user/login/test'
+// 테스트 계정 로그인
+exports.getLoginTest = async (req, res) => {
+  try {
+    let { testNum } = req.query;
+    const whereCondition = {};
+    testNum = parseInt(testNum, 10);
+
+    if (testNum === 1) {
+      whereCondition.uEmail = 'test1@motimates.xyz';
+    } else if (testNum === 2) {
+      whereCondition.uEmail = 'test2@motimates.xyz';
+    }
+
+    const selectOneTestEmail = await User.findOne({
+      where: whereCondition,
+    });
+
+    if (selectOneTestEmail) {
+      const { uSeq, uEmail, uName, uImg } = selectOneTestEmail;
+      console.log('db에서 가져온 uSeq', uSeq);
+      console.log(uEmail, uName, uImg);
+
+      // 해당 3개의 값 가지는 토큰 생성
+      const jwtToken = await jwt.sign({
+        uSeq,
+        userName: uName,
+        userEmail: uEmail,
+      });
+      // console.log(jwtToken);
+
+      res.cookie('token', jwtToken.token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'None',
+      });
+      console.log('토큰>>>>>>>>>>>>>', jwtToken.token);
+
+      // ****************** 토큰을 들고 메인 페이지로 렌더링해야함
+      let redirectUrl = `${serverUrl}:${frontPort}/main`;
+      redirectUrl += `?userImg=${uImg}`;
+      redirectUrl += `&userName=${uName}`;
+      redirectUrl += `&userEmail=${uEmail}`;
+      redirectUrl += `&token=${jwtToken.token}`;
+      res.status(200).redirect(redirectUrl);
+    } else {
+      res.json({ isSuccess: false, msg: '테스트 계정이 없습니다.' });
+    }
+  } catch (err) {
+    console.error(err);
+    res.json({ isSuccess: false, msg: 'error' });
+  }
+};
+
 // #################################################
 // ################# [// LOGIN END] ################
 // #################################################
@@ -417,18 +472,16 @@ exports.postRegister = async (req, res) => {
     });
     console.log(jwtToken.token);
 
-    res
-      .status(200)
-      .send({
-        uEmail: newUser.uEmail,
-        uName: newUser.uName,
-        uImg: newUser.uImg,
-        uCharImg: newUser.uCharImg,
-        uCategory1: newUser.uCategory1,
-        uCategory2: newUser.uCategory2,
-        uCategory3: newUser.uCategory3,
-        token: jwtToken.token,
-      });
+    res.status(200).send({
+      uEmail: newUser.uEmail,
+      uName: newUser.uName,
+      uImg: newUser.uImg,
+      uCharImg: newUser.uCharImg,
+      uCategory1: newUser.uCategory1,
+      uCategory2: newUser.uCategory2,
+      uCategory3: newUser.uCategory3,
+      token: jwtToken.token,
+    });
   } catch (err) {
     console.log(err);
     res.status(err.statusCode || 500).send({

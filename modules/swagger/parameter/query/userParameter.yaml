@@ -1,8 +1,0 @@
-# 유저 관련 파라미터 정의
-queryPetId:
-  name: petId
-  in: path
-  required: true
-  description: The id of the pet to retrieve
-  schema:
-    type: string
