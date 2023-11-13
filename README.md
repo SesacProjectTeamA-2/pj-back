@@ -101,6 +101,12 @@ app.use(
 );
 ```
 
+|  전송 정보 예시 | 결과값 예시 |
+|---|---|
+| ![image](https://github.com/SesacProjectTeamA-2/pj-back/assets/107044870/694a6129-39a3-4ed0-a3b7-54aea5938aa9) | ![image](https://github.com/SesacProjectTeamA-2/pj-back/assets/107044870/84cf5350-4b94-4717-9ed0-4b53177ec208) |
+
+
+### [!!! .env 파일 샘플 코드 바로가기 !!!](./config/sample.env)
 ## 3. 기타 API Key 값 설정
 ### 1) 소셜 로그인
 - 구글 로그인
