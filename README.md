@@ -52,6 +52,17 @@ $ git clone https://github.com/SesacProjectTeamA-2/pj-front.git
 
 ![image](https://github.com/SesacProjectTeamA-2/pj-front/assets/86273626/887bcebc-2966-4f5e-a2fa-a0033377fe8c)
 
+
+![image](https://github.com/SesacProjectTeamA-2/pj-back/assets/107044870/f40f7ead-0afc-4d86-95c4-2f8cf8eb2c3c)
+
+|    테이블명    | 관계 및 추가 정보 |
+|----------------|-------------------|
+| group - mission | - 모임당 하나의 디데이 및 여러 미션을 설정하고 있어 1대다 관계. <br> - 미션에 대한 디데이가 지났는지 여부에 대한 데이터 저장을 위한 컬럼(isExpired) 설정. | 
+| groupBoard - groupUser | - 게시물을 작성시 해당 미션(mSeq)은 ‘미션 완료’로 간주하고(‘y’) <br> - 모임참여유저의 점수가 업데이트. <br> - 난이도 정보가 필요하여 mission Table 을 JOIN |
+| group - groupUser | - 모임의 총 점수와 모임 참여 유저의 현재점수를 사용하여 달성률 및 랭킹을 추출. <br> - 달성률/랭킹을 위한 table을 모델링하게 된다면, 구조가 복잡해지고 데이터저장을 위한 공간이 필요하므로, 반정규화 채택. |
+| groupBoard - mission | - 미션 완료 여부에 대한 컬럼을 groupBoard에 포함. 관계 테이블을 정의하면 한 번의 JOIN을 더 거치게 되어 반정규화 |
+
+
 <br>
 
 # ⚙️ **개발 환경 설정**
