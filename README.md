@@ -40,7 +40,9 @@ $ git clone https://github.com/SesacProjectTeamA-2/pj-front.git
 
 # 🚀 **ERD**
 
-- ERD 이미지 / 설명
+(https://www.erdcloud.com/d/koATx2ojGQyH5Y62S)
+![image](https://github.com/SesacProjectTeamA-2/pj-front/assets/107044870/6fa7adb1-718f-4fdb-a493-1c623120f543)
+
 
 <br>
 
