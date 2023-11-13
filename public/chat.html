@@ -33,6 +33,7 @@
       messageButton.addEventListener('click', () => {
         socket.emit('groupChat', 1);
         socket.emit('chatMessage', messageInput.value);
+        console.log('messageInput.value ::: ', messageInput.value);
         messageInput.value = '';
       });
 
