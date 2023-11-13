@@ -37,20 +37,7 @@ app.use(express.urlencoded({ extended: true }));
 // 2) cors
 app.use(cors());
 
-// 3) express-session : 세션 미사용
-// app.use(
-//   session({
-//     secret: process.env.SESSION_KEY,
-//     resave: false,
-//     saveUninitialized: true,
-//     cookie: {
-//       httpOnly: true,
-//       maxAge: 2 * 60 * 60 * 1000,
-//     },
-//   })
-// );
-
-// 4) swagger
+// 3) swagger
 // 첫 인자로 받은 경로로 접속하면 swagger UI가 보임
 app.use(
   '/api-docs',
@@ -63,7 +50,7 @@ app.use(
   swaggerUi.setup(specs)
 );
 
-// 5) socket.io
+// 4) socket.io
 // socket.io 옵션
 const options = {
   cors: {
@@ -87,17 +74,17 @@ app.use((req, res, next) => {
   next();
 });
 
+// 채팅
+app.get('/api/group/chat', (req, res) => {
+  res.sendFile(__dirname + '/public/chat.html');
+});
+
 /**
  * @path {GET} ${URL}:${PORT}/api
  * @description 모든 api는 indexRouter를 거쳐가도록 설정
  */
 const indexRouter = require('./routes');
 app.use('/api', indexRouter);
-
-// 채팅
-app.get('/api/group/chat', (req, res) => {
-  res.sendFile(__dirname + '/index.html');
-});
 
 // 에러 처리
 app.get('*', (req, res) => {
