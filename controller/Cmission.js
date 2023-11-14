@@ -131,7 +131,6 @@ exports.getMission = async (req, res) => {
           order: [['gSeq', 'ASC']],
         });
       } else {
-        console.log('111111122222222222222222211여기까지 출력');
         missionArray = await Group.findAll({
           where: {
             gSeq: { [Op.in]: gSeqArray },

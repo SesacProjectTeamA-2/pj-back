@@ -16,18 +16,28 @@ const sequelize = require('sequelize');
 module.exports = {
   currentScore: async (guSeq, mSeq) => {
     try {
-      // 게시글 작성시 => 현재 점수에 미션 난이도에 따른 점수 추가
-      const score = await Mission.findOne({
-        where: { mSeq: mSeq, isExpired: { [Op.is]: null } },
-        attributes: ['mLevel'],
+      // 이미 게시글이 작성되어있는 경우
+      const isDone = await GroupUser.findOne({
+        where: { mSeq, guSeq, gbIsDone: 'y' },
       });
+      if (isDone) {
+        console.log('게시글을 작성하여 이미 미션을 완료했습니다.');
+        return;
+      }
+      {
+        // 게시글 작성시 => 현재 점수에 미션 난이도에 따른 점수 추가
+        const score = await Mission.findOne({
+          where: { mSeq: mSeq, isExpired: { [Op.is]: null } },
+          attributes: ['mLevel'],
+        });
 
-      await GroupUser.update(
-        {
-          guNowScore: sequelize.literal(`guNowScore + ${score.mLevel}`),
-        },
-        { where: { guSeq } }
-      );
+        await GroupUser.update(
+          {
+            guNowScore: sequelize.literal(`guNowScore + ${score.mLevel}`),
+          },
+          { where: { guSeq } }
+        );
+      }
     } catch (err) {
       console.error('currentScore 에러:', err.message);
     }
