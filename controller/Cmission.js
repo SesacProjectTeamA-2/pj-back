@@ -82,7 +82,7 @@ exports.getMission = async (req, res) => {
       });
       const { uName, uCharImg, uMainGroup } = userInfo;
 
-      // 3. 그룹별 미션 load(), group [디데이, 모임명 - join], mission [미션 제목, 미션만료x(null)], group board[미션완료여부(y) mission join]
+      // 3. 모임별 미션 load(), group [디데이, 모임명 - join], mission [미션 제목, 미션만료x(null)], group board[미션완료여부(y) mission join]
       const groupInfo = await GroupUser.findAll({
         where: { uSeq },
         attributes: ['gSeq'],
@@ -92,7 +92,7 @@ exports.getMission = async (req, res) => {
       const gSeqArray = groupInfo.map((group) => group.gSeq);
       const groupArray = groupInfo.map((user) => user.tb_group);
 
-      // 그룹별 달성률
+      // 모임별 달성률
       const groupDoneRates = [];
       for (const groupSeq of gSeqArray) {
         const doneRate = await score.doneRate(groupSeq, uSeq);
@@ -103,6 +103,8 @@ exports.getMission = async (req, res) => {
           groupDoneRates.push(doneRate);
         }
       }
+
+      // 모임별 미션
       const doneArrays = await GroupBoard.findAll({
         where: { uSeq, gSeq: { [Op.in]: gSeqArray }, mSeq: { [Op.not]: null } },
 
@@ -131,7 +133,6 @@ exports.getMission = async (req, res) => {
           order: [['gSeq', 'ASC']],
         });
       } else {
-        console.log('111111122222222222222222211여기까지 출력');
         missionArray = await Group.findAll({
           where: {
             gSeq: { [Op.in]: gSeqArray },
