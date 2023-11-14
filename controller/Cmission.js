@@ -89,7 +89,6 @@ exports.getMission = async (req, res) => {
         group: ['gSeq', 'guSeq'],
         include: [{ model: Group, attributes: ['gName', 'gDday'] }],
       });
-
       const gSeqArray = groupInfo.map((group) => group.gSeq);
       const groupArray = groupInfo.map((user) => user.tb_group);
 
@@ -97,21 +96,23 @@ exports.getMission = async (req, res) => {
       const groupDoneRates = [];
       for (const groupSeq of gSeqArray) {
         const doneRate = await score.doneRate(groupSeq, uSeq);
+
         if (Array.isArray(doneRate)) {
           groupDoneRates.push(...doneRate);
         } else {
           groupDoneRates.push(doneRate);
         }
       }
-
       const doneArrays = await GroupBoard.findAll({
-        where: { uSeq, gSeq: { [Op.in]: gSeqArray } },
+        where: { uSeq, gSeq: { [Op.in]: gSeqArray }, mSeq: { [Op.not]: null } },
+
         attributes: ['mSeq'],
       });
 
       let missionArray;
 
       if (doneArrays.length > 0) {
+        const arrayValue = doneArrays.map((mseq) => mseq.mSeq);
         missionArray = await Group.findAll({
           attributes: ['gSeq', 'gName'],
           where: {
@@ -121,15 +122,16 @@ exports.getMission = async (req, res) => {
             {
               model: Mission,
               where: {
-                mSeq: { [Op.notIn]: doneArrays },
+                mSeq: { [Op.notIn]: arrayValue },
                 isExpired: { [Op.is]: null },
               },
-              attributes: ['mTitle', , 'mSeq'],
+              attributes: ['mTitle', 'mSeq'],
             },
           ],
           order: [['gSeq', 'ASC']],
         });
       } else {
+        console.log('111111122222222222222222211여기까지 출력');
         missionArray = await Group.findAll({
           where: {
             gSeq: { [Op.in]: gSeqArray },
@@ -146,6 +148,7 @@ exports.getMission = async (req, res) => {
           ],
           order: [['gSeq', 'ASC']],
         });
+        console.log('133333333333333333333여기까지 출력');
       }
 
       console.log('미션어레이>>>>>>>>>>>>>', missionArray);
