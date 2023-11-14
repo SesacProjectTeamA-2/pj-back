@@ -42,31 +42,34 @@ module.exports = {
         where: { gSeq },
         attributes: ['gTotalScore'],
       });
+      if (missionTotal.gTotalScore === 0) {
+        return 0;
+      } else {
+        if (uSeqArray.length && uSeqArray.length > 0) {
+          const userDoneRates = [];
 
-      if (uSeqArray.length > 0) {
-        const userDoneRates = [];
+          for (const uSeq of uSeqArray) {
+            const userScore = await GroupUser.findOne({
+              where: { uSeq: uSeq, gSeq },
+              attributes: ['guNowScore'],
+            });
 
-        for (const uSeq of uSeqArray) {
+            const userDoneRate =
+              (userScore.guNowScore / missionTotal.gTotalScore) * 100;
+            userDoneRates.push(userDoneRate);
+          }
+          return userDoneRates;
+        } else {
           const userScore = await GroupUser.findOne({
-            where: { uSeq: uSeq, gSeq },
+            where: { uSeq: uSeqArray, gSeq },
             attributes: ['guNowScore'],
           });
 
           const userDoneRate =
             (userScore.guNowScore / missionTotal.gTotalScore) * 100;
-          userDoneRates.push(userDoneRate);
+
+          return userDoneRate;
         }
-        return userDoneRates;
-      } else {
-        const userScore = await GroupUser.findOne({
-          where: { uSeq: uSeqArray, gSeq },
-          attributes: ['guNowScore'],
-        });
-
-        const userDoneRate =
-          (userScore.guNowScore / missionTotal.gTotalScore) * 100;
-
-        return userDoneRate;
       }
     } catch (err) {
       console.error('doneRate 에러:', err.message);

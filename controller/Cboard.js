@@ -592,7 +592,7 @@ exports.createBoard = async (req, res) => {
 
     if (gbCategory == 'mission') {
       const mSeq = req.body.mSeq;
-
+      console.log('mSeq>>>>>>>>>>>>>', mSeq);
       // console.log('416번째줄 :', gbCategory);
       // console.log('417번째줄 :', req.query.gbCategory);
 
