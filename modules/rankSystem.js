@@ -17,10 +17,11 @@ module.exports = {
   currentScore: async (guSeq, mSeq) => {
     try {
       // 이미 게시글이 작성되어있는 경우
-      console.log('여기 출력>>>>>>>>>>>>>>>>>>>');
+
       const isDone = await GroupBoard.findOne({
         where: { mSeq, guSeq, gbIsDone: 'y' },
       });
+      console.log('isDone>>>>>>>>>>>>>>>>>>>', isDone);
       if (isDone) {
         console.log('게시글을 작성하여 이미 미션을 완료했습니다.');
         return;
@@ -32,6 +33,7 @@ module.exports = {
           attributes: ['mLevel'],
         });
 
+        console.log('여기 출력>>>>>>>>>>>>>>>>>>>', score);
         await GroupUser.update(
           {
             guNowScore: sequelize.literal(`guNowScore + ${score.mLevel}`),
