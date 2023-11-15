@@ -596,6 +596,7 @@ exports.createBoard = async (req, res) => {
       // console.log('416번째줄 :', gbCategory);
       // console.log('417번째줄 :', req.query.gbCategory);
 
+      score.currentScore(guSeq, mSeq);
       // 미션이면 미션의 mSeq 있어야함
       const newBoard = await GroupBoard.create({
         gbTitle: req.body.gbTitle,
@@ -606,8 +607,6 @@ exports.createBoard = async (req, res) => {
         uSeq: uSeq,
         guSeq: guSeq,
       });
-
-      score.currentScore(guSeq, mSeq);
 
       res.status(200).send({
         success: true,
