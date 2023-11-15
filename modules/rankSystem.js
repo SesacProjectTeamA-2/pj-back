@@ -17,7 +17,8 @@ module.exports = {
   currentScore: async (guSeq, mSeq) => {
     try {
       // 이미 게시글이 작성되어있는 경우
-      const isDone = await GroupUser.findOne({
+      console.log('여기 출력>>>>>>>>>>>>>>>>>>>');
+      const isDone = await GroupBoard.findOne({
         where: { mSeq, guSeq, gbIsDone: 'y' },
       });
       if (isDone) {
