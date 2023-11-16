@@ -561,7 +561,9 @@ exports.createBoard = async (req, res) => {
     if (gbCategory == 'mission') {
       const mSeq = req.body.mSeq;
 
-      score.currentScore(guSeq, mSeq);
+      const cal = 'add';
+
+      score.currentScore(guSeq, mSeq, cal);
       // 미션이면 미션의 mSeq 있어야함
       const newBoard = await GroupBoard.create({
         gbTitle: req.body.gbTitle,
@@ -627,13 +629,10 @@ exports.getEditBoard = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     if (!token) {
       res.send({
@@ -795,12 +794,23 @@ exports.deleteBoard = async (req, res) => {
     const gbSeq = req.params.gbSeq;
     console.log('삭제하려는 gbSeq : ', gbSeq);
 
+    const boardInfo = await GroupBoard.findOne({
+      where: { gbSeq, uSeq },
+      attributes: ['mSeq', 'gbIsDone', 'guSeq'],
+    });
+
     const isDeleted = await GroupBoard.destroy({
       where: {
         gbSeq: gbSeq,
         uSeq: uSeq,
       },
     });
+
+    // 미션글일경우 - 현재점수하락(게시글이 여러개일경우처리는 rankSystem 내재)
+    if (boardInfo.mSeq) {
+      const cal = 'del';
+      score.currentScore(boardInfo.guSeq, boardInfo.mSeq, cal);
+    }
 
     if (!isDeleted) {
       // 삭제 실패 처리

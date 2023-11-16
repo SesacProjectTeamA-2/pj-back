@@ -14,7 +14,7 @@ const Op = require('sequelize').Op;
 const sequelize = require('sequelize');
 
 module.exports = {
-  currentScore: async (guSeq, mSeq) => {
+  currentScore: async (guSeq, mSeq, cal) => {
     try {
       // 이미 게시글이 작성되어있는 경우
 
@@ -27,18 +27,34 @@ module.exports = {
         return;
       }
       {
-        // 게시글 작성시 => 현재 점수에 미션 난이도에 따른 점수 추가
+        // 게시글 작성시 => 현재 점수에 미션 난이도에 따른 점수 추가/감소
         const score = await Mission.findOne({
           where: { mSeq: mSeq, isExpired: { [Op.is]: null } },
           attributes: ['mLevel'],
         });
 
-        await GroupUser.update(
-          {
-            guNowScore: sequelize.literal(`guNowScore + ${score.mLevel}`),
-          },
-          { where: { guSeq } }
-        );
+        switch (cal) {
+          case 'add':
+            await GroupUser.update(
+              {
+                guNowScore: sequelize.literal(`guNowScore + ${score.mLevel}`),
+              },
+              { where: { guSeq } }
+            );
+            console.log('점수 합산 완료!');
+            break;
+          case 'del':
+            await GroupUser.update(
+              {
+                guNowScore: sequelize.literal(`guNowScore - ${score.mLevel}`),
+              },
+              { where: { guSeq } }
+            );
+            console.log('점수 감소!');
+            break;
+          default:
+            console.log('add/del 아닌 잘못된 접근입니다');
+        }
       }
     } catch (err) {
       console.error('currentScore 에러:', err.message);
