@@ -27,7 +27,7 @@ const updateScore = async () => {
           [Op.eq]: sequelize.literal('DATE_SUB(CURDATE(), INTERVAL 1 DAY)'), // 현재 날짜에서 1일 추가한 날짜와 같은 경우
         },
       },
-      attributes: ['gSeq'], // '*' 대신 원하는 속성을 지정하거나 제외할 수 있음
+      attributes: ['gSeq'],
       include: [{ model: Mission, where: { isExpired: { [Op.is]: null } } }],
     });
 
@@ -149,15 +149,7 @@ exports.getMission = async (req, res) => {
           ],
           order: [['gSeq', 'ASC']],
         });
-        console.log('133333333333333333333여기까지 출력');
       }
-
-      console.log('미션어레이>>>>>>>>>>>>>', missionArray);
-      // const doneArray = await Mission.findAll({
-      //   attributes: ['mTitle'],
-      //   where: { isExpired: { [Op.is]: null } },
-      //   include: [{ model: GroupBoard, where: { gbIsDone: { [Op.ne]: 'y' } } }],
-      // });
 
       // 대표그룹 달성률
       if (uMainGroup) {
@@ -175,7 +167,6 @@ exports.getMission = async (req, res) => {
         });
 
         const groupUserRates = groupRanking.doneRates;
-        console.log(groupRanking);
         res.json({
           result: true,
           mainGroup: true,
@@ -217,13 +208,10 @@ exports.getGroupMission = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     if (!token) {
       res.send({
@@ -266,9 +254,6 @@ exports.getGroupMission = async (req, res) => {
       group: ['mSeq', 'gSeq'],
     });
 
-    console.log('미션리스트>>>>', missionList);
-    console.log('만료미션리스트>>>>', expiredMissionList);
-
     const Dday = await Group.findOne({
       where: { gSeq: gSeq },
       attributes: ['gDday'],
@@ -298,13 +283,10 @@ exports.editMission = async (req, res) => {
     if (req.headers.authorization) {
       let token = req.headers.authorization.split(' ')[1];
       const user = await jwt.verify(token);
-      console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
       const uSeq = user.uSeq;
       const uEmail = user.uEmail;
       const uName = user.uName;
-
-      console.log(uSeq, uEmail, uName);
 
       // 모임장 여부 확인
       const isLeader = await GroupUser.findOne({
@@ -313,10 +295,8 @@ exports.editMission = async (req, res) => {
       });
 
       if (isLeader) {
-        console.log('미션어레이>>>>>>>>', missionArray);
         // 기존 미션 수정시
         for (let missionInfo of missionArray) {
-          console.log(missionInfo);
           if (missionInfo.mSeq) {
             await Mission.update(
               {

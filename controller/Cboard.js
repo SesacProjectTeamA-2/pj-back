@@ -16,13 +16,11 @@ const score = require('../modules/rankSystem');
 
 // 그룹의 공지 게시판
 exports.getGroupNotiBoard = async (req, res) => {
-  //   const gSeq = req.query.gSeq; // 클라이언트에서 보낸 gSeq
   try {
     const gSeq = req.params.gSeq;
     const category = 'notice';
 
     console.log(gSeq, category);
-    console.log(req.params); // gSeq값
 
     const groupInfo = await GroupBoard.findAll({
       where: { gSeq, gbCategory: category },
@@ -57,8 +55,6 @@ exports.getGroupNotiBoard = async (req, res) => {
       delete group.dataValues.tb_groupBoardComments;
     }
 
-    console.log(groupInfo);
-
     if (groupInfo) {
       // 게시글을 찾았을 경우
       res.status(200).send({
@@ -89,7 +85,6 @@ exports.getGroupNotiDetail = async (req, res) => {
     const gbSeq = req.params.gbSeq; // 게시글 고유 식별자
 
     console.log(gSeq, '그룹의', gbSeq, '번째 글, 카테고리는', category);
-    console.log(req.params); // gSeq값
 
     // gSeq 및 category로 공지사항 게시글 필터링
     const groupInfo = await GroupBoard.findOne({
@@ -173,9 +168,6 @@ exports.getGroupFreeBoard = async (req, res) => {
     const gSeq = req.params.gSeq;
     const category = 'free';
 
-    console.log(gSeq, category);
-    console.log(req.params); // gSeq값
-
     const groupInfo = await GroupBoard.findAll({
       where: { gSeq, gbCategory: category },
       include: [
@@ -209,8 +201,6 @@ exports.getGroupFreeBoard = async (req, res) => {
       delete group.dataValues.tb_groupBoardComments;
     }
 
-    console.log(groupInfo);
-
     if (groupInfo) {
       // 게시글을 찾았을 경우
       res.status(200).send({
@@ -241,7 +231,6 @@ exports.getGroupFreeDetail = async (req, res) => {
     const gbSeq = req.params.gbSeq; // 게시글 고유 식별자
 
     console.log(gSeq, '그룹의', gbSeq, '번째 글, 카테고리는', category);
-    console.log(req.params); // gSeq값
 
     // gSeq 및 category로 공지사항 게시글 필터링
     const groupInfo = await GroupBoard.findOne({
@@ -293,7 +282,6 @@ exports.getGroupFreeDetail = async (req, res) => {
         },
       ],
     });
-    console.log('groupInfo:', groupInfo);
 
     if (groupInfo) {
       // 게시글을 찾았을 경우
@@ -358,8 +346,6 @@ exports.getGroupMissionBoard = async (req, res) => {
       group.dataValues.commentCount = commentVal.count;
       delete group.dataValues.tb_groupBoardComments;
     }
-
-    console.log(groupInfo);
 
     if (groupInfo) {
       // 게시글을 찾았을 경우
@@ -447,7 +433,6 @@ exports.getGroupMissionDetail = async (req, res) => {
         },
       ],
     });
-    console.log('groupInfo:', groupInfo);
 
     if (groupInfo) {
       // 게시글을 찾았을 경우
@@ -489,13 +474,10 @@ exports.getCreateBoard = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     if (!token) {
       res.send({
@@ -532,31 +514,17 @@ exports.getCreateBoard = async (req, res) => {
 // 새 게시글 생성 요청
 // /board/create
 exports.createBoard = async (req, res) => {
-  //   authUtil.checkToken();
-  // let token = req.headers.authorization.split(' ')[1];
-  // //   console.log('=========', req.headers, token);
-  // const user = await jwt.verify(token);
-  // console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
-
-  // const uSeq = user.uSeq;
-  // console.log(uSeq);
-
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
 
-    console.log(uSeq, uEmail, uName);
-
     // 클라이언트에서 요청 보낼때 body로 mSeq, gSeq, gbCategory 값 넣어서 보내주기
     const gSeq = req.body.gSeq;
     const gbCategory = req.body.gbCategory;
-    // console.log('377번째줄 :', gbCategory);
-    // console.log('378번째줄 :', req.query.gbCategory);
 
     if (!token) {
       res.send({
@@ -592,9 +560,6 @@ exports.createBoard = async (req, res) => {
 
     if (gbCategory == 'mission') {
       const mSeq = req.body.mSeq;
-      console.log('mSeq>>>>>>>>>>>>>', mSeq);
-      // console.log('416번째줄 :', gbCategory);
-      // console.log('417번째줄 :', req.query.gbCategory);
 
       score.currentScore(guSeq, mSeq);
       // 미션이면 미션의 mSeq 있어야함
@@ -689,7 +654,7 @@ exports.getEditBoard = async (req, res) => {
     const gbSeq = req.params.gbSeq;
 
     const beforeEdit = await GroupBoard.findByPk(gbSeq);
-    console.log(beforeEdit.dataValues);
+
     // uSeq로 게시글 소유자 여부 확인(권한 확인)
     if (beforeEdit.dataValues.uSeq !== uSeq) {
       res.send({
@@ -725,23 +690,13 @@ exports.getEditBoard = async (req, res) => {
 // 게시글 수정 요청
 // /board/edit/:gbSeq
 exports.editBoard = async (req, res) => {
-  // let token = req.headers.authorization.split(' ')[1];
-  // const user = await jwt.verify(token);
-  // console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
-
-  // const uSeq = user.uSeq;
-  // console.log(uSeq);
-
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     if (!token) {
       res.send({
@@ -815,25 +770,13 @@ exports.editBoard = async (req, res) => {
 // 게시글 삭제 처리
 // /board/delete/:gbSeq
 exports.deleteBoard = async (req, res) => {
-  // let token = req.headers.authorization.split(' ')[1];
-  // const user = await jwt.verify(token);
-  // console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
-
-  // const uSeq = user.uSeq;
-  // console.log(uSeq);
-
-  // const gbSeq = req.params.gbSeq;
-
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     if (!token) {
       res.send({

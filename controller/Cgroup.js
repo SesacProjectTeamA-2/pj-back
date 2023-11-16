@@ -16,12 +16,6 @@ const jwt = require('../modules/jwt');
 const ranking = require('../modules/rankSystem');
 const { v4: uuidv4 } = require('uuid'); // 모임 링크 생성
 
-// GET '/api/group/:id'
-// 모임 정보 조회(상세 화면)
-// exports.getGroup = (req, res) => {
-//   res.send('ok');
-// };
-
 // GET '/api/group?search=###&category=###'
 // 모임 조회 (검색어 검색 / 카테고리 검색)
 exports.getGroups = async (req, res) => {
@@ -74,13 +68,10 @@ exports.getJoined = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     if (!token) {
       res.send({
@@ -153,13 +144,10 @@ exports.getMade = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     if (!token) {
       res.send({
@@ -180,7 +168,6 @@ exports.getMade = async (req, res) => {
       where: { uSeq, guIsLeader: 'y' }, // 모임장인 그룹만
       attributes: ['gSeq'],
     });
-    console.log('>///////////////////', groupList);
 
     const groups = groupList.map((list) => list.gSeq);
 
@@ -229,7 +216,6 @@ exports.getMade = async (req, res) => {
 // 모임장 위임
 async function changeGroupLeader(currentLeaderUSeq, gSeq, newLeaderUSeq) {
   try {
-    console.log(gSeq, currentLeaderUSeq, newLeaderUSeq);
     if (currentLeaderUSeq === newLeaderUSeq) {
       return { success: false };
     }
@@ -260,13 +246,10 @@ exports.deleteQuitGroup = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     if (!token) {
       res.send({
@@ -393,13 +376,10 @@ exports.postGroup = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     const { gName, gDesc, gDday, gMaxMem, gCategory, missionArray } = req.body;
 
@@ -418,8 +398,6 @@ exports.postGroup = async (req, res) => {
       gCategory, // 카테고리
       gLink: base64,
     });
-
-    console.log(insertOneGroup);
 
     // db에 모임 정보 저장 후 gSeq로 링크 생성
     // const inviteLink = generateInviteLink(insertOneGroup.gSeq);
@@ -486,13 +464,10 @@ exports.patchGroup = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     const { gSeq, gName, gDesc, gMaxMem, gCategory } = req.body;
 
@@ -545,13 +520,10 @@ exports.groupCoverImg = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     if (req.file.location) {
       const gCoverImg = req.file.location; // 업로드된 이미지의 S3 URL
@@ -614,14 +586,11 @@ exports.deleteGroup = async (req, res) => {
 
   try {
     let token = req.headers.authorization.split(' ')[1];
-    const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
+    const user = await jwt.verify(token);
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     const { gSeq } = req.body;
 
@@ -632,8 +601,6 @@ exports.deleteGroup = async (req, res) => {
       },
     });
 
-    console.log(selectOneGroupUser);
-
     // y = 모임장, null = 모임원
     if (selectOneGroupUser.guIsLeader) {
       // 2) 모임장을 포함한 모임 인원 확인 (2명 이상이면 모임장 위임 화면으로 이동)
@@ -642,8 +609,6 @@ exports.deleteGroup = async (req, res) => {
           gSeq,
         },
       });
-
-      console.log(countGroupUser);
 
       // 모임원이 2명 이상이면 모임장 위임하는 화면으로 이동
       if (countGroupUser > 1) {
@@ -705,7 +670,6 @@ exports.getGroupDetail = async (req, res) => {
     let groupSeq = req.params.gSeq;
 
     // 모임 정보
-    console.log(groupSeq);
     const groupInfo = await Group.findOne({ where: { gSeq: groupSeq } });
 
     const { gName, gDesc, gDday, gMaxMem, gCategory, gCoverImg } = groupInfo;
@@ -738,11 +702,7 @@ exports.getGroupDetail = async (req, res) => {
       ],
     });
 
-    console.log('멤버어레이>>>>>>>>>', memberArray);
-
     const groupRanking = await ranking.groupRanking(groupSeq);
-
-    console.log('그룹 랭킹>>>>>>>>>>', groupRanking);
 
     const nowScoreUserInfo = groupRanking.nowRanking.map(
       (user) => user.tb_user
@@ -772,7 +732,6 @@ exports.getGroupDetail = async (req, res) => {
     if (req.headers.authorization) {
       let token = req.headers.authorization.split(' ')[1];
       const user = await jwt.verify(token);
-      console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
       // 모임에 가입한 경우
       let isLeader;
@@ -847,7 +806,6 @@ exports.joinGroup = async (req, res) => {
   if (req.headers.authorization) {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const userJoin = await GroupUser.create({
       gSeq: groupSeq,
@@ -1060,13 +1018,10 @@ exports.postJoinByLink = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     if (!token || !uSeq) {
       res.send({
@@ -1075,7 +1030,6 @@ exports.postJoinByLink = async (req, res) => {
       });
       return;
     }
-    console.log('dddddddddddddddd', req.body);
     const gLink = req.body.gLink;
 
     const group = await Group.findOne({ where: { gLink: gLink } });
@@ -1126,13 +1080,10 @@ exports.postJoin = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     if (!token || !uSeq) {
       res.send({
@@ -1142,7 +1093,6 @@ exports.postJoin = async (req, res) => {
       return;
     }
 
-    console.log('dddddddddddddddd', req.body);
     const gSeq = req.body.gSeq;
 
     const group = await Group.findOne({ where: { gSeq: gSeq } });
@@ -1194,10 +1144,8 @@ exports.patchLeader = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
-    console.log(uSeq);
 
     if (!token) {
       res.send({
@@ -1243,7 +1191,6 @@ exports.patchLeader = async (req, res) => {
     // 모임장으로 위임할 유저의 guIsLeader 값을 y로 수정
     const newLeaderUSeq = req.body.newLeaderUSeq;
 
-    console.log('uSeq::::::::::::::::', uSeq);
     if (newLeaderUSeq) {
       const changeLeaderResult = await changeGroupLeader(
         uSeq,
