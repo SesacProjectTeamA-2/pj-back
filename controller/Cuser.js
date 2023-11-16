@@ -33,9 +33,7 @@ exports.getOAuth = (req, res) => {
   const REST_API_KEY = process.env.REST_API_KEY;
   const REDIRECT_URL = `${serverUrl}:${serverPort}` + process.env.REDIRECT_URL;
   const kakaoAuthURL = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URL}`;
-  console.log(kakaoAuthURL);
   res.redirect(kakaoAuthURL);
-  console.log(res.statusCode);
 };
 
 // 카카오 로그인 redirect
@@ -50,8 +48,6 @@ exports.getKakao = async (req, res) => {
   data.append('client_id', REST_API_KEY);
   data.append('redirect_uri', REDIRECT_URL);
   data.append('code', code);
-
-  // console.log(data);
 
   try {
     // 카카오 OAuth 서버로 POST 요청 보내기
@@ -85,16 +81,12 @@ exports.getKakao = async (req, res) => {
 
     // db에 값 있으면 이미 회원가입 한 유저
     if (alreadyUser) {
-      console.log('db에서 가져온 uSeq', alreadyUser.uSeq);
-      console.log(userEmail, userName, userImg);
-
       // 해당 3개의 값 가지는 토큰 생성
       const jwtToken = await jwt.sign({
         uSeq: alreadyUser.uSeq,
         userName: userName,
         userEmail: userEmail,
       });
-      // console.log(jwtToken);
 
       res.cookie('token', jwtToken.token, {
         httpOnly: true,
@@ -373,8 +365,6 @@ exports.getLoginTest = async (req, res) => {
 
     if (selectOneTestEmail) {
       const { uSeq, uEmail, uName, uImg } = selectOneTestEmail;
-      console.log('db에서 가져온 uSeq', uSeq);
-      console.log(uEmail, uName, uImg);
 
       // 해당 3개의 값 가지는 토큰 생성
       const jwtToken = await jwt.sign({
@@ -382,7 +372,6 @@ exports.getLoginTest = async (req, res) => {
         userName: uName,
         userEmail: uEmail,
       });
-      // console.log(jwtToken);
 
       res.cookie('token', jwtToken.token, {
         httpOnly: true,
@@ -470,7 +459,6 @@ exports.postRegister = async (req, res) => {
       secure: true,
       sameSite: 'None',
     });
-    console.log(jwtToken.token);
 
     res.status(200).send({
       uEmail: newUser.uEmail,
@@ -498,7 +486,6 @@ exports.getProfile = async (req, res) => {
     if (req.headers.authorization) {
       let token = req.headers.authorization.split(' ')[1];
       const user = await jwt.verify(token);
-      console.log('디코딩된 유저 토큰!!', user);
 
       // 보여줄 정보 : 닉네임, 설명, 캐릭터, 관심분야(null), 메인화면 설정(dday, 달성량), 커버이미지
       const userSeq = user.uSeq;
@@ -569,7 +556,6 @@ exports.editProfile = async (req, res) => {
     if (req.headers.authorization) {
       let token = req.headers.authorization.split(' ')[1];
       const user = await jwt.verify(token);
-      console.log('디코딩된 유저 토큰!!', user);
       const {
         uName,
         uDesc,
@@ -629,7 +615,6 @@ exports.userImg = async (req, res) => {
     if (req.headers.authorization) {
       let token = req.headers.authorization.split(' ')[1];
       const user = await jwt.verify(token);
-      console.log('디코딩된 유저 토큰!!', user);
       if (req.file.location) {
         const imageUrl = req.file.location; // 업로드된 이미지의 S3 URL
 
@@ -663,7 +648,6 @@ exports.userCoverImg = async (req, res) => {
     if (req.headers.authorization) {
       let token = req.headers.authorization.split(' ')[1];
       const user = await jwt.verify(token);
-      console.log('디코딩된 유저 토큰!!', user);
       if (req.file.location) {
         const imageUrl = req.file.location; // 업로드된 이미지의 S3 URL
 
@@ -698,7 +682,6 @@ exports.delUser = async (req, res) => {
     if (req.headers.authorization) {
       let token = req.headers.authorization.split(' ')[1];
       const user = await jwt.verify(token);
-      console.log('디코딩된 유저 토큰!!', user);
 
       await User.destroy({
         where: { uSeq: user.uSeq },

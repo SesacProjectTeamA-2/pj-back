@@ -19,13 +19,10 @@ exports.createComment = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     if (!token) {
       res.send({
@@ -123,13 +120,10 @@ exports.editComment = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     if (!token) {
       res.send({
@@ -226,13 +220,10 @@ exports.deleteComment = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     if (!token) {
       res.send({
@@ -249,6 +240,7 @@ exports.deleteComment = async (req, res) => {
       return;
     }
     const gbcSeq = req.params.gbcSeq;
+
     console.log('삭제하려는 gbcSeq : ', gbcSeq);
 
     const groupUser = await GroupUser.findOne({
