@@ -17,7 +17,6 @@ const GroupUser = require('./GroupUser')(sequelize, Sequelize);
 const Mission = require('./Mission')(sequelize, Sequelize);
 
 //=== Relation 설정 ===
-// 전체 1:다 관계
 
 // 1. User 1 - GroupUser 다
 User.hasMany(GroupUser, {
@@ -119,7 +118,7 @@ GroupBoardComment.belongsTo(GroupBoard, {
   onUpdate: 'CASCADE',
 });
 
-// 6. GroupUser 1 - GroupBoardComment 다
+// 9. GroupUser 1 - GroupBoardComment 다
 GroupUser.hasMany(GroupBoardComment, {
   foreignKey: 'guSeq',
   onDelete: 'CASCADE',
@@ -131,7 +130,7 @@ GroupBoardComment.belongsTo(GroupUser, {
   onUpdate: 'CASCADE',
 });
 
-// 9. GroupBoard 1 - GroupBoardIcon 다
+// 10. GroupBoard 1 - GroupBoardIcon 다
 GroupBoard.hasMany(GroupBoardIcon, {
   foreignKey: 'gbSeq',
   onDelete: 'CASCADE',

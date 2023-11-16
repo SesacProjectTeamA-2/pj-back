@@ -1,14 +1,54 @@
 {
-  "name": "pj-back",
+  "name": "motimates",
   "version": "1.0.0",
-  "description": "Todo를 혼자서, 모임으로 같이 진행해봐요!",
+  "description": "온라인 모임을 통해 미션을 같이 진행하면서 성취감을 느껴보세요!",
   "main": "app.js",
   "scripts": {
     "start": "cross-env NODE_ENV=development nodemon app",
     "start:prod": "cross-env NODE_ENV=production nodemon app",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "keywords": [
+    "node.js",
+    "express",
+    "react",
+    "mysql",
+    "sequelize",
+    "swagger",
+    "motimates"
+  ],
+  "contributors": [
+    {
+      "name": "강혜빈",
+      "role": "Front-end Developer",
+      "github": "https://github.com/ch0rckbean"
+    },
+    {
+      "name": "김세화",
+      "role": "Front-end Developer",
+      "github": "https://github.com/loveflora"
+    },
+    {
+      "name": "최제윤",
+      "role": "Front-end Developer",
+      "github": "https://github.com/lemon4974"
+    },
+    {
+      "name": "문영민",
+      "role": "Back-end Developer",
+      "github": "https://github.com/eoeung"
+    },
+    {
+      "name": "문효진",
+      "role": "Back-end Developer",
+      "github": "https://github.com/jinnymoon1124"
+    },
+    {
+      "name": "최태영",
+      "role": "Back-end Developer",
+      "github": "https://github.com/chitty12"
+    }
+  ],
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.1488.0",

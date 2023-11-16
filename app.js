@@ -74,11 +74,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// 채팅
-app.get('/api/group/chat', (req, res) => {
-  res.sendFile(__dirname + '/public/chat.html');
-});
-
 /**
  * @path {GET} ${URL}:${PORT}/api
  * @description 모든 api는 indexRouter를 거쳐가도록 설정
