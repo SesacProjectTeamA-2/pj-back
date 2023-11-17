@@ -51,14 +51,11 @@ const updateScore = async () => {
         );
         // 그룹 미션 점수 초기화
         await Group.update({ gTotalScore: 0 }, { where: { gSeq: group.gSeq } });
-        console.log(
-          '1. 누적 점수 업데이트!!!! 2. 미션만료!!! 3. 모임 미션 점수 초기화!!!'
-        );
       }
     }
   } catch (error) {
     // 기타 데이터베이스 오류
-    console.log('노드 크론 실행 중 서버 에러', error);
+    console.error('노드 크론 실행 중 서버 에러', error);
     // 에러 핸들링 코드 추가
   }
 };
@@ -167,7 +164,7 @@ exports.getMission = async (req, res) => {
         });
 
         const groupUserRates = groupRanking.doneRates;
-        res.json({
+        res.send({
           result: true,
           mainGroup: true,
           uName,
@@ -181,7 +178,7 @@ exports.getMission = async (req, res) => {
           doneRates: groupDoneRates,
         });
       } else {
-        res.json({
+        res.send({
           result: true,
           mainGroup: false,
           uName,
@@ -193,11 +190,11 @@ exports.getMission = async (req, res) => {
         });
       }
     } else {
-      res.json({ result: false, message: '로그인 해주세요!' });
+      res.send({ result: false, message: '로그인 해주세요!' });
     }
   } catch (err) {
     console.error(err);
-    res.json({ isSuccess: false, msg: 'error' });
+    res.send({ isSuccess: false, msg: 'error' });
   }
 };
 
@@ -270,7 +267,7 @@ exports.getGroupMission = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.json({ isSuccess: false, msg: 'error' });
+    res.send({ isSuccess: false, msg: 'error' });
   }
 };
 
@@ -327,13 +324,13 @@ exports.editMission = async (req, res) => {
           uName: uName,
         });
       } else {
-        res.json({ result: false, message: '권한이 없어요' });
+        res.send({ result: false, message: '권한이 없어요' });
       }
     } else {
-      res.json({ result: false, message: '로그인 해주세요!' });
+      res.send({ result: false, message: '로그인 해주세요!' });
     }
   } catch (err) {
     console.error(err);
-    res.json({ isSuccess: false, msg: 'error' });
+    res.send({ isSuccess: false, msg: 'error' });
   }
 };

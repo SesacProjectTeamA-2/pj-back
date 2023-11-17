@@ -23,7 +23,7 @@ module.exports = {
       });
 
       if (isDone) {
-        console.log('게시글을 작성하여 이미 미션을 완료했습니다.');
+        console.error('게시글을 작성하여 이미 미션을 완료했습니다.');
         return;
       }
       {
@@ -53,7 +53,7 @@ module.exports = {
             console.log('점수 감소!');
             break;
           default:
-            console.log('add/del 아닌 잘못된 접근입니다');
+            console.error('add/del 아닌 잘못된 접근입니다');
         }
       }
     } catch (err) {

@@ -145,76 +145,19 @@ $ npm run start:prod
 # 📂 **프로젝트 폴더 구조:**
 
 ```JS
-
 ├── app.js
 ├── config
-│   ├── .env
-│   ├── config.js
-│   ├── sample.env
-│   └── secretkey.js
-│
 ├── controller
-│   ├── Cboard.js
-│   ├── Ccomment.js
-│   ├── Cgroup.js
-│   ├── Cmission.js
-│   └── Cuser.js
-│
 ├── middlewares
-│   ├── auth.js
-│   └── imgUpload.js
-│
 ├── models
-│   ├── Group.js
-│   ├── GroupBoard.js
-│   ├── GroupBoardComment.js
-│   ├── GroupBoardIcon.js
-│   ├── GroupUser.js
-│   ├── index.js
-│   ├── User.js
-│   └── Mission.js
-│
 ├── modules
 │   ├── swagger
 │   │    ├── parameter
 │   │    │    ├─ path
-│   │    │    │  ├─ BoardParamPath.yaml
-│   │    │    │  └─ GroupParamPath.yaml
-│   │    │    │
 │   │    │    ├─ query
-│   │    │    │  ├─ BoardParamQuery.yaml
-│   │    │    │  ├─ GroupParamQuery.yaml
-│   │    │    │  └─ userParameter.yaml
-│   │    │    └─ GroupParameter.yaml
-│   │    │
 │   │    ├── requestBody
-│   │    │    ├─ BoardRequestBody.yaml
-│   │    │    ├─ CommentRequestBody.yaml
-│   │    │    ├─ GroupRequestBody.yaml
-│   │    │    ├─ MissionRequestBody.yaml
-│   │    │    └─ UserRequestBody.yaml
-│   │    │
 │   │    ├── response
-│   │    │    ├─ BoardRequest.yaml
-│   │    │    ├─ CommentResponse.yaml
-│   │    │    ├─ GroupResponse.yaml
-│   │    │    ├─ missionResponse.yaml
-│   │    │    └─ UseResponse.yaml
-│   │    │
-│   │    └── swagger.js
-│   │
-│   ├── jwt.js
-│   └── rankSystem.js
-│
 └── routes
-    ├── board.js
-    ├── comment.js
-    ├── group.js
-    ├── index.js
-    ├── mission.js
-    └── user.js
-   // node-modules
-
 ```
 
 <br/>

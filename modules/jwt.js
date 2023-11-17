@@ -27,14 +27,14 @@ module.exports = {
       decoded = jwt.verify(token, secretKey);
     } catch (err) {
       if (err.message === 'jwt expired') {
-        console.log('expired token');
+        console.error('expired token');
         return TOKEN_EXPIRED;
       } else if (err.message === 'invalid token') {
-        console.log('invalid token');
-        console.log(TOKEN_INVALID);
+        console.error('invalid token');
+        console.error(TOKEN_INVALID);
         return TOKEN_INVALID;
       } else {
-        console.log('invalid token');
+        console.error('invalid token');
         return TOKEN_INVALID;
       }
     }

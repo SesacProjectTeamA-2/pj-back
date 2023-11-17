@@ -28,10 +28,16 @@
       // const uToken = cookie.get('isUser'); // 토큰 값
       // console.log(uToken);
       const uSeq = 1;
-      socket.emit('login', uSeq);
+      const data = {
+        uSeq: 1,
+        uName: 'Test 유저',
+        gName: '임시 모임',
+        gSeq: 1,
+      };
+      socket.emit('login', data);
 
       messageButton.addEventListener('click', () => {
-        socket.emit('groupChat', 1);
+        socket.emit('groupChat');
         socket.emit('chatMessage', messageInput.value);
         console.log('messageInput.value ::: ', messageInput.value);
         messageInput.value = '';

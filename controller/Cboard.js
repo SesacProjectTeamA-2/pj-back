@@ -20,8 +20,6 @@ exports.getGroupNotiBoard = async (req, res) => {
     const gSeq = req.params.gSeq;
     const category = 'notice';
 
-    console.log(gSeq, category);
-
     const groupInfo = await GroupBoard.findAll({
       where: { gSeq, gbCategory: category },
       include: [
@@ -77,14 +75,12 @@ exports.getGroupNotiBoard = async (req, res) => {
   }
 };
 
-// 그룹의 공지 게시글 디테알
+// 그룹의 공지 게시글 디테일
 exports.getGroupNotiDetail = async (req, res) => {
   try {
     const gSeq = req.params.gSeq;
     const category = 'notice'; // 'notice' 카테고리
     const gbSeq = req.params.gbSeq; // 게시글 고유 식별자
-
-    console.log(gSeq, '그룹의', gbSeq, '번째 글, 카테고리는', category);
 
     // gSeq 및 category로 공지사항 게시글 필터링
     const groupInfo = await GroupBoard.findOne({
@@ -115,28 +111,9 @@ exports.getGroupNotiDetail = async (req, res) => {
               ],
             },
           ],
-          // include: [
-          //   {
-          //     model: GroupBoard, // 댓글 작성자 정보 가져오기
-          //     attributes: ['gbSeq'],
-          //     include: [
-          //       {
-          //         model: GroupUser,
-          //         attributes: ['guSeq'],
-          //         include: [
-          //           {
-          //             model: User,
-          //             attributes: ['uName', 'uImg'],
-          //           },
-          //         ],
-          //       },
-          //     ],
-          //   },
-          // ],
         },
       ],
     });
-    console.log('groupInfo:', groupInfo);
 
     if (groupInfo) {
       // 게시글을 찾았을 경우
@@ -230,8 +207,6 @@ exports.getGroupFreeDetail = async (req, res) => {
     const category = 'free'; // 'free' 카테고리
     const gbSeq = req.params.gbSeq; // 게시글 고유 식별자
 
-    console.log(gSeq, '그룹의', gbSeq, '번째 글, 카테고리는', category);
-
     // gSeq 및 category로 공지사항 게시글 필터링
     const groupInfo = await GroupBoard.findOne({
       where: { gSeq: gSeq, gbCategory: category, gbSeq: gbSeq },
@@ -261,24 +236,6 @@ exports.getGroupFreeDetail = async (req, res) => {
               ],
             },
           ],
-          // include: [
-          //   {
-          //     model: GroupBoard, // 댓글 작성자 정보 가져오기
-          //     attributes: ['gbSeq'],
-          //     include: [
-          //       {
-          //         model: GroupUser,
-          //         attributes: ['guSeq'],
-          //         include: [
-          //           {
-          //             model: User,
-          //             attributes: ['uName', 'uImg'],
-          //           },
-          //         ],
-          //       },
-          //     ],
-          //   },
-          // ],
         },
       ],
     });
@@ -311,8 +268,6 @@ exports.getGroupMissionBoard = async (req, res) => {
     const gSeq = req.params.gSeq;
     const category = 'mission';
     const mSeq = req.params.mSeq; // 클라이언트에서 요청 보낼때 query로 mSeq 값 넣어서 보내주기
-
-    console.log(gSeq, category, mSeq);
 
     const groupInfo = await GroupBoard.findAll({
       where: { gSeq: gSeq, gbCategory: category, mSeq: mSeq },
@@ -377,12 +332,6 @@ exports.getGroupMissionDetail = async (req, res) => {
     const mSeq = req.params.mSeq;
     const gbSeq = req.params.gbSeq;
 
-    console.log('getGroupMissionDetail : ', gSeq, category, mSeq, gbSeq);
-
-    // const groupInfo = await GroupBoard.findOne({
-    //   where: { gSeq: gSeq, gbCategory: category, mSeq: mSeq, gbSeq: gbSeq },
-    //   include: [GroupBoardComment], // 댓글 배열형태로 가져오기
-    // });
     // gSeq 및 category로 공지사항 게시글 필터링
     const groupInfo = await GroupBoard.findOne({
       where: { gSeq: gSeq, gbCategory: category, mSeq: mSeq, gbSeq: gbSeq },
@@ -412,24 +361,6 @@ exports.getGroupMissionDetail = async (req, res) => {
               ],
             },
           ],
-          // include: [
-          //   {
-          //     model: GroupBoard, // 댓글 작성자 정보 가져오기
-          //     attributes: ['gbSeq'],
-          //     include: [
-          //       {
-          //         model: GroupUser,
-          //         attributes: ['guSeq'],
-          //         include: [
-          //           {
-          //             model: User,
-          //             attributes: ['uName', 'uImg'],
-          //           },
-          //         ],
-          //       },
-          //     ],
-          //   },
-          // ],
         },
       ],
     });
@@ -459,18 +390,6 @@ exports.getGroupMissionDetail = async (req, res) => {
 // 새 게시글 생성 페이지 렌더링
 // /board/create
 exports.getCreateBoard = async (req, res) => {
-  // let token = req.headers.authorization.split(' ')[1];
-  // const user = await jwt.verify(token);
-  // console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
-
-  // const uSeq = user.uSeq;
-  // console.log(uSeq);
-
-  // // 클라이언트에서 요청 보낼때 query로 mSeq, gSeq, category 값 넣어서 보내주기
-  // const mSeq = req.query.mSeq;
-  // const gSeq = req.query.gSeq;
-  // const category = req.query.category;
-
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
@@ -503,8 +422,8 @@ exports.getCreateBoard = async (req, res) => {
     });
   } catch (error) {
     // 기타 데이터베이스 오류
-    console.log(error);
-    res.status(500).send({
+    console.error(error);
+    res.send({
       success: false,
       msg: '서버 에러',
     });
@@ -541,8 +460,6 @@ exports.createBoard = async (req, res) => {
       return;
     }
 
-    console.log('gSeq : ', gSeq);
-
     // 모임원인지 아닌지 guSeq 확인
     const groupUser = await GroupUser.findOne({
       where: { uSeq: uSeq, gSeq: gSeq },
@@ -556,7 +473,6 @@ exports.createBoard = async (req, res) => {
       return;
     }
     const guSeq = groupUser.guSeq;
-    console.log('uSeq의 guSeq : ', guSeq);
 
     if (gbCategory == 'mission') {
       const mSeq = req.body.mSeq;
@@ -610,8 +526,8 @@ exports.createBoard = async (req, res) => {
     }
   } catch (error) {
     // 기타 데이터베이스 오류
-    console.log(error);
-    res.status(500).send({
+    console.error(error);
+    res.send({
       success: false,
       msg: '서버에러 발생',
     });
@@ -678,8 +594,8 @@ exports.getEditBoard = async (req, res) => {
     }
   } catch (error) {
     // 에러 처리
-    console.log(error);
-    res.status(500).send({
+    console.error(error);
+    res.send({
       success: false,
       msg: '서버 에러 발생',
     });
@@ -758,8 +674,8 @@ exports.editBoard = async (req, res) => {
     });
   } catch (error) {
     // 에러 처리
-    console.log(error);
-    res.status(500).send({
+    console.error(error);
+    res.send({
       success: false,
       msg: '서버 에러 발생',
     });
@@ -792,7 +708,6 @@ exports.deleteBoard = async (req, res) => {
       return;
     }
     const gbSeq = req.params.gbSeq;
-    console.log('삭제하려는 gbSeq : ', gbSeq);
 
     const boardInfo = await GroupBoard.findOne({
       where: { gbSeq, uSeq },
@@ -830,9 +745,9 @@ exports.deleteBoard = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     // 에러 처리
-    res.status(500).send({
+    res.send({
       success: false,
       msg: '게시글 삭제처리 중 서버에러 발생',
     });
