@@ -50,10 +50,12 @@ $ git clone https://github.com/SesacProjectTeamA-2/pj-front.git
 
 # 🚀 **ERD**
 
-![image](https://github.com/SesacProjectTeamA-2/pj-front/assets/86273626/887bcebc-2966-4f5e-a2fa-a0033377fe8c)
+![image](https://user-images.githubusercontent.com/134040422/284274008-c402135f-6528-4cdc-b63b-70dd69a4bc54.png)
 
+<br>
 
-![image](https://github.com/SesacProjectTeamA-2/pj-back/assets/107044870/f40f7ead-0afc-4d86-95c4-2f8cf8eb2c3c)
+## ＊반정규화
+![image](https://user-images.githubusercontent.com/134040422/284274029-53a281dd-465f-4a44-ad22-3ad2fb5068f8.png)
 
 |    테이블명    | 관계 및 추가 정보 |
 |----------------|-------------------|
