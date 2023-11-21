@@ -14,20 +14,48 @@ const Op = require('sequelize').Op;
 const sequelize = require('sequelize');
 
 module.exports = {
-  currentScore: async (guSeq, mSeq) => {
+  currentScore: async (guSeq, mSeq, cal) => {
     try {
-      // 게시글 작성시 => 현재 점수에 미션 난이도에 따른 점수 추가
-      const score = await Mission.findOne({
-        where: { mSeq: mSeq, isExpired: { [Op.is]: null } },
-        attributes: ['mLevel'],
+      // 이미 게시글이 작성되어있는 경우
+
+      const isDone = await GroupBoard.findOne({
+        where: { mSeq, guSeq, gbIsDone: 'y' },
       });
 
-      await GroupUser.update(
-        {
-          guNowScore: sequelize.literal(`guNowScore + ${score.mLevel}`),
-        },
-        { where: { guSeq } }
-      );
+      if (isDone) {
+        console.error('게시글을 작성하여 이미 미션을 완료했습니다.');
+        return;
+      }
+      {
+        // 게시글 작성시 => 현재 점수에 미션 난이도에 따른 점수 추가/감소
+        const score = await Mission.findOne({
+          where: { mSeq: mSeq, isExpired: { [Op.is]: null } },
+          attributes: ['mLevel'],
+        });
+
+        switch (cal) {
+          case 'add':
+            await GroupUser.update(
+              {
+                guNowScore: sequelize.literal(`guNowScore + ${score.mLevel}`),
+              },
+              { where: { guSeq } }
+            );
+            console.log('점수 합산 완료!');
+            break;
+          case 'del':
+            await GroupUser.update(
+              {
+                guNowScore: sequelize.literal(`guNowScore - ${score.mLevel}`),
+              },
+              { where: { guSeq } }
+            );
+            console.log('점수 감소!');
+            break;
+          default:
+            console.error('add/del 아닌 잘못된 접근입니다');
+        }
+      }
     } catch (err) {
       console.error('currentScore 에러:', err.message);
     }
@@ -42,31 +70,34 @@ module.exports = {
         where: { gSeq },
         attributes: ['gTotalScore'],
       });
+      if (missionTotal.gTotalScore === 0) {
+        return 0;
+      } else {
+        if (uSeqArray.length && uSeqArray.length > 0) {
+          const userDoneRates = [];
 
-      if (uSeqArray.length > 0) {
-        const userDoneRates = [];
+          for (const uSeq of uSeqArray) {
+            const userScore = await GroupUser.findOne({
+              where: { uSeq: uSeq, gSeq },
+              attributes: ['guNowScore'],
+            });
 
-        for (const uSeq of uSeqArray) {
+            const userDoneRate =
+              (userScore.guNowScore / missionTotal.gTotalScore) * 100;
+            userDoneRates.push(userDoneRate);
+          }
+          return userDoneRates;
+        } else {
           const userScore = await GroupUser.findOne({
-            where: { uSeq: uSeq, gSeq },
+            where: { uSeq: uSeqArray, gSeq },
             attributes: ['guNowScore'],
           });
 
           const userDoneRate =
             (userScore.guNowScore / missionTotal.gTotalScore) * 100;
-          userDoneRates.push(userDoneRate);
+
+          return userDoneRate;
         }
-        return userDoneRates;
-      } else {
-        const userScore = await GroupUser.findOne({
-          where: { uSeq: uSeqArray, gSeq },
-          attributes: ['guNowScore'],
-        });
-
-        const userDoneRate =
-          (userScore.guNowScore / missionTotal.gTotalScore) * 100;
-
-        return userDoneRate;
       }
     } catch (err) {
       console.error('doneRate 에러:', err.message);

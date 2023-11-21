@@ -16,11 +16,19 @@ const jwt = require('../modules/jwt');
 const ranking = require('../modules/rankSystem');
 const { v4: uuidv4 } = require('uuid'); // 모임 링크 생성
 
-// GET '/api/group/:id'
-// 모임 정보 조회(상세 화면)
-// exports.getGroup = (req, res) => {
-//   res.send('ok');
-// };
+// 디데이 계산함수.
+function calculateDDay(targetDate) {
+  const currentDate = new Date();
+  const target = new Date(targetDate);
+
+  // 날짜 차이를 밀리초 단위로 계산
+  const timeDiff = target - currentDate;
+
+  // 밀리초를 일(day)로 변환
+  const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+  return daysRemaining;
+}
 
 // GET '/api/group?search=###&category=###'
 // 모임 조회 (검색어 검색 / 카테고리 검색)
@@ -34,8 +42,6 @@ exports.getGroups = async (req, res) => {
       category = category.split(',');
     }
 
-    console.log(search);
-    console.log(category);
     const selectGroups = await Group.findAndCountAll({
       where: {
         [Op.or]: [
@@ -55,16 +61,16 @@ exports.getGroups = async (req, res) => {
     });
 
     if (selectGroups.count > 0) {
-      res.json({
+      res.send({
         count: selectGroups.count,
         groupArray: selectGroups.rows,
       });
     } else {
-      res.json({ isSuccess: true, msg: '해당하는 모임이 없습니다.' });
+      res.send({ isSuccess: true, msg: '해당하는 모임이 없습니다.' });
     }
   } catch (err) {
     console.error(err);
-    res.json({ isSuccess: false, msg: 'error' });
+    res.send({ isSuccess: false, msg: 'error' });
   }
 };
 
@@ -74,13 +80,10 @@ exports.getJoined = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     if (!token) {
       res.send({
@@ -139,8 +142,8 @@ exports.getJoined = async (req, res) => {
     });
   } catch (error) {
     // 기타 데이터베이스 오류
-    console.log(error);
-    res.status(500).send({
+    console.error(error);
+    res.send({
       success: false,
       msg: '서버 에러',
     });
@@ -153,13 +156,10 @@ exports.getMade = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     if (!token) {
       res.send({
@@ -180,7 +180,6 @@ exports.getMade = async (req, res) => {
       where: { uSeq, guIsLeader: 'y' }, // 모임장인 그룹만
       attributes: ['gSeq'],
     });
-    console.log('>///////////////////', groupList);
 
     const groups = groupList.map((list) => list.gSeq);
 
@@ -218,8 +217,8 @@ exports.getMade = async (req, res) => {
     });
   } catch (error) {
     // 기타 데이터베이스 오류
-    console.log(error);
-    res.status(500).send({
+    console.error(error);
+    res.send({
       success: false,
       msg: '서버 에러',
     });
@@ -229,7 +228,6 @@ exports.getMade = async (req, res) => {
 // 모임장 위임
 async function changeGroupLeader(currentLeaderUSeq, gSeq, newLeaderUSeq) {
   try {
-    console.log(gSeq, currentLeaderUSeq, newLeaderUSeq);
     if (currentLeaderUSeq === newLeaderUSeq) {
       return { success: false };
     }
@@ -250,6 +248,7 @@ async function changeGroupLeader(currentLeaderUSeq, gSeq, newLeaderUSeq) {
     );
     return { success: true };
   } catch (error) {
+    console.error(error);
     return { success: false };
   }
 }
@@ -260,13 +259,10 @@ exports.deleteQuitGroup = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     if (!token) {
       res.send({
@@ -319,7 +315,6 @@ exports.deleteQuitGroup = async (req, res) => {
         // 모임장 위임 로직 호출
         const newLeaderUSeq = req.body.newLeaderUSeq;
 
-        console.log('uSeq::::::::::::::::', uSeq);
         if (newLeaderUSeq) {
           const changeLeaderResult = await changeGroupLeader(
             uSeq,
@@ -371,17 +366,13 @@ exports.deleteQuitGroup = async (req, res) => {
     return;
   } catch (error) {
     // 기타 데이터베이스 오류
-    console.log(error);
-    res.status(500).send({
+    console.error(error);
+    res.send({
       success: false,
       msg: '서버 에러',
     });
   }
 };
-
-// GET '/api/group/recommend'
-// 추천 모임
-// exports.getRecommend = (req, res) => {};
 
 // POST '/api/group'
 // 모임 생성
@@ -393,13 +384,10 @@ exports.postGroup = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     const { gName, gDesc, gDday, gMaxMem, gCategory, missionArray } = req.body;
 
@@ -419,11 +407,6 @@ exports.postGroup = async (req, res) => {
       gLink: base64,
     });
 
-    console.log(insertOneGroup);
-
-    // db에 모임 정보 저장 후 gSeq로 링크 생성
-    // const inviteLink = generateInviteLink(insertOneGroup.gSeq);
-
     // 2) 모임장을 모임 참여 유저에 추가
     if (insertOneGroup) {
       const insertOneGroupUser = await GroupUser.create({
@@ -431,8 +414,6 @@ exports.postGroup = async (req, res) => {
         uSeq,
         guIsLeader: 'y',
       });
-
-      console.log(insertOneGroupUser);
 
       // 3) 모임 생성 화면에서 등록한 미션 등록
       let mCnt = 0;
@@ -466,17 +447,17 @@ exports.postGroup = async (req, res) => {
             uName: uName,
           });
         } else {
-          res.json({ isSuccess: false, msg: '모임 생성에 실패했습니다.' });
+          res.send({ isSuccess: false, msg: '모임 생성에 실패했습니다.' });
         }
       } else {
-        res.json({ isSuccess: false, msg: '모임 생성에 실패했습니다.' });
+        res.send({ isSuccess: false, msg: '모임 생성에 실패했습니다.' });
       }
     } else {
-      res.json({ isSuccess: false, msg: '모임 생성에 실패했습니다.' });
+      res.send({ isSuccess: false, msg: '모임 생성에 실패했습니다.' });
     }
   } catch (err) {
     console.error(err);
-    res.json({ isSuccess: false, msg: 'error' });
+    res.send({ isSuccess: false, msg: 'error' });
   }
 };
 
@@ -486,15 +467,12 @@ exports.patchGroup = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
 
-    console.log(uSeq, uEmail, uName);
-
-    const { gSeq, gName, gDesc, gDday, gMaxMem, gCategory } = req.body;
+    const { gSeq, gName, gDesc, gMaxMem, gCategory } = req.body;
 
     // 현재 모임을 수정하려는 사람이 모임장인지 확인
     const selectOneGroupUser = await GroupUser.findOne({
@@ -509,7 +487,6 @@ exports.patchGroup = async (req, res) => {
         {
           gName,
           gDesc,
-          gDday,
           gMaxMem,
           gCategory,
         },
@@ -529,14 +506,14 @@ exports.patchGroup = async (req, res) => {
           uName: uName,
         });
       } else {
-        res.json({ isSuccess: false, msg: '모임 수정에 실패했습니다' });
+        res.send({ isSuccess: false, msg: '모임 수정에 실패했습니다' });
       }
     } else {
-      res.json({ isSuccess: false, msg: '모임장이 아닙니다.' });
+      res.send({ isSuccess: false, msg: '모임장이 아닙니다.' });
     }
   } catch (err) {
     console.error(err);
-    res.json({ isSuccess: false, msg: 'error' });
+    res.send({ isSuccess: false, msg: 'error' });
   }
 };
 
@@ -546,13 +523,10 @@ exports.groupCoverImg = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     if (req.file.location) {
       const gCoverImg = req.file.location; // 업로드된 이미지의 S3 URL
@@ -586,14 +560,14 @@ exports.groupCoverImg = async (req, res) => {
           uName: uName,
         });
       } else {
-        res.json({ isSuccess: false, msg: '모임장이 아닙니다.' });
+        res.send({ isSuccess: false, msg: '모임장이 아닙니다.' });
       }
     } else {
-      res.json({ isSuccess: false, msg: '이미지가 첨부되지 않았습니다' });
+      res.send({ isSuccess: false, msg: '이미지가 첨부되지 않았습니다' });
     }
   } catch (err) {
     console.error(err);
-    res.json({ isSuccess: false, msg: 'error' });
+    res.send({ isSuccess: false, msg: 'error' });
   }
 };
 
@@ -615,14 +589,11 @@ exports.deleteGroup = async (req, res) => {
 
   try {
     let token = req.headers.authorization.split(' ')[1];
-    const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
+    const user = await jwt.verify(token);
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     const { gSeq } = req.body;
 
@@ -633,8 +604,6 @@ exports.deleteGroup = async (req, res) => {
       },
     });
 
-    console.log(selectOneGroupUser);
-
     // y = 모임장, null = 모임원
     if (selectOneGroupUser.guIsLeader) {
       // 2) 모임장을 포함한 모임 인원 확인 (2명 이상이면 모임장 위임 화면으로 이동)
@@ -644,11 +613,9 @@ exports.deleteGroup = async (req, res) => {
         },
       });
 
-      console.log(countGroupUser);
-
       // 모임원이 2명 이상이면 모임장 위임하는 화면으로 이동
       if (countGroupUser > 1) {
-        res.json({ isSuccess: false, msg: '모임장 위임을 해야합니다.' });
+        res.send({ isSuccess: false, msg: '모임장 위임을 해야합니다.' });
 
         // 모임장인데, 모임원이 모임장 혼자인 경우는 모임 관련 데이터 삭제
       } else {
@@ -674,31 +641,17 @@ exports.deleteGroup = async (req, res) => {
             uName: uName,
           });
         } else {
-          res.json({ isSuccess: false, msg: '모임 삭제에 실패했습니다' });
+          res.send({ isSuccess: false, msg: '모임 삭제에 실패했습니다' });
         }
       }
     } else {
-      res.json({ isSuccess: false, msg: '모임장이 아닙니다.' });
+      res.send({ isSuccess: false, msg: '모임장이 아닙니다.' });
     }
   } catch (err) {
     console.error(err);
-    res.json({ isSuccess: false, msg: 'error' });
+    res.send({ isSuccess: false, msg: 'error' });
   }
 };
-
-// 디데이 계산함수.
-function calculateDDay(targetDate) {
-  const currentDate = new Date();
-  const target = new Date(targetDate);
-
-  // 날짜 차이를 밀리초 단위로 계산
-  const timeDiff = target - currentDate;
-
-  // 밀리초를 일(day)로 변환
-  const daysRemaining = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-
-  return daysRemaining;
-}
 
 // 모임 페이지 load
 exports.getGroupDetail = async (req, res) => {
@@ -706,7 +659,6 @@ exports.getGroupDetail = async (req, res) => {
     let groupSeq = req.params.gSeq;
 
     // 모임 정보
-    console.log(groupSeq);
     const groupInfo = await Group.findOne({ where: { gSeq: groupSeq } });
 
     const { gName, gDesc, gDday, gMaxMem, gCategory, gCoverImg } = groupInfo;
@@ -739,11 +691,7 @@ exports.getGroupDetail = async (req, res) => {
       ],
     });
 
-    console.log('멤버어레이>>>>>>>>>', memberArray);
-
     const groupRanking = await ranking.groupRanking(groupSeq);
-
-    console.log('그룹 랭킹>>>>>>>>>>', groupRanking);
 
     const nowScoreUserInfo = groupRanking.nowRanking.map(
       (user) => user.tb_user
@@ -773,7 +721,6 @@ exports.getGroupDetail = async (req, res) => {
     if (req.headers.authorization) {
       let token = req.headers.authorization.split(' ')[1];
       const user = await jwt.verify(token);
-      console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
       // 모임에 가입한 경우
       let isLeader;
@@ -794,7 +741,7 @@ exports.getGroupDetail = async (req, res) => {
         isLeader = false;
       }
 
-      res.json({
+      res.send({
         result: true,
         isJoin,
         isLeader,
@@ -815,7 +762,7 @@ exports.getGroupDetail = async (req, res) => {
       });
       // 비회원인경우
     } else {
-      res.json({
+      res.send({
         result: false,
         groupMission,
         nowRanking,
@@ -833,8 +780,8 @@ exports.getGroupDetail = async (req, res) => {
       });
     }
   } catch (err) {
-    console.log(err);
-    res.status(err.statusCode || 500).send({
+    console.error(err);
+    res.send({
       msg: err.message,
       OK: false,
     });
@@ -848,17 +795,14 @@ exports.joinGroup = async (req, res) => {
   if (req.headers.authorization) {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const userJoin = await GroupUser.create({
       gSeq: groupSeq,
       uSeq: user.uSeq,
     });
-    console.log(
-      '참여 요청-알림-수락의 경우 레디스/웹소켓이 필요할것으로 생각됨.'
-    );
+    // 참여 요청-알림-수락의 경우 레디스/웹소켓이 필요할것으로 생각됨
   } else {
-    res.json({ result: false, message: '먼저 로그인 해주세요.' });
+    res.send({ result: false, message: '먼저 로그인 해주세요.' });
   }
 };
 
@@ -866,106 +810,97 @@ exports.joinGroup = async (req, res) => {
 // 모임(별) 채팅
 exports.getGroupChat = async (req, res) => {
   try {
+    const connectedUser = {}; // 연결된 클라이언트를 저장할 객체
+    const io = req.io;
     const { gSeq } = req.params;
-    let token = req.headers.authorization.split(' ')[1];
-    const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
-    const uSeq = user.uSeq;
-    console.log(uSeq);
+    /////////////////////////////////////////////////////
+    const connectedSockets = new Set();
 
-    // 해당 모임의 모임원인지 확인
-    const groupInfo = await GroupUser.findOne({
-      attributes: [
-        'gSeq',
-        'guIsLeader',
-        'tb_group.gName',
-        'tb_user.uName',
-        'tb_user.uEmail',
-      ],
-      include: [
-        {
-          model: Group,
-          required: true,
-        },
-        {
-          model: User,
-          required: true,
-          where: {
-            uSeq,
-            isUse: {
-              // 현재 서비스 이용 가능한 유저
-              [Op.eq]: 'y',
-            },
-          },
-        },
-      ],
-      where: {
-        uSeq,
-        gSeq,
-        guIsBlackUser: {
-          [Op.is]: null, // 화이트유저만 가지고온다.
-        },
-      },
+    // 네임스페이스 생성
+    const chatNamespace = io.of(`/api/group/chat`);
+
+    // 네임스페이스에 이벤트 리스너 등록
+    chatNamespace.on('connection', (socket) => {
+      // 클라이언트 소켓의 고유한 ID를 가져옴
+      const socketId = socket.id;
+
+      console.log(`/api/group/chat 네임스페이스 연결 완료 ::: `, socketId);
+
+      // 이미 연결된 소켓인지 확인
+      if (connectedSockets.has(socketId)) {
+        // 중복 연결이면 처리하지 않고 종료
+        console.log(`Socket ${socketId} is already connected.`);
+        return;
+      }
+
+      // 새로운 소켓을 연결된 소켓 목록에 추가
+      connectedSockets.add(socketId);
+
+      // 연결 이벤트 핸들러
+      console.log(`Socket ${socketId} connected.`);
+
+      // 다른 이벤트 핸들러 등록 가능
+
+      // 연결이 끊어질 때 연결된 소켓 목록에서 제거
+      socket.on('disconnect', () => {
+        console.log(`/api/group/chat 접속 종료 ::: `, socket.id);
+        console.log(`Socket ${socketId} disconnected.`);
+        connectedSockets.delete(socketId);
+      });
     });
 
-    if (groupInfo) {
-      const { guIsLeader } = groupInfo.dataValues;
-      const { gName } = groupInfo.dataValues.tb_group;
-      const { uName, uEmail } = groupInfo.dataValues.tb_user;
+    //////////////////////////////////////////////////
 
-      // 해당 모임에 모임원의 정보가 있는 경우, 채팅 가능
-      // 모임별 방번호는 gSeq로 설정
-      // Socket.io를 사용하여 클라이언트와 통신할 수 있음
-      const io = req.io;
-      const connectedClients = {}; // 연결된 클라이언트를 저장할 객체
+    // // 네임스페이스 생성
+    // const chatNamespace = io.of(`/api/group/chat/${gSeq}`);
 
-      io.on('connection', (socket) => {
-        socket.on('login', (uSeq) => {
-          // 클라이언트에서 로그인 이벤트를 보내면, 연결을 저장하고 해당 연결을 사용
-          if (!connectedClients[uSeq]) {
-            connectedClients[uSeq] = socket;
-            socket.name = uName;
-            socket.roomName = gName;
-            socket.roomNumber = gSeq;
-            console.log('소켓 연결이 이루어졌습니다.');
-            // console.log(connectedClients);
-          } else {
-            // 이미 연결이 있는 경우, 기존 연결을 사용하고 새 연결을 닫음
-            socket.disconnect();
-          }
-        });
+    // // 네임스페이스에 이벤트 리스너 등록
+    // chatNamespace.on('connection', (socket) => {
+    //   console.log(
+    //     `/api/group/chat/${gSeq} 네임스페이스 연결 완료 ::: `,
+    //     socket.id
+    //   );
 
-        socket.on('groupChat', (gSeq) => {
-          socket.name = uName;
-          socket.roomName = gName;
-          socket.roomNumber = gSeq;
-          socket.join(socket.roomNumber);
-          console.log(socket.roomName, ' -- ', socket.roomNumber);
-        });
+    //   socket.on('disconnect', () => {
+    //     console.log(`/api/group/chat/${gSeq} 접속 종료 ::: `, socket.id);
+    //   });
 
-        socket.on('chatMessage', (message) => {
-          console.log(message);
-          io.to(socket.roomNumber).emit(
-            'message',
-            `${socket.name} : ` + message
-          ); // 모든 클라이언트에 메시지를 전송
-        });
+    //   // socket.on('login', (data) => {
+    //   //   console.log('data ::::: ', data);
+    //   //   const { uSeq, uName, gName, gSeq } = data;
 
-        socket.on('disconnect', () => {
-          console.log('소켓 연결이 끊어졌습니다.');
-        });
-      });
+    //   //   // 클라이언트에서 로그인 이벤트를 보내면, 연결을 저장하고 해당 연결을 사용
+    //   //   if (!connectedUser[uSeq]) {
+    //   //     connectedUser[uSeq] = socket.id;
+    //   //     socket.name = uName;
+    //   //     socket.roomName = gName;
+    //   //     socket.roomNumber = gSeq;
+    //   //     // 소켓에 들어오게 되면 자동으로 모임 채팅에 참여함
+    //   //     socket.join(socket.roomNumber);
+    //   //     console.log(socket.roomName, ' -- ', socket.roomNumber);
+    //   //     console.log('연결된 유저 목록 ::::::', connectedUser);
 
-      // res.status(200).json({ isSuccess: true });
-      const { join } = require('node:path');
-      res.sendFile(join(__dirname, '/../public/chat.html'));
-    } else {
-      res.json({ isSuccess: false, msg: '해당 모임의 인원이 아닙니다.' });
-    }
+    //   //   } else {
+    //   //     // 이미 연결이 있는 경우, 기존 연결을 사용하고 새 연결을 닫음
+    //   //     socket.disconnect();
+    //   //   }
+    //   // });
+
+    //   // socket.on('chatMessage', (message) => {
+    //   //   console.log(message);
+    //   //   req.io
+    //   //     .to(socket.roomNumber)
+    //   //     .emit('message', `${socket.name} : ` + message); // 모든 클라이언트에 메시지를 전송
+    //   // });
+    // });
+
+    // const { join } = require('node:path');
+    // res.sendFile(join(__dirname, '/../public/chat.html'));
+    res.render('chat');
   } catch (err) {
     console.error(err);
-    res.status(500).json({ isSuccess: false, msg: 'error' });
+    res.send({ isSuccess: false, msg: 'error' });
   }
 };
 
@@ -1006,8 +941,8 @@ exports.getJoinLink = async (req, res) => {
     return;
   } catch (error) {
     // 기타 데이터베이스 오류
-    console.log(error);
-    res.status(500).send({
+    console.error(error);
+    res.send({
       success: false,
       msg: '서버 에러',
     });
@@ -1018,13 +953,10 @@ exports.postJoinByLink = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     if (!token || !uSeq) {
       res.send({
@@ -1033,13 +965,12 @@ exports.postJoinByLink = async (req, res) => {
       });
       return;
     }
-    console.log('dddddddddddddddd', req.body);
     const gLink = req.body.gLink;
 
     const group = await Group.findOne({ where: { gLink: gLink } });
 
     if (!group) {
-      res.json({ success: false, msg: '모임을 찾을 수 없습니다.' });
+      res.send({ success: false, msg: '모임을 찾을 수 없습니다.' });
       return;
     }
 
@@ -1049,7 +980,7 @@ exports.postJoinByLink = async (req, res) => {
     });
 
     if (alreadyJoined) {
-      res.json({
+      res.send({
         success: false,
         msg: '사용자는 이미 그룹에 속해 있습니다.',
       });
@@ -1072,11 +1003,11 @@ exports.postJoinByLink = async (req, res) => {
         uName: uName,
       });
     } else {
-      res.json({ success: false, msg: '모임 참여에 실패했습니다.' });
+      res.send({ success: false, msg: '모임 참여에 실패했습니다.' });
     }
   } catch (err) {
     console.error(err);
-    res.json({ success: false, msg: 'error' });
+    res.send({ success: false, msg: 'error' });
   }
 };
 
@@ -1084,13 +1015,10 @@ exports.postJoin = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     if (!token || !uSeq) {
       res.send({
@@ -1100,13 +1028,12 @@ exports.postJoin = async (req, res) => {
       return;
     }
 
-    console.log('dddddddddddddddd', req.body);
     const gSeq = req.body.gSeq;
 
     const group = await Group.findOne({ where: { gSeq: gSeq } });
 
     if (!group) {
-      res.json({ success: false, msg: '모임을 찾을 수 없습니다.' });
+      res.send({ success: false, msg: '모임을 찾을 수 없습니다.' });
       return;
     }
 
@@ -1116,7 +1043,7 @@ exports.postJoin = async (req, res) => {
     });
 
     if (alreadyJoined) {
-      res.json({
+      res.send({
         success: false,
         msg: '사용자는 이미 그룹에 속해 있습니다.',
       });
@@ -1138,11 +1065,11 @@ exports.postJoin = async (req, res) => {
         uName: uName,
       });
     } else {
-      res.json({ success: false, msg: '모임 참여에 실패했습니다.' });
+      res.send({ success: false, msg: '모임 참여에 실패했습니다.' });
     }
   } catch (err) {
     console.error(err);
-    res.json({ success: false, msg: 'error' });
+    res.send({ success: false, msg: 'error' });
   }
 };
 
@@ -1152,10 +1079,8 @@ exports.patchLeader = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
-    console.log(uSeq);
 
     if (!token) {
       res.send({
@@ -1201,7 +1126,6 @@ exports.patchLeader = async (req, res) => {
     // 모임장으로 위임할 유저의 guIsLeader 값을 y로 수정
     const newLeaderUSeq = req.body.newLeaderUSeq;
 
-    console.log('uSeq::::::::::::::::', uSeq);
     if (newLeaderUSeq) {
       const changeLeaderResult = await changeGroupLeader(
         uSeq,
@@ -1231,7 +1155,7 @@ exports.patchLeader = async (req, res) => {
     }
   } catch (error) {
     // 기타 데이터베이스 오류
-    console.log(error);
+    console.error(error);
     res.send({
       success: false,
       msg: '서버 에러',

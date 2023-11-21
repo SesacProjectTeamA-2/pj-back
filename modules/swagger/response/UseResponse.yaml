@@ -104,3 +104,20 @@ components:
           type: string
           description: 응답 메세지
           example: 회원탈퇴 완료/ 비로그인시(로그인해주세요)
+
+    # 기본적인 응답 object (성공 여부, 응답 메시지)
+    userApiResult:
+      required:
+        - isSuccess
+        - msg
+      type: object
+      description: 기본적인 응답 object (성공 여부, 응답 메시지)
+      properties: # res.json으로 정의한 값 정의
+        isSuccess:
+          type: boolean
+          description: 성공 여부
+          example: true
+        msg:
+          type: string
+          description: 응답 메시지
+          example: 성공

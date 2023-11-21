@@ -27,7 +27,7 @@ const updateScore = async () => {
           [Op.eq]: sequelize.literal('DATE_SUB(CURDATE(), INTERVAL 1 DAY)'), // 현재 날짜에서 1일 추가한 날짜와 같은 경우
         },
       },
-      attributes: ['gSeq'], // '*' 대신 원하는 속성을 지정하거나 제외할 수 있음
+      attributes: ['gSeq'],
       include: [{ model: Mission, where: { isExpired: { [Op.is]: null } } }],
     });
 
@@ -51,14 +51,11 @@ const updateScore = async () => {
         );
         // 그룹 미션 점수 초기화
         await Group.update({ gTotalScore: 0 }, { where: { gSeq: group.gSeq } });
-        console.log(
-          '1. 누적 점수 업데이트!!!! 2. 미션만료!!! 3. 모임 미션 점수 초기화!!!'
-        );
       }
     }
   } catch (error) {
     // 기타 데이터베이스 오류
-    console.log('노드 크론 실행 중 서버 에러', error);
+    console.error('노드 크론 실행 중 서버 에러', error);
     // 에러 핸들링 코드 추가
   }
 };
@@ -82,21 +79,21 @@ exports.getMission = async (req, res) => {
       });
       const { uName, uCharImg, uMainGroup } = userInfo;
 
-      // 3. 그룹별 미션 load(), group [디데이, 모임명 - join], mission [미션 제목, 미션만료x(null)], group board[미션완료여부(y) mission join]
+      // 3. 모임별 미션 load(), group [디데이, 모임명 - join], mission [미션 제목, 미션만료x(null)], group board[미션완료여부(y) mission join]
       const groupInfo = await GroupUser.findAll({
         where: { uSeq },
         attributes: ['gSeq'],
         group: ['gSeq', 'guSeq'],
         include: [{ model: Group, attributes: ['gName', 'gDday'] }],
       });
-
       const gSeqArray = groupInfo.map((group) => group.gSeq);
       const groupArray = groupInfo.map((user) => user.tb_group);
 
-      // 그룹별 달성률
+      // 모임별 달성률
       const groupDoneRates = [];
       for (const groupSeq of gSeqArray) {
         const doneRate = await score.doneRate(groupSeq, uSeq);
+
         if (Array.isArray(doneRate)) {
           groupDoneRates.push(...doneRate);
         } else {
@@ -104,14 +101,17 @@ exports.getMission = async (req, res) => {
         }
       }
 
+      // 모임별 미션
       const doneArrays = await GroupBoard.findAll({
-        where: { uSeq, gSeq: { [Op.in]: gSeqArray } },
+        where: { uSeq, gSeq: { [Op.in]: gSeqArray }, mSeq: { [Op.not]: null } },
+
         attributes: ['mSeq'],
       });
 
       let missionArray;
 
       if (doneArrays.length > 0) {
+        const arrayValue = doneArrays.map((mseq) => mseq.mSeq);
         missionArray = await Group.findAll({
           attributes: ['gSeq', 'gName'],
           where: {
@@ -121,10 +121,10 @@ exports.getMission = async (req, res) => {
             {
               model: Mission,
               where: {
-                mSeq: { [Op.notIn]: doneArrays },
+                mSeq: { [Op.notIn]: arrayValue },
                 isExpired: { [Op.is]: null },
               },
-              attributes: ['mTitle', , 'mSeq'],
+              attributes: ['mTitle', 'mSeq'],
             },
           ],
           order: [['gSeq', 'ASC']],
@@ -148,13 +148,6 @@ exports.getMission = async (req, res) => {
         });
       }
 
-      console.log('미션어레이>>>>>>>>>>>>>', missionArray);
-      // const doneArray = await Mission.findAll({
-      //   attributes: ['mTitle'],
-      //   where: { isExpired: { [Op.is]: null } },
-      //   include: [{ model: GroupBoard, where: { gbIsDone: { [Op.ne]: 'y' } } }],
-      // });
-
       // 대표그룹 달성률
       if (uMainGroup) {
         const groupRanking = await score.groupRanking(uMainGroup);
@@ -171,8 +164,7 @@ exports.getMission = async (req, res) => {
         });
 
         const groupUserRates = groupRanking.doneRates;
-        console.log(groupRanking);
-        res.json({
+        res.send({
           result: true,
           mainGroup: true,
           uName,
@@ -186,7 +178,7 @@ exports.getMission = async (req, res) => {
           doneRates: groupDoneRates,
         });
       } else {
-        res.json({
+        res.send({
           result: true,
           mainGroup: false,
           uName,
@@ -198,11 +190,11 @@ exports.getMission = async (req, res) => {
         });
       }
     } else {
-      res.json({ result: false, message: '로그인 해주세요!' });
+      res.send({ result: false, message: '로그인 해주세요!' });
     }
   } catch (err) {
     console.error(err);
-    res.json({ isSuccess: false, msg: 'error' });
+    res.send({ isSuccess: false, msg: 'error' });
   }
 };
 
@@ -213,13 +205,10 @@ exports.getGroupMission = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     if (!token) {
       res.send({
@@ -262,9 +251,6 @@ exports.getGroupMission = async (req, res) => {
       group: ['mSeq', 'gSeq'],
     });
 
-    console.log('미션리스트>>>>', missionList);
-    console.log('만료미션리스트>>>>', expiredMissionList);
-
     const Dday = await Group.findOne({
       where: { gSeq: gSeq },
       attributes: ['gDday'],
@@ -281,7 +267,7 @@ exports.getGroupMission = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.json({ isSuccess: false, msg: 'error' });
+    res.send({ isSuccess: false, msg: 'error' });
   }
 };
 
@@ -294,13 +280,10 @@ exports.editMission = async (req, res) => {
     if (req.headers.authorization) {
       let token = req.headers.authorization.split(' ')[1];
       const user = await jwt.verify(token);
-      console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
       const uSeq = user.uSeq;
       const uEmail = user.uEmail;
       const uName = user.uName;
-
-      console.log(uSeq, uEmail, uName);
 
       // 모임장 여부 확인
       const isLeader = await GroupUser.findOne({
@@ -309,10 +292,8 @@ exports.editMission = async (req, res) => {
       });
 
       if (isLeader) {
-        console.log('미션어레이>>>>>>>>', missionArray);
         // 기존 미션 수정시
         for (let missionInfo of missionArray) {
-          console.log(missionInfo);
           if (missionInfo.mSeq) {
             await Mission.update(
               {
@@ -343,13 +324,13 @@ exports.editMission = async (req, res) => {
           uName: uName,
         });
       } else {
-        res.json({ result: false, message: '권한이 없어요' });
+        res.send({ result: false, message: '권한이 없어요' });
       }
     } else {
-      res.json({ result: false, message: '로그인 해주세요!' });
+      res.send({ result: false, message: '로그인 해주세요!' });
     }
   } catch (err) {
     console.error(err);
-    res.json({ isSuccess: false, msg: 'error' });
+    res.send({ isSuccess: false, msg: 'error' });
   }
 };

@@ -3,7 +3,6 @@
 ###################################################
 components:
   parameters:
-
     # 모임 조회시 필요한 QueryString
     # 모임 이름 및 설명으로 검색
     groupSearchParamQuery:
@@ -14,6 +13,7 @@ components:
       example: 스터디
       schema:
         type: string
+        
     # 모임 카테고리로 검색
     groupCategoryParamQuery:
       in: query

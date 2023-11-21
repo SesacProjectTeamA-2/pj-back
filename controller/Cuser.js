@@ -10,18 +10,12 @@ const { serverUrl, serverPort, frontPort, naverClientId, naverClientSecret } =
   config; // 서버 설정
 
 const { User } = require('../models');
-const { Op } = require('sequelize');
+const { Op, where } = require('sequelize');
 
 // 로그인 된 사용자인지 아닌지 판별하려면 불러와야함
 const jwt = require('../modules/jwt');
 const authUtil = require('../middlewares/auth');
 const score = require('../modules/rankSystem');
-
-// GET '/api/user/users'
-// 모든 유저 조회
-exports.getUsers = (req, res) => {
-  res.send('ok');
-};
 
 // #################################################
 // ################# [LOGIN START] #################
@@ -33,9 +27,7 @@ exports.getOAuth = (req, res) => {
   const REST_API_KEY = process.env.REST_API_KEY;
   const REDIRECT_URL = `${serverUrl}:${serverPort}` + process.env.REDIRECT_URL;
   const kakaoAuthURL = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URL}`;
-  console.log(kakaoAuthURL);
   res.redirect(kakaoAuthURL);
-  console.log(res.statusCode);
 };
 
 // 카카오 로그인 redirect
@@ -50,8 +42,6 @@ exports.getKakao = async (req, res) => {
   data.append('client_id', REST_API_KEY);
   data.append('redirect_uri', REDIRECT_URL);
   data.append('code', code);
-
-  // console.log(data);
 
   try {
     // 카카오 OAuth 서버로 POST 요청 보내기
@@ -85,23 +75,18 @@ exports.getKakao = async (req, res) => {
 
     // db에 값 있으면 이미 회원가입 한 유저
     if (alreadyUser) {
-      console.log('db에서 가져온 uSeq', alreadyUser.uSeq);
-      console.log(userEmail, userName, userImg);
-
       // 해당 3개의 값 가지는 토큰 생성
       const jwtToken = await jwt.sign({
         uSeq: alreadyUser.uSeq,
         userName: userName,
         userEmail: userEmail,
       });
-      // console.log(jwtToken);
 
       res.cookie('token', jwtToken.token, {
         httpOnly: true,
         secure: true,
         sameSite: 'None',
       });
-      console.log('토큰>>>>>>>>>>>>>', jwtToken.token);
 
       // ****************** 토큰을 들고 메인 페이지로 렌더링해야함
       let redirectUrl = `${serverUrl}:${frontPort}/main`;
@@ -109,7 +94,7 @@ exports.getKakao = async (req, res) => {
       redirectUrl += `&userName=${userName}`;
       redirectUrl += `&userEmail=${userEmail}`;
       redirectUrl += `&token=${jwtToken.token}`;
-      res.status(200).redirect(redirectUrl);
+      res.redirect(redirectUrl);
     } else {
       // 최초 로그인 하는 유저
       // *************** 토큰 발급 없이 회원가입 창으로 렌더링 필요
@@ -117,13 +102,14 @@ exports.getKakao = async (req, res) => {
       redirectUrl += `?userImg=${userImg}`;
       redirectUrl += `&userName=${userName}`;
       redirectUrl += `&userEmail=${userEmail}`;
-      res.status(200).redirect(redirectUrl);
+      res.redirect(redirectUrl);
     }
   } catch (error) {
+    console.error(error);
     // 에러 처리
     let redirectUrl = `${serverUrl}:${frontPort}/main`;
     redirectUrl += `?msg=액세스 토큰 요청 중 오류 발생`;
-    res.status(500).redirect(redirectUrl);
+    res.redirect(redirectUrl);
   }
 };
 
@@ -177,7 +163,6 @@ exports.getLoginNaverRedirect = async (req, res) => {
     },
   })
     .then((tokenRes) => {
-      console.log('토큰레스>>>>>>>>>>>>>>>>>', tokenRes.data);
       return axios({
         method: 'get',
         url: 'https://openapi.naver.com/v1/nid/me',
@@ -214,7 +199,6 @@ exports.getLoginNaverRedirect = async (req, res) => {
           secure: true,
           sameSite: 'None',
         });
-        console.log('토큰값<<<<<<<<<<<<', jwtToken.token);
 
         // ****************** 토큰을 들고 메인 페이지로 렌더링해야함
         let redirectUrl = `${serverUrl}:${frontPort}/main`;
@@ -222,16 +206,15 @@ exports.getLoginNaverRedirect = async (req, res) => {
         redirectUrl += `&userName=${userName}`;
         redirectUrl += `&userEmail=${userEmail}`;
         redirectUrl += `&token=${jwtToken.token}`;
-        res.status(200).redirect(redirectUrl);
+        res.redirect(redirectUrl);
       } else {
-        console.log('최초로그인 실행>>>>>>>>>>>>>>');
         // 최초 로그인 하는 유저
         // *************** 토큰 발급 없이 회원가입 창으로 렌더링 필요
         let redirectUrl = `${serverUrl}:${frontPort}/join`;
         redirectUrl += `?userImg=${userImg}`;
         redirectUrl += `&userName=${userName}`;
         redirectUrl += `&userEmail=${userEmail}`;
-        res.status(200).redirect(redirectUrl);
+        res.redirect(redirectUrl);
       }
     });
 };
@@ -314,14 +297,13 @@ exports.getLoginGoogleRedirect = async (req, res) => {
           secure: true,
           sameSite: 'None',
         });
-        console.log('토큰>>>>>>>>>>>>>>>>>>>>>>>>', jwtToken.token);
 
         let redirectUrl = `${serverUrl}:${frontPort}/main`;
         redirectUrl += `?userImg=${picture}`;
         redirectUrl += `&userName=${name}`;
         redirectUrl += `&userEmail=${email}`;
         redirectUrl += `&token=${jwtToken.token}`;
-        res.status(200).redirect(redirectUrl);
+        res.redirect(redirectUrl);
         // 4) 비회원
       } else {
         // 4-1) 검증(확인)된 메일일 경우에만 회원 가입 진행
@@ -330,7 +312,7 @@ exports.getLoginGoogleRedirect = async (req, res) => {
           redirectUrl += `?userImg=${picture}`;
           redirectUrl += `&userName=${name}`;
           redirectUrl += `&userEmail=${email}`;
-          res.status(200).redirect(redirectUrl);
+          res.redirect(redirectUrl);
         } else {
           let redirectUrl = `${serverUrl}:${frontPort}/main`;
           redirectUrl += `?isSuccess=${false}`;
@@ -349,9 +331,60 @@ exports.getLoginGoogleRedirect = async (req, res) => {
     let redirectUrl = `${serverUrl}:${frontPort}/main`;
     redirectUrl += `?isSuccess=${false}`;
     redirectUrl += `&msg=error`;
-    res.status(500).redirect(redirectUrl); // 에러
+    res.redirect(redirectUrl); // 에러
   }
 };
+
+// GET '/api/user/login/test'
+// 테스트 계정 로그인
+exports.getLoginTest = async (req, res) => {
+  try {
+    let { testNum } = req.query;
+    const whereCondition = {};
+    testNum = parseInt(testNum, 10);
+
+    if (testNum === 1) {
+      whereCondition.uEmail = 'test1@motimates.xyz';
+    } else if (testNum === 2) {
+      whereCondition.uEmail = 'test2@motimates.xyz';
+    }
+
+    const selectOneTestEmail = await User.findOne({
+      where: whereCondition,
+    });
+
+    if (selectOneTestEmail) {
+      const { uSeq, uEmail, uName, uImg } = selectOneTestEmail;
+
+      // 해당 3개의 값 가지는 토큰 생성
+      const jwtToken = await jwt.sign({
+        uSeq,
+        userName: uName,
+        userEmail: uEmail,
+      });
+
+      res.cookie('token', jwtToken.token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'None',
+      });
+
+      // ****************** 토큰을 들고 메인 페이지로 렌더링해야함
+      let redirectUrl = `${serverUrl}:${frontPort}/main`;
+      redirectUrl += `?userImg=${uImg}`;
+      redirectUrl += `&userName=${uName}`;
+      redirectUrl += `&userEmail=${uEmail}`;
+      redirectUrl += `&token=${jwtToken.token}`;
+      res.redirect(redirectUrl);
+    } else {
+      res.send({ isSuccess: false, msg: '테스트 계정이 없습니다.' });
+    }
+  } catch (err) {
+    console.error(err);
+    res.send({ isSuccess: false, msg: 'error' });
+  }
+};
+
 // #################################################
 // ################# [// LOGIN END] ################
 // #################################################
@@ -359,15 +392,13 @@ exports.getLoginGoogleRedirect = async (req, res) => {
 // POST '/api/user/register'
 // 회원가입
 exports.postRegister = async (req, res) => {
-  console.log(req.headers);
-
   try {
     let { uEmail, uName, uImg, uCharImg, uCategory1, uCategory2, uCategory3 } =
       req.body;
 
     // null 값 있는지 검사 : 필수값은 3개
     if (!uEmail || !uName || !uCharImg) {
-      return res.json({
+      return res.send({
         OK: false,
         msg: '입력 필드 중 하나 이상이 누락되었습니다.',
       });
@@ -378,7 +409,7 @@ exports.postRegister = async (req, res) => {
     const uNameIsDuplicate = await User.count({ where: { uName } });
 
     if (uEmailIsDuplicate || uNameIsDuplicate) {
-      return res.json({
+      return res.send({
         OK: false,
         uEmailIsDuplicate,
         uNameIsDuplicate,
@@ -415,23 +446,20 @@ exports.postRegister = async (req, res) => {
       secure: true,
       sameSite: 'None',
     });
-    console.log(jwtToken.token);
 
-    res
-      .status(200)
-      .send({
-        uEmail: newUser.uEmail,
-        uName: newUser.uName,
-        uImg: newUser.uImg,
-        uCharImg: newUser.uCharImg,
-        uCategory1: newUser.uCategory1,
-        uCategory2: newUser.uCategory2,
-        uCategory3: newUser.uCategory3,
-        token: jwtToken.token,
-      });
+    res.status(200).send({
+      uEmail: newUser.uEmail,
+      uName: newUser.uName,
+      uImg: newUser.uImg,
+      uCharImg: newUser.uCharImg,
+      uCategory1: newUser.uCategory1,
+      uCategory2: newUser.uCategory2,
+      uCategory3: newUser.uCategory3,
+      token: jwtToken.token,
+    });
   } catch (err) {
-    console.log(err);
-    res.status(err.statusCode || 500).send({
+    console.error(err);
+    res.send({
       msg: err.message,
       OK: false,
     });
@@ -445,7 +473,6 @@ exports.getProfile = async (req, res) => {
     if (req.headers.authorization) {
       let token = req.headers.authorization.split(' ')[1];
       const user = await jwt.verify(token);
-      console.log('디코딩된 유저 토큰!!', user);
 
       // 보여줄 정보 : 닉네임, 설명, 캐릭터, 관심분야(null), 메인화면 설정(dday, 달성량), 커버이미지
       const userSeq = user.uSeq;
@@ -471,7 +498,7 @@ exports.getProfile = async (req, res) => {
       } = userInfo;
 
       if (isUse) {
-        res.json({
+        res.send({
           result: true,
           isBlock: true,
           nickname: uName,
@@ -488,7 +515,7 @@ exports.getProfile = async (req, res) => {
           setMainGroup: uMainGroup,
         });
       } else {
-        res.json({
+        res.send({
           result: true,
           isBlock: false,
           message: '관리자에 의해 추방된 유저입니다.',
@@ -496,14 +523,14 @@ exports.getProfile = async (req, res) => {
       }
       // 비로그인 상태
     } else {
-      res.json({
+      res.send({
         result: false,
         message: '로그인 해주세요!',
       });
     }
   } catch (err) {
-    console.log(err);
-    res.status(err.statusCode || 500).send({
+    console.error(err);
+    res.send({
       msg: err.message,
       OK: false,
     });
@@ -516,7 +543,6 @@ exports.editProfile = async (req, res) => {
     if (req.headers.authorization) {
       let token = req.headers.authorization.split(' ')[1];
       const user = await jwt.verify(token);
-      console.log('디코딩된 유저 토큰!!', user);
       const {
         uName,
         uDesc,
@@ -536,7 +562,7 @@ exports.editProfile = async (req, res) => {
 
       // 닉네임이 이미 존재하는 경우
       if (isNickname) {
-        res.json({ result: false, message: '이미 존재하는 닉네임입니다.' });
+        res.send({ result: false, message: '이미 존재하는 닉네임입니다.' });
       } else {
         await User.update(
           {
@@ -555,14 +581,14 @@ exports.editProfile = async (req, res) => {
             where: { uSeq: user.uSeq },
           }
         );
-        res.json({ result: true, message: '회원정보 수정 완료!' });
+        res.send({ result: true, message: '회원정보 수정 완료!' });
       }
     } else {
-      res.json({ result: false, message: '로그인 해주세요!' });
+      res.send({ result: false, message: '로그인 해주세요!' });
     }
   } catch (err) {
-    console.log(err);
-    res.status(err.statusCode || 500).send({
+    console.error(err);
+    res.send({
       msg: err.message,
       OK: false,
     });
@@ -576,7 +602,6 @@ exports.userImg = async (req, res) => {
     if (req.headers.authorization) {
       let token = req.headers.authorization.split(' ')[1];
       const user = await jwt.verify(token);
-      console.log('디코딩된 유저 토큰!!', user);
       if (req.file.location) {
         const imageUrl = req.file.location; // 업로드된 이미지의 S3 URL
 
@@ -588,16 +613,16 @@ exports.userImg = async (req, res) => {
             where: { uSeq: user.uSeq },
           }
         );
-        res.json({ result: true, message: '이미지 업로드 성공' });
+        res.send({ result: true, message: '이미지 업로드 성공' });
       } else {
-        res.josn({ result: false, message: '이미지가 첨부되지 않았습니다' });
+        res.send({ result: false, message: '이미지가 첨부되지 않았습니다' });
       }
     } else {
-      res.json({ result: false, message: '로그인 해주세요!' });
+      res.send({ result: false, message: '로그인 해주세요!' });
     }
   } catch (err) {
-    console.log(err);
-    res.status(err.statusCode || 500).send({
+    console.error(err);
+    res.send({
       msg: err.message,
       OK: false,
     });
@@ -610,7 +635,6 @@ exports.userCoverImg = async (req, res) => {
     if (req.headers.authorization) {
       let token = req.headers.authorization.split(' ')[1];
       const user = await jwt.verify(token);
-      console.log('디코딩된 유저 토큰!!', user);
       if (req.file.location) {
         const imageUrl = req.file.location; // 업로드된 이미지의 S3 URL
 
@@ -622,16 +646,16 @@ exports.userCoverImg = async (req, res) => {
             where: { uSeq: user.uSeq },
           }
         );
-        res.json({ result: true, message: '이미지 업로드 성공' });
+        res.send({ result: true, message: '이미지 업로드 성공' });
       } else {
-        res.json({ result: false, message: '이미지가 첨부되지 않았습니다.' });
+        res.send({ result: false, message: '이미지가 첨부되지 않았습니다.' });
       }
     } else {
-      res.json({ result: false, message: '로그인 해주세요!' });
+      res.send({ result: false, message: '로그인 해주세요!' });
     }
   } catch (err) {
-    console.log(err);
-    res.status(err.statusCode || 500).send({
+    console.error(err);
+    res.send({
       msg: err.message,
       OK: false,
     });
@@ -645,27 +669,26 @@ exports.delUser = async (req, res) => {
     if (req.headers.authorization) {
       let token = req.headers.authorization.split(' ')[1];
       const user = await jwt.verify(token);
-      console.log('디코딩된 유저 토큰!!', user);
 
       await User.destroy({
         where: { uSeq: user.uSeq },
       });
 
-      res.json({
+      res.send({
         result: true,
         message: '회원탈퇴 완료',
       });
 
       // 비로그인 상태
     } else {
-      res.json({
+      res.send({
         result: false,
         message: '로그인 해주세요!',
       });
     }
   } catch (err) {
-    console.log(err);
-    res.status(err.statusCode || 500).send({
+    console.error(err);
+    res.send({
       msg: err.message,
       OK: false,
     });

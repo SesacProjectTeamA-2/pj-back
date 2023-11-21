@@ -19,13 +19,10 @@ exports.createComment = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     if (!token) {
       res.send({
@@ -104,8 +101,8 @@ exports.createComment = async (req, res) => {
     return;
   } catch (error) {
     // 기타 데이터베이스 오류
-    console.log(error);
-    res.status(500).send({
+    console.error(error);
+    res.send({
       success: false,
       msg: '데이터베이스 오류 발생',
     });
@@ -123,13 +120,10 @@ exports.editComment = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     if (!token) {
       res.send({
@@ -212,8 +206,8 @@ exports.editComment = async (req, res) => {
     });
   } catch (error) {
     // 에러 처리
-    console.log(error);
-    res.status(500).send({
+    console.error(error);
+    res.send({
       success: false,
       msg: '서버 에러 발생',
     });
@@ -226,13 +220,10 @@ exports.deleteComment = async (req, res) => {
   try {
     let token = req.headers.authorization.split(' ')[1];
     const user = await jwt.verify(token);
-    console.log('디코딩 된 토큰!!!!!!!!!!! :', user);
 
     const uSeq = user.uSeq;
     const uEmail = user.uEmail;
     const uName = user.uName;
-
-    console.log(uSeq, uEmail, uName);
 
     if (!token) {
       res.send({
@@ -249,7 +240,6 @@ exports.deleteComment = async (req, res) => {
       return;
     }
     const gbcSeq = req.params.gbcSeq;
-    console.log('삭제하려는 gbcSeq : ', gbcSeq);
 
     const groupUser = await GroupUser.findOne({
       where: { uSeq: uSeq },
@@ -290,9 +280,9 @@ exports.deleteComment = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log(error);
     // 에러 처리
-    res.status(500).send({
+    console.error(error);
+    res.send({
       success: false,
       msg: '댓글 삭제처리 중 서버에러 발생',
     });

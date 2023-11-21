@@ -3,9 +3,6 @@ const router = express.Router();
 const controller = require('../controller/Cuser');
 const authUtil = require('../middlewares/auth').checkToken;
 const upload = require('../middlewares/imgUpload').upload;
-console.log(upload.upload);
-
-router.get('/users', controller.getUsers); // 모든 유저 조회
 
 router.get('/login/kakao/authorize', controller.getOAuth);
 router.get('/login/kakao/token', controller.getKakao);
@@ -15,6 +12,8 @@ router.get('/login/naver/callback', controller.getLoginNaverRedirect);
 
 router.get('/login/google', controller.getLoginGoogle); // 구글 로그인
 router.get('/login/google/redirect', controller.getLoginGoogleRedirect); // 구글 로그인 처리
+
+router.get('/login/test', controller.getLoginTest); // 테스트 계정 로그인
 
 /**
  * @swagger
