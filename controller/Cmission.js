@@ -334,3 +334,42 @@ exports.editMission = async (req, res) => {
     res.send({ isSuccess: false, msg: 'error' });
   }
 };
+
+// 미션 삭제
+exports.delMission = async (req, res) => {
+  try {
+    // 로그인 여부
+    if (req.headers.authorization) {
+      let token = req.headers.authorization.split(' ')[1];
+      const user = await jwt.verify(token);
+
+      const uSeq = user.uSeq;
+      const uEmail = user.uEmail;
+      const uName = user.uName;
+
+      // 모임장 여부 확인
+      const isLeader = await GroupUser.findOne({
+        where: { gSeq, uSeq },
+        attributes: ['guIsBlackUser'],
+      });
+      if (isLeader) {
+        const mSeq = req.params.mSeq;
+        await Mission.destroy({
+          where: { mSeq },
+        });
+
+        res.send({
+          result: true,
+          message: '삭제 완료',
+        });
+      } else {
+        res.send({ result: false, message: '권한이 없어요' });
+      }
+    } else {
+      res.send({ result: false, message: '로그인 해주세요!' });
+    }
+  } catch {
+    console.error(err);
+    res.send({ isSuccess: false, msg: 'error' });
+  }
+};

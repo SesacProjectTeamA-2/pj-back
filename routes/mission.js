@@ -79,4 +79,6 @@ router.get('/group/:gSeq', authUtil, controller.getGroupMission);
  */
 router.patch('/:gSeq', authUtil, controller.editMission);
 
+router.delete('/:gSeq', authUtil, controller.delMission);
+
 module.exports = router;
