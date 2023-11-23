@@ -14,6 +14,7 @@ const Op = require('sequelize').Op;
 const sequelize = require('sequelize');
 const jwt = require('../modules/jwt');
 const ranking = require('../modules/rankSystem');
+const Score = require('../modules/rankSystem');
 const { v4: uuidv4 } = require('uuid'); // 모임 링크 생성
 
 // 디데이 계산함수.
@@ -426,14 +427,7 @@ exports.postGroup = async (req, res) => {
             mLevel: missionInfo.mLevel, // 난이도 (상: 5점, 중: 3점, 하: 1점)
           });
 
-          await Group.update(
-            {
-              gTotalScore: sequelize.literal(
-                `gTotalScore + ${missionInfo.mLevel}`
-              ),
-            },
-            { where: { gSeq: insertOneGroup.gSeq } }
-          );
+          Score.groupTotalScore(insertOneGroupUser.gSeq, 0, missionInfo.mLevel);
 
           mCnt++;
         }
