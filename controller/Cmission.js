@@ -288,13 +288,27 @@ exports.editMission = async (req, res) => {
       // 모임장 여부 확인
       const isLeader = await GroupUser.findOne({
         where: { gSeq, uSeq },
-        attributes: ['guIsBlackUser'],
+        attributes: ['guIsLeader'],
       });
 
       if (isLeader) {
         // 기존 미션 수정시
         for (let missionInfo of missionArray) {
           if (missionInfo.mSeq) {
+            // 삭제하고 더할지 or update 할지
+
+            const currentLevel = await Mission.findOne({
+              where: { mSeq: missionInfo.mSeq },
+              attributes: ['mLevel'],
+            });
+
+            if (missionInfo.mLevel > currentLevel) {
+              score.groupTotalScore(gSeq, 0, 2);
+            } else if (missionInfo.mLevel === currentLevel) {
+              console.log('수정된 점수가 동일하여 그룹 총 점수 변동 없음.');
+            } else {
+              score.groupTotalScore(gSeq, 1, 2);
+            }
             await Mission.update(
               {
                 mTitle: missionInfo.mTitle, // 미션 제목
@@ -311,6 +325,8 @@ exports.editMission = async (req, res) => {
               mContent: missionInfo.mContent, // 미션 내용
               mLevel: missionInfo.mLevel, // 난이도 (상: 5점, 중: 3점, 하: 1점)
             });
+
+            score.groupTotalScore(gSeq, 0, missionInfo.mLevel);
           }
         }
         const gDday = missionArray[0].gDday;
@@ -338,25 +354,30 @@ exports.editMission = async (req, res) => {
 // 미션 삭제
 exports.delMission = async (req, res) => {
   try {
+    const gSeq = req.params.gSeq;
+
     // 로그인 여부
     if (req.headers.authorization) {
       let token = req.headers.authorization.split(' ')[1];
       const user = await jwt.verify(token);
 
       const uSeq = user.uSeq;
-      const uEmail = user.uEmail;
-      const uName = user.uName;
 
       // 모임장 여부 확인
       const isLeader = await GroupUser.findOne({
         where: { gSeq, uSeq },
-        attributes: ['guIsBlackUser'],
+        attributes: ['guIsLeader'],
       });
       if (isLeader) {
-        const mSeq = req.params.mSeq;
+        const mSeq = req.body.mSeq;
+        const mLevel = req.body.mLevel;
+
         await Mission.destroy({
           where: { mSeq },
         });
+
+        // 모임 점수 수정/
+        score.groupTotalScore(gSeq, 1, mLevel);
 
         res.send({
           result: true,
