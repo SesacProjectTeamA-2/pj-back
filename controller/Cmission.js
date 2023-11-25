@@ -304,11 +304,26 @@ exports.editMission = async (req, res) => {
             if (missionInfo.mLevel > currentLevel) {
               score.groupTotalScore(gSeq, 0, 2);
               console.log('모임 총점수 감소');
+
+              await GroupUser.update(
+                { guNowScore: sequelize.literal(`guNowScore + 2`) },
+                {
+                  where: { gSeq },
+                }
+              );
+              console.log('모임원 현재 점수 증가');
             } else if (missionInfo.mLevel === currentLevel) {
-              console.log('수정된 점수가 동일하여 그룹 총 점수 변동 없음.');
+              console.log('수정된 점수가 동일하여 점수 변동 없음.');
             } else {
               score.groupTotalScore(gSeq, 1, 2);
               console.log('모임 총점수 증가');
+              await GroupUser.update(
+                { guNowScore: sequelize.literal(`guNowScore - 2`) },
+                {
+                  where: { gSeq },
+                }
+              );
+              console.log('모임원 현재 점수 감소');
             }
             await Mission.update(
               {
@@ -379,6 +394,13 @@ exports.delMission = async (req, res) => {
 
         // 모임 점수 수정/
         score.groupTotalScore(gSeq, 1, mLevel);
+        console.log('모임 점수 수정 완료');
+
+        await GroupUser.update(
+          { guNowScore: sequelize.literal(`guNowScore - ${mLevel}`) },
+          { where: { gSeq } }
+        );
+        console.log('모임원 현재 점수 수정 완료');
 
         res.send({
           result: true,
