@@ -350,21 +350,26 @@ exports.editMission = async (req, res) => {
         const gDday = missionArray[0].gDday;
         await Group.update({ gDday }, { where: { gSeq } });
 
+        // 미션 삭제 처리
         if (deleteList.length > 0) {
           for (let list of deleteList) {
-            await Mission.destroy({
-              where: { mSeq: list.mSeq },
-            });
+            if (list.mSeq) {
+              await Mission.destroy({
+                where: { mSeq: list.mSeq },
+              });
 
-            // 모임 점수 수정/
-            score.groupTotalScore(gSeq, 1, list.mLevel);
-            console.log('모임 점수 수정 완료');
+              // 모임 점수 수정/
+              score.groupTotalScore(gSeq, 1, list.mLevel);
+              console.log('모임 점수 수정 완료');
 
-            await GroupUser.update(
-              { guNowScore: sequelize.literal(`guNowScore - ${list.mLevel}`) },
-              { where: { gSeq } }
-            );
-            console.log('모임원 현재 점수 수정 완료');
+              await GroupUser.update(
+                {
+                  guNowScore: sequelize.literal(`guNowScore - ${list.mLevel}`),
+                },
+                { where: { gSeq } }
+              );
+              console.log('모임원 현재 점수 수정 완료');
+            }
           }
         }
 
