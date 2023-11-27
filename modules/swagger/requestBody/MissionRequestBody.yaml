@@ -7,6 +7,7 @@ components: # 컴포넌트 선언
     editMission: # PATCH '/api/mission/{gSeq}'
       required:
         - missionArray
+        - deleteList
       type: object
       description: 미션 수정시 필요한 정보
       properties: # req.body로 넘어온 값 정의
@@ -19,19 +20,10 @@ components: # 컴포넌트 선언
               mTitle: '운동하기'
               mContent: '일주일에 한 번 헬스장'
               mLevel: 5
-    # 미션 삭제시 필요한 req.body
-      delMission: # DELETE '/api/mission/{gSeq}'
-      required:
-        - mSeq
-        - mLevel
-      type: object
-      description: 미션 삭제시 필요한 정보
-      properties: # req.body로 넘어온 값 정의
-        missionArray:
+        deleteList:
           type: array
           description: |
             미션 시퀀스(mSeq), 난이도(mLevel)를 포함하는 객체의 배열입니다.
           example:
             - mSeq: 1
-            - mLevel: 5
-
+              mLevel: 5
