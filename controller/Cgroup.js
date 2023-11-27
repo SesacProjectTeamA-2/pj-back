@@ -466,7 +466,7 @@ exports.patchGroup = async (req, res) => {
     const uEmail = user.uEmail;
     const uName = user.uName;
 
-    const { gSeq, gName, gDesc, gMaxMem, gCategory } = req.body;
+    const { gSeq, gName, gDesc, gDday, gMaxMem, gCategory } = req.body;
 
     // 현재 모임을 수정하려는 사람이 모임장인지 확인
     const selectOneGroupUser = await GroupUser.findOne({
@@ -481,6 +481,7 @@ exports.patchGroup = async (req, res) => {
         {
           gName,
           gDesc,
+          gDday,
           gMaxMem,
           gCategory,
         },
