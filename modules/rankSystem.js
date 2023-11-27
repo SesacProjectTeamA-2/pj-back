@@ -150,6 +150,7 @@ module.exports = {
             },
             { where: { gSeq } }
           );
+          break;
         case 1:
           await Group.update(
             {
@@ -157,6 +158,7 @@ module.exports = {
             },
             { where: { gSeq } }
           );
+          break;
         default:
           console.error('0 또는 1이 아닌 잘못된 접근입니다');
       }
