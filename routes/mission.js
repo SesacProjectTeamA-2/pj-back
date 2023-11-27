@@ -79,34 +79,4 @@ router.get('/group/:gSeq', authUtil, controller.getGroupMission);
  */
 router.patch('/:gSeq', authUtil, controller.editMission);
 
-/**
- * @swagger
- * paths:
- *   /api/mission/{gSeq}:
- *     delete:
- *       summary: 미션 삭제
- *       description: 미션 삭제
- *       security:
- *         - bearerAuth: []
- *       tags: [Mission]
- *       parameters:
- *         - $ref: '#/components/parameters/groupSeqParamPath'
- *       requestBody:
- *         description: 미션 삭제하기 위해 필요한 정보
- *         required: true
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/delMission'
- *       responses:
- *         "200":
- *           description: 미션 삭제에 대한 성공 여부/메시지
- *           required: true
- *           content:
- *             application/json:
- *               schema:
- *                 $ref: '#/components/schemas/delMissionResult'
- */
-router.delete('/:gSeq', authUtil, controller.delMission);
-
 module.exports = router;
