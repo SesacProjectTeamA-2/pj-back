@@ -275,7 +275,7 @@ exports.getGroupMission = async (req, res) => {
 exports.editMission = async (req, res) => {
   try {
     const gSeq = req.params.gSeq;
-    const missionArray = req.body;
+    const { missionArray, deleteList } = req.body;
     // 로그인 여부 확인
     if (req.headers.authorization) {
       let token = req.headers.authorization.split(' ')[1];
@@ -345,8 +345,28 @@ exports.editMission = async (req, res) => {
             score.groupTotalScore(gSeq, 0, missionInfo.mLevel);
           }
         }
+
+        // 디데이 수정
         const gDday = missionArray[0].gDday;
         await Group.update({ gDday }, { where: { gSeq } });
+
+        if (deleteList.length > 0) {
+          for (let list of deleteList) {
+            await Mission.destroy({
+              where: { mSeq: list.mSeq },
+            });
+
+            // 모임 점수 수정/
+            score.groupTotalScore(gSeq, 1, list.mLevel);
+            console.log('모임 점수 수정 완료');
+
+            await GroupUser.update(
+              { guNowScore: sequelize.literal(`guNowScore - ${list.mLevel}`) },
+              { where: { gSeq } }
+            );
+            console.log('모임원 현재 점수 수정 완료');
+          }
+        }
 
         res.status(200).send({
           result: true,
@@ -368,52 +388,52 @@ exports.editMission = async (req, res) => {
 };
 
 // 미션 삭제
-exports.delMission = async (req, res) => {
-  try {
-    const gSeq = req.params.gSeq;
+// exports.delMission = async (req, res) => {
+//   try {
+//     const gSeq = req.params.gSeq;
 
-    // 로그인 여부
-    if (req.headers.authorization) {
-      let token = req.headers.authorization.split(' ')[1];
-      const user = await jwt.verify(token);
+//     // 로그인 여부
+//     if (req.headers.authorization) {
+//       let token = req.headers.authorization.split(' ')[1];
+//       const user = await jwt.verify(token);
 
-      const uSeq = user.uSeq;
+//       const uSeq = user.uSeq;
 
-      // 모임장 여부 확인
-      const isLeader = await GroupUser.findOne({
-        where: { gSeq, uSeq },
-        attributes: ['guIsLeader'],
-      });
-      if (isLeader) {
-        const mSeq = req.body.mSeq;
-        const mLevel = req.body.mLevel;
+//       // 모임장 여부 확인
+//       const isLeader = await GroupUser.findOne({
+//         where: { gSeq, uSeq },
+//         attributes: ['guIsLeader'],
+//       });
+//       if (isLeader) {
+//         const mSeq = req.body.mSeq;
+//         const mLevel = req.body.mLevel;
 
-        await Mission.destroy({
-          where: { mSeq },
-        });
+//         await Mission.destroy({
+//           where: { mSeq },
+//         });
 
-        // 모임 점수 수정/
-        score.groupTotalScore(gSeq, 1, mLevel);
-        console.log('모임 점수 수정 완료');
+//         // 모임 점수 수정/
+//         score.groupTotalScore(gSeq, 1, mLevel);
+//         console.log('모임 점수 수정 완료');
 
-        await GroupUser.update(
-          { guNowScore: sequelize.literal(`guNowScore - ${mLevel}`) },
-          { where: { gSeq } }
-        );
-        console.log('모임원 현재 점수 수정 완료');
+//         await GroupUser.update(
+//           { guNowScore: sequelize.literal(`guNowScore - ${mLevel}`) },
+//           { where: { gSeq } }
+//         );
+//         console.log('모임원 현재 점수 수정 완료');
 
-        res.send({
-          result: true,
-          message: '삭제 완료',
-        });
-      } else {
-        res.send({ result: false, message: '권한이 없어요' });
-      }
-    } else {
-      res.send({ result: false, message: '로그인 해주세요!' });
-    }
-  } catch {
-    console.error(err);
-    res.send({ isSuccess: false, msg: 'error' });
-  }
-};
+//         res.send({
+//           result: true,
+//           message: '삭제 완료',
+//         });
+//       } else {
+//         res.send({ result: false, message: '권한이 없어요' });
+//       }
+//     } else {
+//       res.send({ result: false, message: '로그인 해주세요!' });
+//     }
+//   } catch {
+//     console.error(err);
+//     res.send({ isSuccess: false, msg: 'error' });
+//   }
+// };
