@@ -301,28 +301,35 @@ exports.editMission = async (req, res) => {
               attributes: ['mLevel'],
             });
 
+            const seqs = await GroupBoard.findAll({
+              where: {
+                gSeq,
+                gbIsDone: 'y',
+                mSeq: missionInfo.mSeq,
+              },
+              attributes: ['guSeq'],
+            });
+
             if (missionInfo.mLevel > currentLevel) {
               score.groupTotalScore(gSeq, 0, 2);
-              console.log('모임 총점수 감소');
+              console.log('모임 총점수 증가');
 
-              await GroupUser.update(
-                { guNowScore: sequelize.literal(`guNowScore + 2`) },
-                {
-                  where: { gSeq },
-                }
-              );
+              // mSeq 완료한 guSeq 추출하여, 2점 증가
+              for (seq of seqs) {
+                score.currentScore(seq.guSeq, missionInfo.mSeq, editPlus);
+              }
+
               console.log('모임원 현재 점수 증가');
             } else if (missionInfo.mLevel === currentLevel) {
               console.log('수정된 점수가 동일하여 점수 변동 없음.');
             } else {
               score.groupTotalScore(gSeq, 1, 2);
-              console.log('모임 총점수 증가');
-              await GroupUser.update(
-                { guNowScore: sequelize.literal(`guNowScore - 2`) },
-                {
-                  where: { gSeq },
-                }
-              );
+              console.log('모임 총점수 감소');
+
+              // mSeq 완료한 guSeq 추출하여, 2점 감소
+              for (seq of seqs) {
+                score.currentScore(seq.guSeq, missionInfo.mSeq, editMinus);
+              }
               console.log('모임원 현재 점수 감소');
             }
             await Mission.update(
@@ -346,28 +353,29 @@ exports.editMission = async (req, res) => {
           }
         }
 
-        // 디데이 수정
-        // const gDday = missionArray[0].gDday;
-        // await Group.update({ gDday }, { where: { gSeq } });
-
         // 미션 삭제 처리
         if (deleteList.length > 0) {
           for (let list of deleteList) {
+            const seqs = await GroupBoard.findAll({
+              where: {
+                gSeq,
+                gbIsDone: 'y',
+                mSeq: list.mSeq,
+              },
+              attributes: ['guSeq'],
+            });
             if (list.mSeq) {
               await Mission.destroy({
                 where: { mSeq: list.mSeq },
               });
 
-              // 모임 점수 수정/
+              // 모임 점수 수정
               score.groupTotalScore(gSeq, 1, list.mLevel);
               console.log('모임 점수 수정 완료');
 
-              await GroupUser.update(
-                {
-                  guNowScore: sequelize.literal(`guNowScore - ${list.mLevel}`),
-                },
-                { where: { gSeq } }
-              );
+              for (seq of seqs) {
+                score.currentScore(seq.guSeq, missionInfo.mSeq, editMinus);
+              }
               console.log('모임원 현재 점수 수정 완료');
             }
           }
