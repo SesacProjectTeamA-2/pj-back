@@ -703,10 +703,10 @@ exports.getGroupDetail = async (req, res) => {
       (user) => user.tb_user
     );
 
-    const totalRanking = groupRanking.nowRanking.map((item) => {
+    const totalRanking = groupRanking.totalRanking.map((item) => {
       return {
         uSeq: item.uSeq,
-        guNowScore: item.guNowScore,
+        guTotalScore: item.guTotalScore,
       };
     });
 
