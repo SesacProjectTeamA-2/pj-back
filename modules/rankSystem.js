@@ -52,8 +52,23 @@ module.exports = {
             );
             console.log('점수 감소!');
             break;
+
+          case 'editPlus':
+            await GroupUser.update(
+              {
+                guNowScore: sequelize.literal(`guNowScore + 2`),
+              },
+              { where: { guSeq } }
+            );
+          case 'editMinus':
+            await GroupUser.update(
+              {
+                guNowScore: sequelize.literal(`guNowScore - 2`),
+              },
+              { where: { guSeq } }
+            );
           default:
-            console.error('add/del 아닌 잘못된 접근입니다');
+            console.error('add/del/edit 아닌 잘못된 접근입니다');
         }
       }
     } catch (err) {
