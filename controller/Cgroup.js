@@ -14,6 +14,7 @@ const Op = require('sequelize').Op;
 const sequelize = require('sequelize');
 const jwt = require('../modules/jwt');
 const ranking = require('../modules/rankSystem');
+const Score = require('../modules/rankSystem');
 const { v4: uuidv4 } = require('uuid'); // 모임 링크 생성
 
 // 디데이 계산함수.
@@ -426,14 +427,7 @@ exports.postGroup = async (req, res) => {
             mLevel: missionInfo.mLevel, // 난이도 (상: 5점, 중: 3점, 하: 1점)
           });
 
-          await Group.update(
-            {
-              gTotalScore: sequelize.literal(
-                `gTotalScore + ${missionInfo.mLevel}`
-              ),
-            },
-            { where: { gSeq: insertOneGroup.gSeq } }
-          );
+          Score.groupTotalScore(insertOneGroupUser.gSeq, 0, missionInfo.mLevel);
 
           mCnt++;
         }
@@ -472,7 +466,7 @@ exports.patchGroup = async (req, res) => {
     const uEmail = user.uEmail;
     const uName = user.uName;
 
-    const { gSeq, gName, gDesc, gMaxMem, gCategory } = req.body;
+    const { gSeq, gName, gDesc, gDday, gMaxMem, gCategory } = req.body;
 
     // 현재 모임을 수정하려는 사람이 모임장인지 확인
     const selectOneGroupUser = await GroupUser.findOne({
@@ -487,6 +481,7 @@ exports.patchGroup = async (req, res) => {
         {
           gName,
           gDesc,
+          gDday,
           gMaxMem,
           gCategory,
         },
@@ -708,10 +703,10 @@ exports.getGroupDetail = async (req, res) => {
       (user) => user.tb_user
     );
 
-    const totalRanking = groupRanking.nowRanking.map((item) => {
+    const totalRanking = groupRanking.totalRanking.map((item) => {
       return {
         uSeq: item.uSeq,
-        guNowScore: item.guNowScore,
+        guTotalScore: item.guTotalScore,
       };
     });
 

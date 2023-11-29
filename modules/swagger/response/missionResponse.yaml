@@ -90,3 +90,20 @@ components:
           format: date
           description: 디데이 날짜
           example: 2023-11-20
+
+    # 미션 삭제에 대한 응답
+    delMissionResult:
+      type: object
+      required:
+        - result
+        - message
+      description: 미션 삭제 응답
+      properties: # res.json으로 정의한 값 정의
+        result:
+          type: boolean
+          description: 삭제 여부
+          example: true
+        message:
+          type: string
+          description: 응답메세지('삭제완료', '권한이 없어요', '로그인 해주세요!')
+          example: 삭제완료

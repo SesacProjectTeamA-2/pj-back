@@ -52,8 +52,23 @@ module.exports = {
             );
             console.log('점수 감소!');
             break;
+
+          case 'editPlus':
+            await GroupUser.update(
+              {
+                guNowScore: sequelize.literal(`guNowScore + 2`),
+              },
+              { where: { guSeq } }
+            );
+          case 'editMinus':
+            await GroupUser.update(
+              {
+                guNowScore: sequelize.literal(`guNowScore - 2`),
+              },
+              { where: { guSeq } }
+            );
           default:
-            console.error('add/del 아닌 잘못된 접근입니다');
+            console.error('add/del/edit 아닌 잘못된 접근입니다');
         }
       }
     } catch (err) {
@@ -136,6 +151,34 @@ module.exports = {
       return { nowRanking, totalRanking, doneRates };
     } catch (err) {
       console.error('groupRanking 에러:', err.message);
+    }
+  },
+
+  groupTotalScore: async (gSeq, Idx, mLevel) => {
+    // Idx: 점수 증가(0)[미션 추가, 미션 수정] /점수 감소(1) [미션 삭제, 미션 수정]
+    try {
+      switch (Idx) {
+        case 0:
+          await Group.update(
+            {
+              gTotalScore: sequelize.literal(`gTotalScore + ${mLevel}`),
+            },
+            { where: { gSeq } }
+          );
+          break;
+        case 1:
+          await Group.update(
+            {
+              gTotalScore: sequelize.literal(`gTotalScore - ${mLevel}`),
+            },
+            { where: { gSeq } }
+          );
+          break;
+        default:
+          console.error('0 또는 1이 아닌 잘못된 접근입니다');
+      }
+    } catch (err) {
+      console.log('groupTotalScore 처리 중 에러:', err.message);
     }
   },
 };
