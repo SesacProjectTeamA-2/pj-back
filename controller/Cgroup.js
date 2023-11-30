@@ -398,6 +398,15 @@ exports.postGroup = async (req, res) => {
     // UUID를 Base64로 인코딩
     const base64 = Buffer.from(uuid, 'utf8').toString('base64');
 
+    const isPossible = await Group.findOne({ where: { gName } });
+
+    if (isPossible) {
+      return res.send({
+        isSuccess: false,
+        msg: '모임명이 중복되었습니다.',
+      });
+    }
+
     // 1) 모임 생성 → gSeq
     const insertOneGroup = await Group.create({
       gName, // 모임명
@@ -467,6 +476,15 @@ exports.patchGroup = async (req, res) => {
     const uName = user.uName;
 
     const { gSeq, gName, gDesc, gDday, gMaxMem, gCategory } = req.body;
+
+    const isPossible = await Group.findOne({ where: { gName } });
+
+    if (isPossible) {
+      return res.send({
+        isSuccess: false,
+        msg: '모임명이 중복되었습니다.',
+      });
+    }
 
     // 현재 모임을 수정하려는 사람이 모임장인지 확인
     const selectOneGroupUser = await GroupUser.findOne({
