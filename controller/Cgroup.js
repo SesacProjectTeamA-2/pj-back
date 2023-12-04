@@ -477,7 +477,9 @@ exports.patchGroup = async (req, res) => {
 
     const { gSeq, gName, gDesc, gDday, gMaxMem, gCategory } = req.body;
 
-    const isPossible = await Group.findOne({ where: { gName } });
+    const isPossible = await Group.findOne({
+      where: { gName, gSeq: { [Op.ne]: gSeq } },
+    });
 
     if (isPossible) {
       return res.send({
