@@ -48,12 +48,11 @@
       let isConnected = false;
 
       // 로컬
-      const socket = io.connect(`http://localhost:8888/api/group/chat`);
+      const socket = io.connect(`http://localhost:8888/api/socket/chat`);
       // 배포
       // const socket = io.connect('http://13.124.147.68:7777');
 
       socket.on('connect', () => {
-        console.log(isConnected);
         if (!isConnected) {
           console.log('클라이언트 연결 완료 ::: ', socket.id);
           isConnected = true;

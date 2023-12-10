@@ -14,7 +14,6 @@ const Op = require('sequelize').Op;
 const sequelize = require('sequelize');
 const jwt = require('../modules/jwt');
 const ranking = require('../modules/rankSystem');
-const Score = require('../modules/rankSystem');
 const { v4: uuidv4 } = require('uuid'); // 모임 링크 생성
 
 // 디데이 계산함수.
@@ -436,7 +435,11 @@ exports.postGroup = async (req, res) => {
             mLevel: missionInfo.mLevel, // 난이도 (상: 5점, 중: 3점, 하: 1점)
           });
 
-          Score.groupTotalScore(insertOneGroupUser.gSeq, 0, missionInfo.mLevel);
+          ranking.groupTotalScore(
+            insertOneGroupUser.gSeq,
+            0,
+            missionInfo.mLevel
+          );
 
           mCnt++;
         }
@@ -818,104 +821,6 @@ exports.joinGroup = async (req, res) => {
     // 참여 요청-알림-수락의 경우 레디스/웹소켓이 필요할것으로 생각됨
   } else {
     res.send({ result: false, message: '먼저 로그인 해주세요.' });
-  }
-};
-
-// GET '/api/group/chat/:gSeq'
-// 모임(별) 채팅
-exports.getGroupChat = async (req, res) => {
-  try {
-    const connectedUser = {}; // 연결된 클라이언트를 저장할 객체
-    const io = req.io;
-    const { gSeq } = req.params;
-
-    /////////////////////////////////////////////////////
-    const connectedSockets = new Set();
-
-    // 네임스페이스 생성
-    const chatNamespace = io.of(`/api/group/chat`);
-
-    // 네임스페이스에 이벤트 리스너 등록
-    chatNamespace.on('connection', (socket) => {
-      // 클라이언트 소켓의 고유한 ID를 가져옴
-      const socketId = socket.id;
-
-      console.log(`/api/group/chat 네임스페이스 연결 완료 ::: `, socketId);
-
-      // 이미 연결된 소켓인지 확인
-      if (connectedSockets.has(socketId)) {
-        // 중복 연결이면 처리하지 않고 종료
-        console.log(`Socket ${socketId} is already connected.`);
-        return;
-      }
-
-      // 새로운 소켓을 연결된 소켓 목록에 추가
-      connectedSockets.add(socketId);
-
-      // 연결 이벤트 핸들러
-      console.log(`Socket ${socketId} connected.`);
-
-      // 다른 이벤트 핸들러 등록 가능
-
-      // 연결이 끊어질 때 연결된 소켓 목록에서 제거
-      socket.on('disconnect', () => {
-        console.log(`/api/group/chat 접속 종료 ::: `, socket.id);
-        console.log(`Socket ${socketId} disconnected.`);
-        connectedSockets.delete(socketId);
-      });
-    });
-
-    //////////////////////////////////////////////////
-
-    // // 네임스페이스 생성
-    // const chatNamespace = io.of(`/api/group/chat/${gSeq}`);
-
-    // // 네임스페이스에 이벤트 리스너 등록
-    // chatNamespace.on('connection', (socket) => {
-    //   console.log(
-    //     `/api/group/chat/${gSeq} 네임스페이스 연결 완료 ::: `,
-    //     socket.id
-    //   );
-
-    //   socket.on('disconnect', () => {
-    //     console.log(`/api/group/chat/${gSeq} 접속 종료 ::: `, socket.id);
-    //   });
-
-    //   // socket.on('login', (data) => {
-    //   //   console.log('data ::::: ', data);
-    //   //   const { uSeq, uName, gName, gSeq } = data;
-
-    //   //   // 클라이언트에서 로그인 이벤트를 보내면, 연결을 저장하고 해당 연결을 사용
-    //   //   if (!connectedUser[uSeq]) {
-    //   //     connectedUser[uSeq] = socket.id;
-    //   //     socket.name = uName;
-    //   //     socket.roomName = gName;
-    //   //     socket.roomNumber = gSeq;
-    //   //     // 소켓에 들어오게 되면 자동으로 모임 채팅에 참여함
-    //   //     socket.join(socket.roomNumber);
-    //   //     console.log(socket.roomName, ' -- ', socket.roomNumber);
-    //   //     console.log('연결된 유저 목록 ::::::', connectedUser);
-
-    //   //   } else {
-    //   //     // 이미 연결이 있는 경우, 기존 연결을 사용하고 새 연결을 닫음
-    //   //     socket.disconnect();
-    //   //   }
-    //   // });
-
-    //   // socket.on('chatMessage', (message) => {
-    //   //   console.log(message);
-    //   //   req.io
-    //   //     .to(socket.roomNumber)
-    //   //     .emit('message', `${socket.name} : ` + message); // 모든 클라이언트에 메시지를 전송
-    //   // });
-    // });
-
-    // const { join } = require('node:path');
-    // res.sendFile(join(__dirname, '/../public/chat.html'));
-    res.render('chat');
-  } catch (err) {
-    console.error(err);
-    res.send({ isSuccess: false, msg: 'error' });
   }
 };
 

@@ -6,6 +6,7 @@ const groupRouter = require('./group');
 const boardRouter = require('./board');
 const commentRouter = require('./comment');
 const missionRouter = require('./mission');
+const socketRouter = require('./socket');
 
 // index 라우터에는 각각의 라우터에 대한 태그와 설명을 작성
 /**
@@ -46,5 +47,7 @@ router.use('/comment', commentRouter); // 게시글
  *   description: 미션 관련 API
  */
 router.use('/mission', missionRouter); // 미션
+
+router.use('/socket', socketRouter); // 소켓
 
 module.exports = router;
