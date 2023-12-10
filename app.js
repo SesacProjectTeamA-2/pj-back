@@ -51,6 +51,9 @@ app.use(
 );
 
 // 4) socket.io
+app.set('view engine', 'html');
+app.engine('html', require('ejs').renderFile); // HTML을 뷰로 사용하기 위한 설정
+
 // socket.io 옵션
 const options = {
   cors: {
@@ -64,6 +67,10 @@ const options = {
       `${process.env.SERVER_PROD_DOMAIN}:${process.env.SERVER_PROD_PORT}`, // 배포
     ],
     methods: ['GET', 'POST'],
+    // credentials : true
+    // 쿠키, 인증헤더, TLS client certificates 를 일컫는다.
+    // client 와 server 가 쿠키 값을 공유하겠다는 말
+    // client server 모두 credentials 사용한다는 속성 설정해줘야 한다.
   },
 };
 
@@ -76,6 +83,7 @@ const io = require('socket.io')(server, options);
 app.use((req, res, next) => {
   req.io = io; // req.io에 Socket.io 객체를 할당합니다.
   next();
+  // next()가 있을때와 없을때의 차이점
 });
 
 /**
